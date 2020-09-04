@@ -11,14 +11,14 @@
 % zpracování / processing: make, make pdf, make clean
 %==============================================================================
 % Soubory, které je nutné upravit nebo smazat: / Files which have to be edited or deleted:
-%   projekt-20-literatura-bibliography.bib - literatura / bibliography
-%   projekt-01-kapitoly-chapters.tex - obsah práce / the thesis content
-%   projekt-01-kapitoly-chapters-en.tex - obsah práce v angličtině / the thesis content in English
-%   projekt-30-prilohy-appendices.tex - přílohy / appendices
-%   projekt-30-prilohy-appendices-en.tex - přílohy v angličtině / appendices in English
+%   contracts_for_concurrency-20-literatura-bibliography.bib - literatura / bibliography
+%   contracts_for_concurrency-01-kapitoly-chapters.tex - obsah práce / the thesis content
+%   contracts_for_concurrency-01-kapitoly-chapters-en.tex - obsah práce v angličtině / the thesis content in English
+%   contracts_for_concurrency-30-prilohy-appendices.tex - přílohy / appendices
+%   contracts_for_concurrency-30-prilohy-appendices-en.tex - přílohy v angličtině / appendices in English
 %==============================================================================
-\documentclass[]{fitthesis} % bez zadání - pro začátek práce, aby nebyl problém s překladem
-%\documentclass[english]{fitthesis} % without assignment - for the work start to avoid compilation problem
+%\documentclass[]{fitthesis} % bez zadání - pro začátek práce, aby nebyl problém s překladem
+\documentclass[english]{fitthesis} % without assignment - for the work start to avoid compilation problem
 %\documentclass[zadani]{fitthesis} % odevzdani do wisu a/nebo tisk s barevnými odkazy - odkazy jsou barevné
 %\documentclass[english,zadani]{fitthesis} % for submission to the IS FIT and/or print with color links - links are color
 %\documentclass[zadani,print]{fitthesis} % pro černobílý tisk - odkazy jsou černé
@@ -51,8 +51,8 @@
 
 % Nastavení cesty k obrázkům
 % Setting of a path to the pictures
-%\graphicspath{{obrazky-figures/}{./obrazky-figures/}}
-%\graphicspath{{obrazky-figures/}{../obrazky-figures/}}
+%\graphicspath{{figures/}{./figures/}}
+%\graphicspath{{figures/}{../figures/}}
 
 %---rm---------------
 \renewcommand{\rmdefault}{lmr}%zavede Latin Modern Roman jako rm / set Latin Modern Roman as rm
@@ -117,25 +117,25 @@
 %---------------------------------------------------------------------------
 \projectinfo{
   %Prace / Thesis
-  project={BP},            %typ práce BP/SP/DP/DR  / thesis type (SP = term project)
+  project={DP},            %typ práce BP/SP/DP/DR  / thesis type (SP = term project)
   year={2020},             % rok odevzdání / year of submission
   date=\today,             % datum odevzdání / submission date
   %Nazev prace / thesis title
-  title.cs={Název práce},  % název práce v češtině či slovenštině (dle zadání) / thesis title in czech language (according to assignment)
-  title.en={Thesis title}, % název práce v angličtině / thesis title in english
-  %title.length={14.5cm}, % nastavení délky bloku s titulkem pro úpravu zalomení řádku (lze definovat zde nebo níže) / setting the length of a block with a thesis title for adjusting a line break (can be defined here or below)
+  title.cs={Instrumentace Java programů, kontrakty pro paralelismus},  % název práce v češtině či slovenštině (dle zadání) / thesis title in czech language (according to assignment)
+  title.en={Parametric Contracts for Concurrency in Java Programs}, % název práce v angličtině / thesis title in english
+  title.length={14.5cm}, % nastavení délky bloku s titulkem pro úpravu zalomení řádku (lze definovat zde nebo níže) / setting the length of a block with a thesis title for adjusting a line break (can be defined here or below)
   %sectitle.length={14.5cm}, % nastavení délky bloku s druhým titulkem pro úpravu zalomení řádku (lze definovat zde nebo níže) / setting the length of a block with a second thesis title for adjusting a line break (can be defined here or below)
   %Autor / Author
-  author.name={Jméno},   % jméno autora / author name
-  author.surname={Příjmení},   % příjmení autora / author surname 
-  %author.title.p={Bc.}, % titul před jménem (nepovinné) / title before the name (optional)
+  author.name={Jan},   % jméno autora / author name
+  author.surname={Žárský},   % příjmení autora / author surname 
+  author.title.p={Bc.}, % titul před jménem (nepovinné) / title before the name (optional)
   %author.title.a={Ph.D.}, % titul za jménem (nepovinné) / title after the name (optional)
   %Ustav / Department
-  department={UPGM}, % doplňte příslušnou zkratku dle ústavu na zadání: UPSY/UIFS/UITS/UPGM / fill in appropriate abbreviation of the department according to assignment: UPSY/UIFS/UITS/UPGM
+  department={UITS}, % doplňte příslušnou zkratku dle ústavu na zadání: UPSY/UIFS/UITS/UPGM / fill in appropriate abbreviation of the department according to assignment: UPSY/UIFS/UITS/UPGM
   % Školitel / supervisor
-  supervisor.name={Jméno},   % jméno školitele / supervisor name 
-  supervisor.surname={Příjmení},   % příjmení školitele / supervisor surname
-  supervisor.title.p={prof. RNDr.},   %titul před jménem (nepovinné) / title before the name (optional)
+  supervisor.name={Aleš},   % jméno školitele / supervisor name 
+  supervisor.surname={Smrčka},   % příjmení školitele / supervisor surname
+  supervisor.title.p={Ing.},   %titul před jménem (nepovinné) / title before the name (optional)
   supervisor.title.a={Ph.D.},    %titul za jménem (nepovinné) / title after the name (optional)
   % Klíčová slova / keywords
   keywords.cs={Sem budou zapsána jednotlivá klíčová slova v českém (slovenském) jazyce, oddělená čárkami.}, % klíčová slova v českém či slovenském jazyce / keywords in czech or slovak language
@@ -146,24 +146,24 @@
   abstract.en={Do tohoto odstavce bude zapsán výtah (abstrakt) práce v anglickém jazyce.}, % abstrakt v anglickém jazyce / abstract in english
   %abstract.en={An abstract of the work in English will be written in this paragraph.},
   % Prohlášení (u anglicky psané práce anglicky, u slovensky psané práce slovensky) / Declaration (for thesis in english should be in english)
-  declaration={Prohlašuji, že jsem tuto bakalářskou práci vypracoval samostatně pod vedením pana X...
-Další informace mi poskytli...
-Uvedl jsem všechny literární prameny, publikace a další zdroje, ze kterých jsem čerpal.},
-  %declaration={I hereby declare that this Bachelor's thesis was prepared as an original work by the author under the supervision of Mr. X
-% The supplementary information was provided by Mr. Y
-% I have listed all the literary sources, publications and other sources, which were used during the preparation of this thesis.},
+  %declaration={Prohlašuji, že jsem tuto bakalářskou práci vypracoval samostatně pod vedením pana X...
+%Další informace mi poskytli...
+%Uvedl jsem všechny literární prameny, publikace a další zdroje, ze kterých jsem čerpal.},
+  declaration={I hereby declare that this Bachelor's thesis was prepared as an original work by the author under the supervision of Mr. X
+ The supplementary information was provided by Mr. Y
+ I have listed all the literary sources, publications and other sources, which were used during the preparation of this thesis.},
   % Poděkování (nepovinné, nejlépe v jazyce práce) / Acknowledgement (optional, ideally in the language of the thesis)
-  acknowledgment={V této sekci je možno uvést poděkování vedoucímu práce a těm, kteří poskytli odbornou pomoc
-(externí zadavatel, konzultant apod.).},
-  %acknowledgment={Here it is possible to express thanks to the supervisor and to the people which provided professional help
-%(external submitter, consultant, etc.).},
+  %acknowledgment={V této sekci je možno uvést poděkování vedoucímu práce a těm, kteří poskytli odbornou pomoc
+%(externí zadavatel, konzultant apod.).},
+  acknowledgment={Here it is possible to express thanks to the supervisor and to the people which provided professional help
+(external submitter, consultant, etc.).},
   % Rozšířený abstrakt (cca 3 normostrany) - lze definovat zde nebo níže / Extended abstract (approximately 3 standard pages) - can be defined here or below
-  %extendedabstract={Do tohoto odstavce bude zapsán rozšířený výtah (abstrakt) práce v českém (slovenském) jazyce.},
+  extendedabstract={Do tohoto odstavce bude zapsán rozšířený výtah (abstrakt) práce v českém (slovenském) jazyce.},
   %faculty={FIT}, % FIT/FEKT/FSI/FA/FCH/FP/FAST/FAVU/USI/DEF
   faculty.cs={Fakulta informačních technologií}, % Fakulta v češtině - pro využití této položky výše zvolte fakultu DEF / Faculty in Czech - for use of this entry select DEF above
   faculty.en={Faculty of Information Technology}, % Fakulta v angličtině - pro využití této položky výše zvolte fakultu DEF / Faculty in English - for use of this entry select DEF above
-  department.cs={Ústav matematiky}, % Ústav v češtině - pro využití této položky výše zvolte ústav DEF nebo jej zakomentujte / Department in Czech - for use of this entry select DEF above or comment it out
-  department.en={Institute of Mathematics} % Ústav v angličtině - pro využití této položky výše zvolte ústav DEF nebo jej zakomentujte / Department in English - for use of this entry select DEF above or comment it out
+  %department.cs={Ústav matematiky}, % Ústav v češtině - pro využití této položky výše zvolte ústav DEF nebo jej zakomentujte / Department in Czech - for use of this entry select DEF above or comment it out
+  %department.en={Institute of Mathematics} % Ústav v angličtině - pro využití této položky výše zvolte ústav DEF nebo jej zakomentujte / Department in English - for use of this entry select DEF above or comment it out
 }
 
 % Rozšířený abstrakt (cca 3 normostrany) - lze definovat zde nebo výše / Extended abstract (approximately 3 standard pages) - can be defined here or above
@@ -225,11 +225,7 @@ Uvedl jsem všechny literární prameny, publikace a další zdroje, ze kterých
 
   % Text prace / Thesis text
   % ----------------------------------------------
-  \ifenglish
-    \input{projekt-01-kapitoly-chapters-en}
-  \else
-    \input{projekt-01-kapitoly-chapters}
-  \fi
+  \input{contracts_for_concurrency-01-chapters}
   
   % Kompilace po částech (viz výše, nutno odkomentovat)
   % Compilation piecewise (see above, it is necessary to uncomment it)
@@ -260,7 +256,7 @@ Uvedl jsem všechny literární prameny, publikace a další zdroje, ze kterých
   \fi
 \fi
   \begin{flushleft}
-  \bibliography{projekt-20-literatura-bibliography}
+  \bibliography{contracts_for_concurrency-20-bibliography}
   \end{flushleft}
 
   % vynechani stranky v oboustrannem rezimu
@@ -319,14 +315,10 @@ Uvedl jsem všechny literární prameny, publikace a další zdroje, ze kterých
   \fi
   
   % Přílohy / Appendices
-  \ifenglish
-    \input{projekt-30-prilohy-appendices-en}
-  \else
-    \input{projekt-30-prilohy-appendices}
-  \fi
+  \input{contracts_for_concurrency-30-appendices}
   
   % Kompilace po částech (viz výše, nutno odkomentovat)
   % Compilation piecewise (see above, it is necessary to uncomment it)
-  %\subfile{projekt-30-prilohy-appendices}
+  %\subfile{contracts_for_concurrency-30-prilohy-appendices}
   
 \end{document}

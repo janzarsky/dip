@@ -21,7 +21,7 @@ This chapter describes individual parts of the template, followed by a brief ins
 Once you extract the template, you will find the following files and directories:
 \begin{DESCRIPTION}
   \item [bib-styles] Literature styles (see below). 
-  \item [obrazky-figures] Directory for your images. Currently contains \texttt{placeholder.pdf} (a.k.a TODO image -- see below) and image keep-calm.png to demonstrate inserting raster images (you don't submit these images with your thesis). It is advised to use shorter directory name, so that it is only in your chosen language.
+  \item [figures] Directory for your images. Currently contains \texttt{placeholder.pdf} (a.k.a TODO image -- see below) and image keep-calm.png to demonstrate inserting raster images (you don't submit these images with your thesis). It is advised to use shorter directory name, so that it is only in your chosen language.
   \item [template-fig] Template images (BUT logo).
   \item [fitthesis.cls] Template (design definition).
   \item [Makefile] Makefile used to compile the project, count standard pages etc. (see below).
@@ -427,11 +427,11 @@ Image~\ref{sirokyObrazek} displays a wide image comprised of multiple smaller im
 % Využití \begin{figure*} způsobí, že obrázek zabere celou šířku stránky. Takový obrázek dříve mohl být pouze na začátku stránky, případně na konci s využitím balíčku dblfloatfix (případné [h] se ignorovalo a [H] obrázek odstraní). Nové verze LaTeXu už umí i [h].
 \begin{figure*}[h]\centering
   \centering
-  \includegraphics[width=\linewidth,height=1.7in]{obrazky-figures/placeholder.pdf}\\[1pt]
-  \includegraphics[width=0.24\linewidth]{obrazky-figures/placeholder.pdf}\hfill
-  \includegraphics[width=0.24\linewidth]{obrazky-figures/placeholder.pdf}\hfill
-  \includegraphics[width=0.24\linewidth]{obrazky-figures/placeholder.pdf}\hfill
-  \includegraphics[width=0.24\linewidth]{obrazky-figures/placeholder.pdf}
+  \includegraphics[width=\linewidth,height=1.7in]{figures/placeholder.pdf}\\[1pt]
+  \includegraphics[width=0.24\linewidth]{figures/placeholder.pdf}\hfill
+  \includegraphics[width=0.24\linewidth]{figures/placeholder.pdf}\hfill
+  \includegraphics[width=0.24\linewidth]{figures/placeholder.pdf}\hfill
+  \includegraphics[width=0.24\linewidth]{figures/placeholder.pdf}
   \caption{\textbf{Wide image.} Image can be comprised of multiple smaller images. If you want to address the partial images from text, use packagae \texttt{subcaption}.}
   \label{sirokyObrazek}
 \end{figure*}
@@ -441,7 +441,7 @@ Image~\ref{sirokyObrazek} displays a wide image comprised of multiple smaller im
 
 \begin{figure}[hbt]
 	\centering
-	\includegraphics[width=0.3\textwidth]{obrazky-figures/keep-calm.png}
+	\includegraphics[width=0.3\textwidth]{figures/keep-calm.png}
 	\caption{Good text is a bad text, that has been changed countless times. You have to start somewhere.}
 	\label{keepCalm}
 \end{figure}
