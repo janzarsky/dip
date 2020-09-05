@@ -16,11 +16,23 @@
   (2015)
 * [Preventing atomicity violations with contracts](https://docentes.fct.unl.pt/joao-lourenco/files/1505.02951v1-dsousa.pdf)
   (2015)
-* [ANaConDA: A Framework for Analysing Multithreaded C/C++ Programs on the Binary Level](http://dx.doi.org/10.1007/978-3-642-35632-2_5) (2012)
+* [ANaConDA: A Framework for Analysing Multithreaded C/C++ Programs on the Binary Level](http://dx.doi.org/10.1007/978-3-642-35632-2_5)
+  (2012)
 * FastTrack: efficient and precise dynamic race detection (2009)
 * C. Hurlin. Specifying and checking protocols of multithreaded classes. (2009)
-* Y. Cheon and A. Perumandla. Specifying and checking method call sequences of java programs. (2007)
+* Y. Cheon and A. Perumandla. Specifying and checking method call sequences of
+  java programs. (2007)
 * Control flow analysis (2003)
   * control flow graph definition
 * [Applying “design by contract”](http://se.ethz.ch/~meyer/publications/computer/contract.pdf)
   (1992)
+  * move away from defensive programming
+  * contract = precondition, postcondition, invariant
+  * no hidden clauses
+  * who should check - client vs. supplier
+  * invariants: hold for all observable states
+  * inheritance: precondition must be equal or weaker, postcondition equal or
+    stronger
+  * dynamic binding
+  * exception handling
+  * [Wikipedia](https://en.wikipedia.org/wiki/Design_by_contract)
