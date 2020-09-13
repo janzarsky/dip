@@ -81,6 +81,7 @@
   * contracts with parameters
 * [ANaConDA: A Framework for Analysing Multithreaded C/C++ Programs on the Binary Level](http://dx.doi.org/10.1007/978-3-642-35632-2_5)
   (2012)
+* The RoadRunner Dynamic Analysis Framework for Concurrent Programs (2010)
 * FastTrack: efficient and precise dynamic race detection (2009)
 * C. Hurlin. Specifying and checking protocols of multithreaded classes. (2009)
 * Y. Cheon and A. Perumandla. Specifying and checking method call sequences of
