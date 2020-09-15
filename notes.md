@@ -82,6 +82,20 @@
 * [ANaConDA: A Framework for Analysing Multithreaded C/C++ Programs on the Binary Level](http://dx.doi.org/10.1007/978-3-642-35632-2_5)
   (2012)
 * The RoadRunner Dynamic Analysis Framework for Concurrent Programs (2010)
+  * introduction:
+    * for writing dynamic analysis
+    * event handlers for different kind of events
+    * composition: different tools can be chained
+    * each analysis is a filter over event stream
+    * diagnostic tools: print, time, count, record
+    * comparation of dynamic analyses
+  * API:
+    * thread and lock shadows
+    * variable shadows
+    * events
+    * tool composition
+  * implementation details: TODO
+  * optimizations: TODO
 * FastTrack: efficient and precise dynamic race detection (2009)
 * C. Hurlin. Specifying and checking protocols of multithreaded classes. (2009)
 * Y. Cheon and A. Perumandla. Specifying and checking method call sequences of
@@ -100,3 +114,53 @@
   * dynamic binding
   * exception handling
   * [Wikipedia](https://en.wikipedia.org/wiki/Design_by_contract)
+
+## RoadRunner
+
+* tools:
+         A : AtomizerTool                      tools.atomizer
+        BE : EraserWithBarriersTool            tools.barrier_eraser
+         C : CountTool                         rr.simple
+    FPTest : FastPathTestTool                  rr.simple
+       FT2 : FastTrackTool                     tools.fasttrack
+      FT2L : FastTrackTool                     tools.fasttrack_long
+        HB : HappensBeforeTool                 tools.hb
+       LOG : ReplayLogTool                     rr.simple
+        LS : LockSetTool                       tools.eraser
+         N : EmptyTool                         rr.simple
+         P : PrintTool                         rr.simple
+        PL : ProtectingLockTool                tools.eraser
+        RS : ReadSharedTool                    tools.eraser
+         S : SyncTool                          rr.simple
+    SFPTool : SpecializedFastPathTestTool      rr.simple
+         T : TimerTool                         rr.simple
+        TL : ThreadLocalTool                   rr.simple
+* CountTool: Access, VolatileAccess, Array Access, Acquire, Release, Enter,
+  Exit, Wait, Notify, Sleep, Join, Start, Guard State
+* PrintTool: example
+    [main: New Thread main with tid=0.]
+    @  main[tid = 0] started .
+    @  Enter(0,test/Test.main([Ljava/lang/String;)V) from null
+    [main: New Thread Thread-0 with tid=1.]
+    @  Thread-0[tid = 1] started by main[tid = 0].
+    @   Start(0,1)
+    @  Enter(1,test/Test.run()V) from null
+    @   Enter(1,test/Test.inc()V) from null
+    @    Rd(1,null.test/Test.y_I)  Final  Test.java:48:0
+    @   Exit(1,test/Test.inc()V)
+    @   Enter(1,test/Test.inc()V) from null
+    @   Exit(1,test/Test.inc()V)
+    @   Start(0,1)
+    [main: New Thread Thread-1 with tid=2.]
+    @  Thread-1[tid = 2] started by main[tid = 0].
+    @   Start(0,2)
+    @   Enter(1,test/Test.inc()V) from null
+    @   Exit(1,test/Test.inc()V)
+    @   Enter(1,test/Test.inc()V) from null
+    @   Exit(1,test/Test.inc()V)
+    ...
+* TimerTool: timers for each event type
+
+## TODO
+
+* study ant
