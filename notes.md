@@ -6,9 +6,12 @@
 
 * [original RoadRunner](https://github.com/stephenfreund/RoadRunner)
 * [roadrunnerX](https://pajda.fit.vutbr.cz/jct/roadrunnerX)
+* [rrcontractvalidator](https://pajda.fit.vutbr.cz/jct/rrcontractvalidator)
 
 ### Papers
 
+* Dynamické analyzátory pro platformu SearchBestie (2017)
+* Fine-grain Noise-injection Heuristics for SearchBestie Infrastructure (2017)
 * [Verifying Concurrent Programs using Contracts](http://www.fit.vutbr.cz/~vojnar/Publications/icst17-contracts.pdf)
   (2017)
   * basic contract:
@@ -56,6 +59,12 @@
         can keep only the last spoiler instance
     * discarding targets:
       * TODO
+    * vector clocks:
+      * one logical clock per thread
+      * each thread has a local copy of global clock array
+      * vector clock for threads: incremented on lock release or fork
+      * vector clock for locks: incremented on operations that impose a
+        happens-before relation
 * [Verifying Concurrent Programs using Contracts - Technical Report](http://www.fit.vutbr.cz/~vojnar/Publications/tr-contracts-16.pdf)
   * proofs for lemmas in dynamic analysis in ^^^
 * [Dynamic validation of contracts in concurrent code](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.715.114&rep=rep1&type=pdf)
@@ -102,6 +111,7 @@
   java programs. (2007)
 * Control flow analysis (2003)
   * control flow graph definition
+* [Eraser: A Dynamic Data Race Detector for Multithreaded Programs](http://cseweb.ucsd.edu/~savage/papers/Tocs97.pdf)
 * [Applying “design by contract”](http://se.ethz.ch/~meyer/publications/computer/contract.pdf)
   (1992)
   * move away from defensive programming
@@ -114,6 +124,10 @@
   * dynamic binding
   * exception handling
   * [Wikipedia](https://en.wikipedia.org/wiki/Design_by_contract)
+
+### Videos
+
+* [Java bytecode](https://www.youtube.com/watch?v=e2zmmkc5xI0)
 
 ## RoadRunner
 
@@ -160,7 +174,75 @@
     @   Exit(1,test/Test.inc()V)
     ...
 * TimerTool: timers for each event type
+* SyncTool: all events are `synchronized`
+* EmptyTool: only for performance tests
+* ReplayLogTool: writes events to a log
+* ThreadLocalTool: filters out thread local accesses
+* LastTool: last tool in any chain, does nothing
+* FastPathTestTool: ???, SpecializedFastPathTestTool: ???
+* MethodMonitoringTool: ???
+
+## RoadRunnerX
+
+* branch contract - new contract tool
+
+## ANaConDA
+
+* analysers/contract-validator
+* analysers/param-contract-validator
+
+## RoadRunner + contracts
+
+* input to roadrunner:
+  * what are the contracts and what is the API
+  * program to be checked
 
 ## TODO
 
 * study ant
+
+## Structure
+
+* introduction
+* "theory"
+  * testing of parallel applications, dynamic vs. static analysis
+  * logical clock
+  * happens-before
+  * contracts for concurrency
+  * parametric contracts
+  * spoilers
+  * dynamic analysis description
+  * optimizations
+  * trace windows, discarding spoilers and targets
+  * vector clocks
+  * roadrunner framework
+  * instrumentation
+  * ASM library
+* design
+* implementation
+* verification
+* conclusion
+
+## Implementation
+
+### Advance Instance
+
+always same thread
+
+    started?    in alph?    can adv?    MV match?           FAinst  lastBeg lastEnd begin   started MV
+    YES         YES         YES         YES                 adv     -//-    -//-    -//-    -//-    -//-    ideal situation: a(X) b(X)
+    YES         YES         YES         NO                  -//-    -//-    -//-    -//-    -//-    -//-    belongs to different instance: a(X) b(Y)
+    YES         YES         NO          YES                 -//-    -//-    -//-    -//-    -//-    -//-    instance NOT invalidated - see example below
+    YES         YES         NO          NO                  -//-    -//-    -//-    -//-    -//-    -//-    belongs to different instance: a(X) c(Y)
+    YES         NO          -           -                   -//-    -//-    -//-    -//-    -//-    -//-    irrelevant: a(X) z(Y)
+    NO          YES         YES         -                   -//-    -//-    -//-    -//-    -//-    -//-    start of new instance: a(X)
+                                                            adv     -//-    -//-    vc      true    bind    
+    NO          YES         NO          -                   -//-    -//-    -//-    -//-    -//-    -//-    not a start: c(X)
+    NO          NO          -           -                   -//-    -//-    -//-    -//-    -//-    -//-    irrelevant: z(X)
+
+    target: A(X,Y,Z) B(X,Y) B(Y,Z)
+    
+    code:
+    A(a,b,c) // instance 1 started
+    A(b,c,d) // instance 2 started
+    B(b,c)   // instance 2 can be advanced, instance 1 is invalidated or not?
