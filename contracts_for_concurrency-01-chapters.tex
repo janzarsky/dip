@@ -19,8 +19,8 @@ given input parameters, and (iii) access restrictions. Access restrictions
 include the domain of valid values, dependencies on other services, and
 atomicity violations \cite{FITPUB11510}.
 
-\emph{Contracts for concurrency} \cite{FITPUB10817}
-\cite{DBLP:journals/corr/SousaDFL15} are a case of a software protocol that
+\emph{Contracts for concurrency} \cite{FITPUB10817},
+\cite{DBLP:journals/corr/SousaDFL15}, are a case of a software protocol that
 expresses access restrictions in concurrent setting. In it's basic form, it
 specifies sequences of methods that must be executed atomically. The contracts
 can be extended with parameters to reflect the data flow between the methods (so
@@ -29,13 +29,47 @@ Another extension adds so called \emph{spoilers} (so that given sequence must be
 executed atomically only with respect to only certain sequences). Both
 extensions can be combined \cite{FITPUB11510}.
 
+\section{Basic Contracts}
+
+\emph{Contract} is formally defined in \cite{FITPUB10817} as follows. Let
+$\Sigma_\mathbb{M}$ be a set of all public method names (the API) of a module or
+a library. A \emph{contract} is a set $\mathbb{R}$ of \emph{clauses}. Each
+clause $\varrho \in \mathbb{R}$ is a star-free regular expression over
+$\Sigma_\mathbb{M}$. A contract violation occurs when any of the sequences in a
+contract is interleaved with an execution of a method from $\Sigma_\mathbb{M}$
+over the same object.
+
+\emph{Example.} Consider a map implementation with the following operations:
+\texttt{put(key, value)}, \texttt{get(key)}, \texttt{remove(key)}, and
+\texttt{contains(key)}. Then a contract for this class may contain the following
+clauses: \todo{formatting}\newline
+    $(\varrho_1)$ \texttt{put get} \newline
+    $(\varrho_2)$ \texttt{contains (put|get|remove)} \newline
+Clause $\varrho_1$ states that when an element is put into the map and then
+retrieved, it should be executed atomically (because the element may be removed
+between the calls). Clause $\varrho_2$ states that when the program modifies the
+map based on the result of the \texttt{contains} call, it should be atomic.
+
+\todo{optional: clause composition}
+
+\section{Parametric Contracts}
+
+\todo{adding parameters}
+
+\todo{arguments, return value, this}
+
+\todo{meta-variables}
+
+\emph{Example.} \todo{previous example, but with parameters}
+
+\section{Contracts with Spoilers}
+
+\todo{}
+
 \todo{
   * testing of parallel applications, dynamic vs. static analysis
   * logical clock
   * happens-before
-  * contracts for concurrency
-  * parametric contracts
-  * spoilers
   * dynamic analysis description
   * optimizations
   * trace windows, discarding spoilers and targets
