@@ -21,7 +21,7 @@ atomicity violations \cite{FITPUB11510}.
 
 \emph{Contracts for concurrency} \cite{FITPUB10817},
 \cite{DBLP:journals/corr/SousaDFL15}, are a case of a software protocol that
-expresses access restrictions in concurrent setting. In it's basic form, it
+expresses access restrictions in concurrent setting. In its basic form, it
 specifies sequences of methods that must be executed atomically. The contracts
 can be extended with parameters to reflect the data flow between the methods (so
 that only methods manipulating the same data must be executed atomically).
@@ -79,7 +79,22 @@ object that the method was called upon (\texttt{this} in Java)
 
 \section{Contracts with Spoilers}
 
-\todo{}
+In \cite{FITPUB11510}, contracts are extended with contextual information to
+distinguish which method sequences violates the contract. Each clause of the
+basic contract is called a \emph{target}, and is assigned a set of so called
+\emph{spoilers}. A spoiler is a set of method sequences that may violate its
+target.
+
+Consider the clause $\varrho_1$ from example \todo{ref example in Basic
+Contracts}. If the element that was put to the map is concurrently removed or
+updated before the \texttt{get} call, a contract violation should be detected.
+However, calling \texttt{contains} or \texttt{get} on the element will not
+affect the computation and should not be marked as a contract violation. In this
+example, sequences \texttt{put} and \texttt{remove} are spoilers for a target
+$\varrho_1$, denoted as \texttt{put get} $\leftsquigarrow$
+\texttt{put|remove}.
+
+Formally, \todo{}
 
 \todo{
   * testing of parallel applications, dynamic vs. static analysis
