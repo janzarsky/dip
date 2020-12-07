@@ -42,7 +42,7 @@ over the same object.
 \emph{Example.} Consider a map implementation with the following operations:
 \texttt{put(key, value)}, \texttt{get(key)}, \texttt{remove(key)}, and
 \texttt{contains(key)}. Then a contract for this class may contain the following
-clauses: \todo{formatting}\newline
+clauses: \todo{formatting} \newline
     $(\varrho_1)$ \texttt{put get} \newline
     $(\varrho_2)$ \texttt{contains (put|get|remove)} \newline
 Clause $\varrho_1$ states that when an element is put into the map and then
@@ -54,13 +54,28 @@ map based on the result of the \texttt{contains} call, it should be atomic.
 
 \section{Parametric Contracts}
 
-\todo{adding parameters}
+In some situations, the definition of contracts may be to restrictive, producing
+false alarms. In \cite{FITPUB11510}, contracts are extended with parameters to
+reflect the data flow between methods. Consider the following example:
+\todo{formatting}\newline
+\texttt{if (q.contains(42)) q.remove(42);} \newline
+These two calls must be executed atomically only if they share the same
+argument. This dependency can be expressed using \emph{meta-variables} placed as
+the parameters or return values of methods. Parameters that should not be taken
+into account are marked with free meta-variable (denoted with underscore).
 
-\todo{arguments, return value, this}
+\emph{Example.} The example from \todo{ref} can be extended with parameters:
+\todo{formatting} \newline
+    $(\varrho_1)$ \texttt{put(X) \_ = get(X)} \newline
+    $(\varrho_2)$ \texttt{\_ = contains(X) ( put(X,\_) | \_ = get(X) | remove(X) )}
+    \newline
 
-\todo{meta-variables}
-
-\emph{Example.} \todo{previous example, but with parameters}
+The basic definition of contracts in fact contains one implicit parameter, the
+object that the method was called upon (\texttt{this} in Java)
+\cite{FITPUB10817}. To better illustrate this, the example can be rewritten as:
+\todo{formatting} \newline
+    $(\varrho_1)$ \texttt{X.put(Y) \_ = X.get(Y)} \newline
+    $(\varrho_2)$ \texttt{\_ = X.contains(Y) ( X.put(Y,\_) | \_ = X.get(Y) | X.remove(Y) )}
 
 \section{Contracts with Spoilers}
 
