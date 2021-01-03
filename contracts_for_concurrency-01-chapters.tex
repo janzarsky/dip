@@ -2,9 +2,127 @@
 
 \todo{}
 
+
+
 \chapter{Testing and Dynamic Analysis in Java}
 
-\todo{}
+\todo{chapter intro}
+
+
+\section{Multi-threaded Programming in Java}
+
+Java provides built-in support for multi-threaded programming. This section
+describes typical thread lifecycle, synchronization of threads, and interthread
+communication, as these are important in dynamic analysis using contracts.
+
+A thread in Java is represented by a \texttt{Thread} object. To create a new
+thread, one can extend the \texttt{Thread} class and override the \texttt{run()}
+method, which will be the entrypoint of the new thread. To start the thread,
+the \texttt{start()} method must be called (which will in turn call the
+\texttt{run()} method). The thread will terminate upon returning from the
+\texttt{run()} method. The \texttt{join()} method can be used in other thread to
+wait for a thread to terminate \cite{javaTheCompleteReference}.
+
+When accessing a shared resource from multiple threads, proper synchronization
+is usually required. In Java, every object gets an implicit monitor, which can
+be owned by only one thread at a given time. To enter the monitor, one must use
+either synchronized methods or synchronized statements. Synchronized statements
+are code blocks with explicitly specified object whose monitor is entered before
+executing the block. Synchronized methods enter the monitor of the instance they
+are called upon. \todo{reword}
+
+Communication between threads is achieved using the following methods:
+\texttt{wait()}, \texttt{notify()}, and \texttt{notifyAll()}. All methods must
+be called within a synchronized context. Calling \texttt{wait()} will suspend
+the calling thread until some other thread enters the same monitor and calls
+either \texttt{notify()} or \texttt{notifyAll()}.
+
+Multi-threaded programs may use the \texttt{volatile} type modifier. It tells
+the compiler that the variable may be modified outside of the current thread.
+
+\section{Java Memory Model}
+
+% http://www.cs.umd.edu/~pugh/java/memoryModel/jsr-133-faq.html
+% https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.4.5
+
+\emph{Java memory model} describes how threads in Java interact with each other
+using shared memory. The model takes a program and an execution trace, and for
+each read operation decides, if it is valid or not. The decision depends on the
+write operation that modified the data before the read operation. The compiler,
+runtime, and hardware must ensure that all executions of a program produce
+execution traces that are valid according to the model.
+
+In a single-threaded program, it is only required that the program produces the
+same result as if it was run serially. The compiler is free to reorder
+instructions when it does not affect the result of the computation.
+
+In multi-threaded programs, the reordering of instructions has to be limited
+when the threads interact with each other. For the purpose of the model, only
+certain program \emph{actions} are considered. There are several orders defined
+over the actions which are used by the dynamic contract analysis: \emph{program
+order}, \emph{synchronization order}, and \emph{happens-before order}.
+
+The actions can be either \emph{intra-} or \emph{inter-thread}. An inter-thread
+action can be detected or influenced by another thread. An intra-thread action
+is for example adding two local variables and is not important to the model.
+Non-volatile reading or writing of shared variable is an inter-thread action.
+\emph{Synchronization actions} are inter-thread actions that include volatile
+reading or writing of variables, locking and unlocking of monitors, and starting
+and stopping of a thread.
+
+\emph{Program order} is a total order over all inter-thread actions from a given
+thread. It reflects the order in which these actions would be executed if
+running \todo{} .
+
+\emph{Synchronization order} is a total order over all synchronization actions
+of an execution. Within each thread, the synchronization order is consistent
+with the program order. The \emph{synchronized-with} relation is defined on
+certain actions. \emph{Example}: starting a thread \emph{synchronized-with} the
+first action in the new thread.
+
+\emph{Happens-before order} is a partial order. If an action
+\emph{happens-before} another, the first action is visible to and ordered before
+the second action. For two actions, \emph{x} and \emph{y}, \emph{hb(x,y)}
+denotes that action \emph{x} \emph{happens-before} action \emph{y}, 
+\todo{}.
+
+\emph{Examples of actions that are ordered by happens-before:}
+\begin{itemize}
+    \item A write to a volatile field \emph{happens-before} every subsequent read
+    of that field.
+    \item \todo{}
+\end{itemize}
+
+
+\section{Common Bugs in Concurrent Environment}
+
+\todo{overview, focus on atomicity and order violation, and something else?}
+
+
+\section{Approaches to Software Verification}
+
+\todo{ \newline
+    * testing \newline
+    * static analysis \newline
+    * dynamic analysis \newline
+}
+
+
+\section{Instrumentation of Java Bytecode}
+
+\todo{ASM library (used by RoadRunner)}
+
+
+\section{Dynamic Analysis using RoadRunner}
+
+\cite{RoadRunner}
+
+\todo{ \newline
+    * introduction, main purpose \newline
+    * architecture, API, thread and lock shadows, events \newline
+}
+
+
 
 \chapter{Contracts for Concurrency}
 
@@ -29,6 +147,7 @@ Another extension adds so called \emph{spoilers} (so that given sequence must be
 executed atomically only with respect to only certain sequences). Both
 extensions can be combined \cite{FITPUB11510}.
 
+
 \section{Basic Contracts}
 
 \emph{Contract} is formally defined in \cite{FITPUB10817} as follows. Let
@@ -51,6 +170,7 @@ between the calls). Clause $\varrho_2$ states that when the program modifies the
 map based on the result of the \texttt{contains} call, it should be atomic.
 
 \todo{optional: clause composition}
+
 
 \section{Parametric Contracts}
 
@@ -77,6 +197,7 @@ object that the method was called upon (\texttt{this} in Java)
     $(\varrho_1)$ \texttt{X.put(Y) \_ = X.get(Y)} \newline
     $(\varrho_2)$ \texttt{\_ = X.contains(Y) ( X.put(Y,\_) | \_ = X.get(Y) | X.remove(Y) )}
 
+
 \section{Contracts with Spoilers}
 
 In \cite{FITPUB11510}, contracts are extended with contextual information to
@@ -96,22 +217,40 @@ $\varrho_1$, denoted as \texttt{put get} $\leftsquigarrow$
 
 Formally, \todo{}
 
-\todo{
-  * testing of parallel applications, dynamic vs. static analysis
-  * logical clock
-  * happens-before
-  * dynamic analysis description
-  * optimizations
-  * trace windows, discarding spoilers and targets
-  * vector clocks
-  * roadrunner framework
-  * instrumentation
-  * ASM library
+
+\section{Dynamic Contract Validation}
+
+\todo{ \newline
+    * trace windows \newline
+    * discarding spoilers and targets \newline
+    * main algorithm \newline
+    * optimizations, vector clocks, happens-before \newline
 }
 
-\chapter{Dynamic Analyzer for Parametric Contracts}
+
+
+\chapter{Design of a Dynamic Analyzer for Parametric Contracts with Spoilers}
+
+\todo{ \newline
+    * design of a RoadRunner tool \newline
+    * requirements \newline
+    * required changes to RR internals \newline
+    * contract limitation? \newline
+}
+
+
+
+\chapter{Implementation of a Contract Validator for RoadRunner}
 
 \todo{}
+
+
+
+\chapter{Evaluation}
+
+\todo{}
+
+
 
 \chapter{Conclusion}
 
