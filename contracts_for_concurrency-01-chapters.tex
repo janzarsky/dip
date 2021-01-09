@@ -4,7 +4,7 @@
 
 
 
-\chapter{Testing and Dynamic Analysis in Java}
+\chapter{Dynamic Analysis of Multi-threaded Programs in Java}
 
 \todo{chapter intro}
 
@@ -77,35 +77,67 @@ running \todo{} .
 \emph{Synchronization order} is a total order over all synchronization actions
 of an execution. Within each thread, the synchronization order is consistent
 with the program order. The \emph{synchronized-with} relation is defined on
-certain actions. \emph{Example}: starting a thread \emph{synchronized-with} the
-first action in the new thread.
+certain actions. \emph{Example}: starting a thread is \emph{synchronized-with}
+the first action in the new thread.
 
 \emph{Happens-before order} is a partial order. If an action
 \emph{happens-before} another, the first action is visible to and ordered before
 the second action. For two actions, \emph{x} and \emph{y}, \emph{hb(x,y)}
-denotes that action \emph{x} \emph{happens-before} action \emph{y}, 
+denotes that action \emph{x} \emph{happens-before} action \emph{y}. If an action
+\emph{x} \emph{synchronizes-with} an action \emph{y}, then alsow \emph{hb(x,y)}.
 \todo{}.
-
-\emph{Examples of actions that are ordered by happens-before:}
-\begin{itemize}
-    \item A write to a volatile field \emph{happens-before} every subsequent read
-    of that field.
-    \item \todo{}
-\end{itemize}
-
 
 \section{Common Bugs in Concurrent Environment}
 
 \todo{overview, focus on atomicity and order violation, and something else?}
 
+\todo{ \newline
+* data race \newline
+* atomicity violation \newline
+* order violation \newline
+* deadlock \newline
+* missed signal \newline
+* blocked thread, livelock, starvation \newline
+}
 
 \section{Approaches to Software Verification}
 
-\todo{ \newline
-    * testing \newline
-    * static analysis \newline
-    * dynamic analysis \newline
-}
+% Carlo Ghezzi, Mehdi Jazayeri, Dino Mandrioli: Fundamentals of Software Engineering, Prentice Hall, ISBN 0-13-099183-X
+
+The goal of software verification is to make sure that the software meets all
+requirements. There are two approaches to software verification:
+\emph{experimentation} and \emph{analysis}. The experimentation approach
+consists of observing the behavior of the software under different conditions,
+in other words \emph{testing} the software. Analysis inspects the software to
+determine its properties and capabilities. Analysis can be either static or
+dynamic. \emph{Dynamic analysis} studies the software while it is running,
+\emph{static analysis} is based on static model of the software.
+
+\subsection{Testing}
+
+Testing consists of running the software under different conditions and
+checking the results of the computation (or observing other behavior of the
+software). To gain enough confidence that the software operates correctly in all
+conditions, suitable set of \emph{test cases} must be found, which is difficult,
+and sometimes impossible. Testing is best suited for confirming presence of
+defects in software, not for proving their absence.
+
+Important property of test cases is their \emph{repeatability}, meaning that a
+certain test case will always yield the same result. When testing multi-threaded
+programs, this property does not hold because of the non-determinism introduced
+by the thread scheduler. Threads are interleaved in a different way on each
+execution which means that errors may or may not appear. This makes discovering
+defects in multi-threaded programs difficult.
+
+\subsection{Static Analysis}
+
+Static analysis is performed without executing the software.
+
+\todo{}
+
+\subsection{Dynamic Analysis}
+
+\todo{}
 
 
 \section{Instrumentation of Java Bytecode}
