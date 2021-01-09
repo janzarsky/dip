@@ -142,7 +142,91 @@ Static analysis is performed without executing the software.
 
 \section{Instrumentation of Java Bytecode}
 
-\todo{ASM library (used by RoadRunner)}
+Instrumentation is the act of inserting instructions to an existing program to
+extract useful information at runtime \todo{citation needed}. Instrumentation
+can be used to measure performance, to log events, or to perform dynamic
+analysis \todo{citation needed}. The running program should not be aware that it
+is being instrumented and the result of the computation should remain the same.
+Instrumentation may add significant overhead to the program.
+
+In Java, instrumentation is done by changing the bytecode. There are several
+general purpose frameworks for modifying the Java bytecode. In this section, the
+ASM framework is described as it is used by the RoadRunner framework, which is
+the basis of this diploma thesis.
+
+\subsection{Java Bytecode Overview}
+
+Programs written in Java are compiled into Java bytecode which is executed by
+the Java Virtual Machine. Every class gets compiled into a Java class file
+containing the following sections \cite{asmguide}:
+\begin{itemize}
+    \item Section with information about the class itself, such as the name of
+    the class, the super class, implemented interfaces, and class annotations.
+    \item One section per field, containing the field name, type, modifiers, and
+    annotations.
+    \item One section per method (and constructor), containing the name of the
+    method, the return type, type of parameters, annotations, and compiled code
+    of the method.
+\end{itemize}
+
+Java class files also contains a \emph{constant pool} section that holds all
+numeric, type, and string constants which are then referenced from other
+sections of the file.
+
+\todo{here will be Figure 2.1 from the ASM4 guide}
+
+Compiled classes do not contain any \texttt{package} or \texttt{import}
+statements, so all type names must be fully qualified. Internally, class files
+use slashes instead of dots in type names, so for example
+\texttt{java.lang.Object} becomes \texttt{java/lang/Object}. In most places,
+Java types are represented with \emph{type descriptors}. Each primitive type is
+assigned a single character: \texttt{I} for \texttt{int}, \texttt{D} for
+\texttt{Double} and so on. Classes and interfaces are written with prefix
+\texttt{L} and semicolon at the end, so string becomes
+\texttt{Ljava/lang/String;}. Arrays are represented using a \texttt{[} and the
+element type, so integer arrays is \texttt{[I}, array of strings is
+\texttt{[Ljava/lang/String;}. Similarly, \emph{method descriptors} are used to
+represent the return type of a method and types of all method parameters. For
+example, a method declared as \texttt{double m(int i, String s)} would be
+represented as \texttt{(ILjava/lang/String;)D}. In method descriptors,
+\texttt{V} is used when the method returns \texttt{void}.
+
+\subsection{The ASM framework}
+
+The ASM framework allows generating and modifying of Java classes directly in
+bytecode. It can be used both statically (for example during compilation) or
+dynamically (to create classes at runtime). The ASM framework provides an
+interface for loading and storing the bytecode using higher-level abstractions,
+such as constants, identifiers, methods, fields, etc. \cite{asmguide}.
+
+There are two interfaces available: the \emph{core API} with an \emph{event
+based} representation of classes, and the \emph{tree API} with an \emph{object
+based} representation. The core API processes classes sequentially. When parsing
+a class, the ASM parser will produce an event for each element of the class.
+When writing a class, the writer creates the class based on a sequence of
+events. The tree API loads the whole class and creates a tree of objects
+representing the class. The core API is faster and requires less memory, however
+it is not practical for complex transformations \cite{asmguide}. The RoadRunner
+framework uses the core API.
+
+The core API is based on the \texttt{ClassVisitor} abstract class. The class
+contains methods for visiting different sections of a class, for example
+\texttt{visitAttribute}, \texttt{visitMethod}, or \texttt{visitField}. Complex
+sections, such as methods or fields, have their own visitor classes. For
+example, the \texttt{MethodVisitor} class has methods such as
+\texttt{visitLocalVariable}, \texttt{visitCode}, or \texttt{visitParameter}
+\cite{asmguide}.
+
+Typical class transformation begins with reading a class using a
+\texttt{ClassReader}. It reads the bytecode of the class and calls visit methods
+on a specified \texttt{ClassVisitor}. Then there may be several class visitors,
+linked in a chain, that transform the class. The last class visitor is an
+instance of a \texttt{ClassWriter}. Every visit method of the writer generates
+bytecode.
+
+To create a \texttt{ClassVisitor} subclass that modifies a class, one has to
+override the visit methods. By default, all methods will just forward the data
+to the next class visitor in the chain. When overridden, can modify... \todo{}
 
 
 \section{Dynamic Analysis using RoadRunner}
