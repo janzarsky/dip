@@ -183,13 +183,17 @@ Java types are represented with \emph{type descriptors}. Each primitive type is
 assigned a single character: \texttt{I} for \texttt{int}, \texttt{D} for
 \texttt{Double} and so on. Classes and interfaces are written with prefix
 \texttt{L} and semicolon at the end, so string becomes
-\texttt{Ljava/lang/String;}. Arrays are represented using a \texttt{[} and the
-element type, so integer arrays is \texttt{[I}, array of strings is
-\texttt{[Ljava/lang/String;}. Similarly, \emph{method descriptors} are used to
-represent the return type of a method and types of all method parameters. For
-example, a method declared as \texttt{double m(int i, String s)} would be
-represented as \texttt{(ILjava/lang/String;)D}. In method descriptors,
-\texttt{V} is used when the method returns \texttt{void}.
+\texttt{Ljava/lang/String;}. Arrays are represented using a
+\texttt{\leftbracket} and the element type, so integer arrays is
+\texttt{\leftbracket I}, array of strings is \texttt{\leftbracket
+Ljava/lang/String;}. Similarly, \emph{method descriptors} are used to represent
+the return type of a method and types of all method parameters. For example, a
+method declared as \texttt{double m(int i, String s)} would be represented as
+\texttt{(ILjava/lang/String;)D}. In method descriptors, \texttt{V} is used when
+the method returns \texttt{void}.
+
+\todo{describe the instructions - groups of instructions, representation,
+method invokation, constants}
 
 \subsection{The ASM framework}
 
@@ -213,21 +217,28 @@ The core API is based on the \texttt{ClassVisitor} abstract class. The class
 contains methods for visiting different sections of a class, for example
 \texttt{visitAttribute}, \texttt{visitMethod}, or \texttt{visitField}. Complex
 sections, such as methods or fields, have their own visitor classes. For
-example, the \texttt{MethodVisitor} class has methods such as
+example, the \texttt{MethodVisitor} class contain methods such as
 \texttt{visitLocalVariable}, \texttt{visitCode}, or \texttt{visitParameter}
 \cite{asmguide}.
 
-Typical class transformation begins with reading a class using a
-\texttt{ClassReader}. It reads the bytecode of the class and calls visit methods
-on a specified \texttt{ClassVisitor}. Then there may be several class visitors,
-linked in a chain, that transform the class. The last class visitor is an
-instance of a \texttt{ClassWriter}. Every visit method of the writer generates
-bytecode.
+To generate a new class, one has to create a \texttt{ClassWriter} instance,
+which is a subclass of \texttt{ClassVisitor}. Then a sequence of visit methods
+must be called, such as \texttt{visitField} or \texttt{visitMethod}. The
+\texttt{ClassWriter} instance will generate appropriate bytecode on each call.
 
-To create a \texttt{ClassVisitor} subclass that modifies a class, one has to
-override the visit methods. By default, all methods will just forward the data
-to the next class visitor in the chain. When overridden, can modify... \todo{}
+To read and parse a class, one has to create a \texttt{ClassReader} instance.
+The reader will produce a sequence of events for each section of the class. To
+consume those events, a \texttt{ClassVisitor} instance must be given to the
+reader. The reader will then call appropriate visit methods on the visitor as it
+is parsing the class. To demonstrate this, one can create a \texttt{ClassReader}
+and connect it to a \texttt{ClassWriter} (which is a subclass of
+\texttt{ClassVisitor}). The reader will call visit methods on the writer,
+effectively copying the class.
 
+Typical class transformation uses the following architecture: a
+\texttt{ClassReader} instance reads the class, then one or more
+\texttt{ClassVisitor} instances modify the class, and then a
+\texttt{ClassWriter} instance writes the modified class back to a file.
 
 \section{Dynamic Analysis using RoadRunner}
 
@@ -331,10 +342,61 @@ example, sequences \texttt{put} and \texttt{remove} are spoilers for a target
 $\varrho_1$, denoted as \texttt{put get} $\leftsquigarrow$
 \texttt{put|remove}.
 
-Formally, \todo{}
+% TODO: this is basically copied - is it ok?
+
+Formally, as defined in \cite{FITPUB11510}, let $\mathbb{R}$ be the set of
+\emph{target} clauses where each target $\varrho \in \mathbb{R}$ is a regular
+expression over $\Sigma_\mathbb{M}$. Let $\mathbb{S}$ be the set of
+\emph{spoilers} where each spoiler $\sigma \in \mathbb{S}$ is a regular
+expression over $\Sigma_\mathbb{M}$. A \emph{contract} is a relation $\mathbb{C}
+\subseteq \mathbb{R} \times \mathbb{S}$ defining for each target, which spoilers
+may cause atomicity violation.
+
+Contract violation is observed when a target sequence $\varrho \in \mathbb{R}$
+is fully interleaved by a spoiler sequence $\sigma \in \mathbb{C}(\varrho)$, and
+the sequences are executed on the same object.
+
+\emph{Example.} The example from \todo{ref} can be extended with spoilers:
+\todo{formatting} \newline
+    $(\varrho_1)$ \texttt{put get} $\leftsquigarrow$ \texttt{put|remove} \newline
+    $(\varrho_2)$ \texttt{contains (put|get|remove)} $\leftsquigarrow$
+    \texttt{put|remove} \newline
+
+\todo{combining spoilers and parameters}
 
 
 \section{Dynamic Contract Validation}
+
+\todo{section intro}
+
+\subsection{Multi-threaded Program Traces}
+
+For the purposes of dynamic contract validation, multi-threaded program
+\emph{trace} consists of events of the following types:
+\begin{itemize}
+    \item thread forking or joining another thread,
+    \item thread entering or exiting a method,
+    \item thread acquiring or releasing a lock.
+\end{itemize}
+
+All events in a trace are indexed by their position in the trace. Let
+$\mathbb{T}$ be a set of threads, $\mathbb{R}$ a set of targets, $\mathbb{S}$ a
+set of spoilers, $\mathbb{C} \subseteq \mathbb{R} \times \mathbb{S}$ a set of
+contracts, and $\mathbb{L}$ a set of locks. The set of all events that can be
+generated by a thread $t \in \mathbb{T}$ is then denoted as $\mathbb{E}_t$. Let
+$\mathbb{E} = \bigcup_{t \in \mathbb{T}} \mathbb{E}_t$. A \emph{trace} is then a
+sequence $\tau = e_1 \hdots e_n \in \mathbb{E}^+$.
+
+% TODO: basically copied
+
+Given a trace $\tau = e_1 \hdots e_n \in \mathbb{E}^+$, we call its subsequence
+$r = e_{i_1} e_{i_2} \hdots e_{i_k}$, $1 < k \leq n$, an \emph{instance} of a
+target $\varrho \in \mathbb{R}$ if, and only if:
+\begin{itemize}
+    \item \todo{}
+\end{itemize}
+
+\todo{}
 
 \todo{ \newline
     * trace windows \newline
