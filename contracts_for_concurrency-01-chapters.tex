@@ -50,7 +50,7 @@ using shared memory. The model takes a program and an execution trace, and for
 each read operation decides, if it is valid or not. The decision depends on the
 write operation that modified the data before the read operation. The compiler,
 runtime, and hardware must ensure that all executions of a program produce
-execution traces that are valid according to the model.
+execution traces that are valid according to the model \cite{jmmspec}.
 
 In a single-threaded program, it is only required that the program produces the
 same result as if it was run serially. The compiler is free to reorder
@@ -111,7 +111,8 @@ consists of observing the behavior of the software under different conditions,
 in other words \emph{testing} the software. Analysis inspects the software to
 determine its properties and capabilities. Analysis can be either static or
 dynamic. \emph{Dynamic analysis} studies the software while it is running,
-\emph{static analysis} is based on static model of the software.
+\emph{static analysis} is based on static model of the software
+\cite{fundamentals}.
 
 \subsection{Testing}
 
@@ -120,7 +121,7 @@ checking the results of the computation (or observing other behavior of the
 software). To gain enough confidence that the software operates correctly in all
 conditions, suitable set of \emph{test cases} must be found, which is difficult,
 and sometimes impossible. Testing is best suited for confirming presence of
-defects in software, not for proving their absence.
+defects in software, not for proving their absence \cite{fundamentals}.
 
 Important property of test cases is their \emph{repeatability}, meaning that a
 certain test case will always yield the same result. When testing multi-threaded
@@ -234,6 +235,11 @@ is parsing the class. To demonstrate this, one can create a \texttt{ClassReader}
 and connect it to a \texttt{ClassWriter} (which is a subclass of
 \texttt{ClassVisitor}). The reader will call visit methods on the writer,
 effectively copying the class.
+
+\begin{figure}[hbt]
+    \includegraphics[width=\textwidth]{figures/asmschema.png}
+    \caption{Typical architecture for class transformation. \todo{redraw}}
+\end{figure}
 
 Typical class transformation uses the following architecture: a
 \texttt{ClassReader} instance reads the class, then one or more
