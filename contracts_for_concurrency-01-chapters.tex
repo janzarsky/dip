@@ -242,14 +242,27 @@ Typical class transformation uses the following architecture: a
 
 \section{Dynamic Analysis using RoadRunner}
 
-\cite{RoadRunner}
+The RoadRunner framework is used for dynamic analysis of concurrent programs
+written in Java. RoadRunner instruments programs to obtain a stream of events
+that are useful for dynamic analysis, such as memory accesses, synchronizing on
+a lock, forking or joining of threads, and so on. This event stream is then
+available to various analysis tools. Multiple tools can be chained together,
+each tool acting as a filter over the events. This allows complex analyses to be
+built from simpler, modular tools \cite{RoadRunner}.
 
-\todo{ \newline
-    * introduction, main purpose \newline
-    * architecture, API, thread and lock shadows, events \newline
-}
+RoadRunner aims to simplify writing dynamic analysis tools. A RoadRunner
+analysis tool only needs to handle events of interest. RoadRunner will ensure
+that the event is properly detected and the event handler is called. To store
+the state of the analysis, RoadRunner provides support for associating
+information with memory locations, locks, or threads.
 
+\todo{tool composition}
 
+\todo{optional: debugging, comparing analyses}
+
+\todo{Tool class, events, shadowThread/Var/Lock, tool composition}
+
+\todo{instrumentation done by roadrunner}
 
 \chapter{Contracts for Concurrency}
 
