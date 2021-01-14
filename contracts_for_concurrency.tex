@@ -67,8 +67,7 @@
 % to avoid unnecessary replacements in the API descriptions etc.
 \csdoublequotesoff
 
-
-\usepackage{txfonts}
+\usepackage{mathabx}
 
 \usepackage{url}
 
@@ -123,48 +122,46 @@
   date=\today,             % datum odevzdání / submission date
   %Nazev prace / thesis title
   title.cs={Instrumentace Java programů, kontrakty pro paralelismus},  % název práce v češtině či slovenštině (dle zadání) / thesis title in czech language (according to assignment)
-  title.en={Parametric Contracts for Concurrency in Java Programs}, % název práce v angličtině / thesis title in english
-  title.length={14.5cm}, % nastavení délky bloku s titulkem pro úpravu zalomení řádku (lze definovat zde nebo níže) / setting the length of a block with a thesis title for adjusting a line break (can be defined here or below)
-  %sectitle.length={14.5cm}, % nastavení délky bloku s druhým titulkem pro úpravu zalomení řádku (lze definovat zde nebo níže) / setting the length of a block with a second thesis title for adjusting a line break (can be defined here or below)
+  title.en={Parametric Contracts for Concurrency in Java Programs},
+  title.length={14.5cm},
+  %sectitle.length={14.5cm},
   %Autor / Author
-  author.name={Jan},   % jméno autora / author name
-  author.surname={Žárský},   % příjmení autora / author surname 
-  author.title.p={Bc.}, % titul před jménem (nepovinné) / title before the name (optional)
-  %author.title.a={Ph.D.}, % titul za jménem (nepovinné) / title after the name (optional)
+  author.name={Jan},
+  author.surname={Žárský},
+  author.title.p={Bc.},
   %Ustav / Department
-  department={UITS}, % doplňte příslušnou zkratku dle ústavu na zadání: UPSY/UIFS/UITS/UPGM / fill in appropriate abbreviation of the department according to assignment: UPSY/UIFS/UITS/UPGM
+  department={UITS},
   % Školitel / supervisor
-  supervisor.name={Aleš},   % jméno školitele / supervisor name 
-  supervisor.surname={Smrčka},   % příjmení školitele / supervisor surname
-  supervisor.title.p={Ing.},   %titul před jménem (nepovinné) / title before the name (optional)
-  supervisor.title.a={Ph.D.},    %titul za jménem (nepovinné) / title after the name (optional)
+  supervisor.name={Aleš},
+  supervisor.surname={Smrčka},
+  supervisor.title.p={Ing.},
+  supervisor.title.a={Ph.D.},
   % Klíčová slova / keywords
-  keywords.cs={Sem budou zapsána jednotlivá klíčová slova v českém (slovenském) jazyce, oddělená čárkami.}, % klíčová slova v českém či slovenském jazyce / keywords in czech or slovak language
-  keywords.en={Sem budou zapsána jednotlivá klíčová slova v anglickém jazyce, oddělená čárkami.}, % klíčová slova v anglickém jazyce / keywords in english
-  %keywords.en={Here, individual keywords separated by commas will be written in English.},
+  keywords.cs={verifikace software, dynamická analýza, Java, kontrakty pro
+  paralelismus, RoadRunner, instrumentace, Java bajtkód, vícevláknové
+  programování},
+  keywords.en={software verification, dynamic analysis, Java, contracts for
+  concurrency, RoadRunner, instrumentation, Java Bytecode, concurrent
+  programming},
   % Abstrakt / Abstract
-  abstract.cs={Do tohoto odstavce bude zapsán výtah (abstrakt) práce v českém (slovenském) jazyce.}, % abstrakt v českém či slovenském jazyce / abstract in czech or slovak language
-  abstract.en={Do tohoto odstavce bude zapsán výtah (abstrakt) práce v anglickém jazyce.}, % abstrakt v anglickém jazyce / abstract in english
-  %abstract.en={An abstract of the work in English will be written in this paragraph.},
-  % Prohlášení (u anglicky psané práce anglicky, u slovensky psané práce slovensky) / Declaration (for thesis in english should be in english)
-  %declaration={Prohlašuji, že jsem tuto bakalářskou práci vypracoval samostatně pod vedením pana X...
-%Další informace mi poskytli...
-%Uvedl jsem všechny literární prameny, publikace a další zdroje, ze kterých jsem čerpal.},
-  declaration={I hereby declare that this Bachelor's thesis was prepared as an original work by the author under the supervision of Mr. X
- The supplementary information was provided by Mr. Y
- I have listed all the literary sources, publications and other sources, which were used during the preparation of this thesis.},
-  % Poděkování (nepovinné, nejlépe v jazyce práce) / Acknowledgement (optional, ideally in the language of the thesis)
-  %acknowledgment={V této sekci je možno uvést poděkování vedoucímu práce a těm, kteří poskytli odbornou pomoc
-%(externí zadavatel, konzultant apod.).},
-  acknowledgment={Here it is possible to express thanks to the supervisor and to the people which provided professional help
-(external submitter, consultant, etc.).},
-  % Rozšířený abstrakt (cca 3 normostrany) - lze definovat zde nebo níže / Extended abstract (approximately 3 standard pages) - can be defined here or below
-  extendedabstract={Do tohoto odstavce bude zapsán rozšířený výtah (abstrakt) práce v českém (slovenském) jazyce.},
-  %faculty={FIT}, % FIT/FEKT/FSI/FA/FCH/FP/FAST/FAVU/USI/DEF
-  faculty.cs={Fakulta informačních technologií}, % Fakulta v češtině - pro využití této položky výše zvolte fakultu DEF / Faculty in Czech - for use of this entry select DEF above
-  faculty.en={Faculty of Information Technology}, % Fakulta v angličtině - pro využití této položky výše zvolte fakultu DEF / Faculty in English - for use of this entry select DEF above
-  %department.cs={Ústav matematiky}, % Ústav v češtině - pro využití této položky výše zvolte ústav DEF nebo jej zakomentujte / Department in Czech - for use of this entry select DEF above or comment it out
-  %department.en={Institute of Mathematics} % Ústav v angličtině - pro využití této položky výše zvolte ústav DEF nebo jej zakomentujte / Department in English - for use of this entry select DEF above or comment it out
+  abstract.cs={Kontrakty pro paralelismus slouží k vyjádření potřebné atomicity
+  sekvencí metod ve vícevláknových programech. Tato práce se zaměřuje na
+  implementaci dynamického analyzátoru, který bude verifikovat programy napsané
+  v jazyce Java vůči kontraktům. Analyzátor je implementován pomocí frameworku
+  RoadRunner. \todo{výsledky}},
+  abstract.en={Contracts for concurrency describes required atomicity of method
+  sequences in concurrent programs. This work aims at implementing a dynamic
+  analyser to verify programs written in Java against contracts. The analyser is
+  built upon the RoadRunner framework. \todo{results}},
+  declaration={I hereby declare that this diploma thesis was prepared as an
+  original work by the author under the supervision of Ing. Aleš Smrčka, Ph.D.
+  The supplementary information was provided by \todo{TODO} I have listed all
+  the literary sources, publications and other sources, which were used during
+  the preparation of this thesis.},
+  acknowledgment={\todo{TODO}},
+  extendedabstract={\todo{TODO}},
+  faculty.cs={Fakulta informačních technologií},
+  faculty.en={Faculty of Information Technology},
 }
 
 % Rozšířený abstrakt (cca 3 normostrany) - lze definovat zde nebo výše / Extended abstract (approximately 3 standard pages) - can be defined here or above
