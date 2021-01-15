@@ -270,6 +270,8 @@ information with memory locations, locks, or threads.
 
 \todo{instrumentation done by roadrunner}
 
+
+
 \chapter{Contracts for Concurrency}
 
 \todo{chapter contents}
@@ -428,12 +430,67 @@ target $\varrho \in \mathbb{R}$ if, and only if:
 
 \chapter{Design of a Dynamic Analyzer for Parametric Contracts with Spoilers}
 
-\todo{ \newline
-    * design of a RoadRunner tool \newline
-    * requirements \newline
-    * required changes to RR internals \newline
-    * contract limitation? \newline
-}
+This chapter describes the proposed dynamic analyser for parametric contracts
+with spoilers. The analyser should follow the method for dynamic analysis of
+contracts described in \cite{FITPUB11510}. \todo{chapter overview}
+
+The analyser should be built as a new tool (or a tool chain) for RoadRunner. The
+input will be a program under analysis, and a contract definition. The analyser
+will be able to detect contract violations in the program and report them. The
+RoadRunner framework will be modified to support obtaining method arguments and
+return values. For performance reasons, the RoadRunner framework should also be
+modified to instrument only relevant actions of the program under analysis.
+
+\section{Restricting Parametric Contracts}
+
+The analyser should work with parametric contracts with spoilers (see
+\todo{ref}). For \todo{which?} reasons, we decided to limit the usage of
+parameters in contracts. It is required that the value of all parameters in
+target or spoiler sequences must be determined by the first method in the
+sequence. For example, method sequence \texttt{a(X,Y) b(Y,Z)} is illegal,
+because after the call to method \texttt{a}, the value of parameter \texttt{Z}
+is still unknown. The free meta-variables (\texttt{\_}) do not have to be
+determined. For example, the sequence \texttt{a(X,Y) b(\_) c(Y)} is valid. This
+restriction enables simple detection of method sequences. \todo{explain why}
+
+The method described in \cite{FITPUB11510} is based on program traces where
+every method represents a single event in the trace. However, the RoadRunner
+framework produces two events for every method -- method entry and method exit.
+Method arguments are available on method entry, the return value is available on
+method exit. The analyser must work around the fact that the return value (which
+can be also parameter) is not available at the method entry. Alternatively, the
+contracts should be limited to not use parametrized return values.
+
+\section{Contract Representation}
+
+The analyser takes a contract definition as a parameter. Method names in
+contracts must be fully qualified (for example
+\texttt{java.lang.Object.toString}). Java allows method overloading, so the
+contract definition should allow for distinguishing methods based on the number
+and type of their parameters.
+
+\section{Changes to Instrumentation Performed by RoadRunner}
+
+The RoadRunner framework does not expose the method arguments or the return
+value through its API. The 
+
+\todo{the need for getting return value and arguments}
+
+\todo{grammar for contract configuration files}
+
+\section{A Contract Validator Tool}
+
+\todo{new tool for roadrunner, which methods will be overridden (acquire,
+release, create, preStart, preJoin}
+
+\todo{what data needs to be stored and where}
+
+\todo{synchronization of the tool itself}
+
+\section{Testability}
+
+\todo{the need for being able to easily test the algorithm without the need for
+RoadRunner}
 
 
 
