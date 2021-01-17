@@ -6,7 +6,16 @@
 
 \chapter{Dynamic Analysis of Multi-threaded Programs in Java}
 
-\todo{chapter intro}
+This chapter starts with necessary basics of multi-threaded programming in Java.
+The Java Memory Model is introduced, as it defines important terms such as the
+\emph{happens-before} relation or a \emph{data race}. Common defects in
+concurrent environment are then described. Section
+\ref{approachesToSwVerification} provides overview of approaches to software
+verification.
+
+Dynamic analysis of Java programs is then described, starting with an overview
+of Java Bytecode, and how it can be instrumented using the ASM framework. The
+RoadRunner framework for dynamic analysis is then introduced.
 
 
 \section{Multi-threaded Programming in Java}
@@ -87,7 +96,7 @@ denotes that action \emph{x} \emph{happens-before} action \emph{y}. If an action
 \emph{x} \emph{synchronizes-with} an action \emph{y}, then alsow \emph{hb(x,y)}.
 \todo{}.
 
-\section{Common Bugs in Concurrent Environment}
+\section{Common Defects in Multi-threaded Programs}
 
 \todo{overview, focus on atomicity and order violation, and something else?}
 
@@ -101,6 +110,7 @@ denotes that action \emph{x} \emph{happens-before} action \emph{y}. If an action
 }
 
 \section{Approaches to Software Verification}
+\label{approachesToSwVerification}
 
 % Carlo Ghezzi, Mehdi Jazayeri, Dino Mandrioli: Fundamentals of Software Engineering, Prentice Hall, ISBN 0-13-099183-X
 
@@ -148,7 +158,9 @@ extract useful information at runtime \todo{citation needed}. Instrumentation
 can be used to measure performance, to log events, or to perform dynamic
 analysis \todo{citation needed}. The running program should not be aware that it
 is being instrumented and the result of the computation should remain the same.
-Instrumentation may add significant overhead to the program.
+Instrumentation may add significant overhead to the program. For example,
+programs instrumented by the RoadRunner framework are roughly 10 times slower
+\cite{RoadRunner}.
 
 In Java, instrumentation is done by changing the bytecode. There are several
 general purpose frameworks for modifying the Java bytecode. In this section, the
@@ -266,10 +278,53 @@ information with memory locations, locks, or threads.
 
 \todo{optional: debugging, comparing analyses}
 
-\todo{Tool class, events, shadowThread/Var/Lock, tool composition}
+\subsection{The RoadRunner Programming Interface}
 
-\todo{instrumentation done by roadrunner}
+Every analyser in RoadRunner is based on the \texttt{Tool} class. Figure
+\ref{toolclass} contains the most important methods of \texttt{Tool}. During the
+analysis, every time an action is detected, the appropriate method in
+\texttt{Tool} is called, along with an \texttt{Event} object that contains
+information about the event.
 
+\begin{figure}[hbt]
+    \label{toolclass}
+    \caption{\todo{Here will be the most important methods of the Tool class}}
+\end{figure}
+
+The following events are detected by the RoadRunner framework:
+\begin{itemize}
+    \item Method entry and exit.
+    \item Memory accesses -- reads and writes to fields and variables.
+    \item Lock acquires and releases.
+    \item Synchronization signals -- wait and notify.
+    \item Thread forking and joining.
+\end{itemize}
+
+There are several subclasses of the \texttt{Event} class with specific
+information about events.
+
+RoadRunner allows associating information with objects from the program under
+analysis. For each thread, a \texttt{ShadowThread} object is created which
+contains reference to the underlying thread. Similarly, for each lock, a
+\texttt{ShadowLock} object is created. Both extend the \texttt{Decoratable}
+class that allows storing of arbitrary information. For associating information
+with memory locations, a \emph{shadow location} is created when the location is
+first accessed.
+
+Multiple tools can be chained together. Each event handler method forwards the
+\texttt{Event} instance to the next tool in chain by default. If the event is
+not forwarded, the tool becomes a filter over the event stream. This can be used
+to filter out events that are not interesting to a particular analysis and then
+performing the analysis in the next tool.
+
+\subsection{Instrumentation Performed by RoadRunner}
+
+RoadRunner uses a modified version of the ASM framework to instrument the
+program under analysis.
+
+\todo{how are fields instrumented}
+
+\todo{how are methods instrumented}
 
 
 \chapter{Contracts for Concurrency}
@@ -294,7 +349,6 @@ that only methods manipulating the same data must be executed atomically).
 Another extension adds so called \emph{spoilers} (so that given sequence must be
 executed atomically only with respect to only certain sequences). Both
 extensions can be combined \cite{FITPUB11510}.
-
 
 \section{Basic Contracts}
 
@@ -469,28 +523,76 @@ contracts must be fully qualified (for example
 contract definition should allow for distinguishing methods based on the number
 and type of their parameters.
 
+\todo{grammar for contract configuration files}
+
 \section{Changes to Instrumentation Performed by RoadRunner}
 
 The RoadRunner framework does not expose the method arguments or the return
-value through its API. The 
+value through its API. The \texttt{enter} and \texttt{exit} methods both take a
+\texttt{MethodEvent} parameter containing the following information:
+\begin{itemize}
+    \item Target -- \texttt{null} for static methods, the value of \texttt{this}
+        for instance methods.
+    \item A \texttt{MethodInfo} object -- static information about the method
+        definition (name, descriptor, whether it is synchronized or static).
+    \item Call site location -- where was the method invoked.
+\end{itemize}
 
-\todo{the need for getting return value and arguments}
+The \texttt{MethodEvent} class should be extended for storing method arguments
+and the return value. In RoadRunner, each method call is wrapped in another, so
+RoadRunner has access to these values. RoadRunner does not need to provide
+argument types, since they are already available in the method descriptor
+(stored in \texttt{MethodInfo}). Also, the analysis performs only identity
+comparison (in case of objects). Primitive types must be handled correctly and
+compared by their value.
 
-\todo{grammar for contract configuration files}
+For dynamic analysis of contracts for concurrency, only a subset of all events
+is required. The RoadRunner framework should be configured or modified to
+instrument only the necessary actions of the program under analysis. Event types
+that are not used at all, such as memory accesses, should not be instrumented.
+Method entries and exits should be instrumented only in case the method is part
+of a contract.
 
 \section{A Contract Validator Tool}
 
-\todo{new tool for roadrunner, which methods will be overridden (acquire,
-release, create, preStart, preJoin}
+The contract analyser should be implemented as a subclass of the \texttt{Tool}
+class. The following methods will be overridden:
+\begin{itemize}
+    \item \texttt{enter()} and \texttt{exit()}, for detecting spoiler and target
+        instances;
+    \item \texttt{acquire()} and \texttt{release()}, for detecting
+        synchronization between threads;
+    \item \texttt{create()}, for creating shadow data for the new thread;
+    \item \texttt{preStart()}, for initializing shadow data;
+    \item \texttt{postJoin()}, for thread synchronization after joining.
+\end{itemize}
 
-\todo{what data needs to be stored and where}
+Methods for detecting memory accesses will not be used by the analyser, and also
+no data will be stored in shadow memory locations.
+
+For each thread, a \texttt{ShadowThread} object will be created that will store
+a \emph{vector clock} for the thread, and information about target and spoiler
+instances. For each lock, a \texttt{ShadowLock} object will be created that will
+store a vector clock for the lock.
+
+The vector clocks associated with threads and locks will be updated on actions,
+that impose a happens-before order of operations between threads. Forking or
+joining thread will update both threads' vector clocks. When a thread acquires a
+lock, the thread's vector clock is updated. When a lock is released, it's vector
+clock is updated. The sole purpose of \texttt{acquire()}, \texttt{release()},
+\texttt{create()}, \texttt{preStart()}, and \texttt{postJoin()} methods is to
+update various vector clocks.
+
+Methods \texttt{enter()} and \texttt{exit()} will track target and spoiler
+instances in a thread, and detect contract violations.
 
 \todo{synchronization of the tool itself}
 
 \section{Testability}
 
-\todo{the need for being able to easily test the algorithm without the need for
-RoadRunner}
+In order to properly test the analyser, it's implementation should not rely on
+RoadRunner's internal data structures. It should be possible to feed the
+analyser a custom event stream without the need for the RoadRunner framework.
 
 
 
