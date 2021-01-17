@@ -1,10 +1,36 @@
+% vim:spelllang=en_us:spell
+
 \chapter{Introduction}
 
+When developing software, one commonly relies on software libraries written by
+other developers. To avoid introducing defects into the software, one has to
+follow rules laid by the library developer. This includes the syntax of the
+library and semantics of operations provided by the library. In concurrent
+environment, a new set of problems related to proper synchronization of threads
+is introduced.
+
+Contracts for concurrency enable library developers to define restrictions on
+the library usage in concurrent environment. It specifies which method sequences
+must be executed atomically.
+
+The goal of this thesis is to implement a dynamic analyzer that will be able to
+detect contract violations in Java programs. The analyzer will be written in the
+RoadRunner framework.
+
 \todo{}
+
+This thesis is structured as follows. Chapter \ref{chTwo} describes specifics of
+multi-threaded programming in Java and approaches to dynamic analysis of Java
+programs. Chapter \ref{chThree} introduces contracts for concurrency, their
+modified versions, and a method for dynamic detection of contract violations. In
+Chapter \ref{chFour}, a dynamic analyzer for contracts is designed. Chapter
+\ref{chFive} describes the analyzer implementation. The results achieved by the
+analyzer are presented in Chapter \ref{chSix}.
 
 
 
 \chapter{Dynamic Analysis of Multi-threaded Programs in Java}
+\label{chTwo}
 
 This chapter starts with necessary basics of multi-threaded programming in Java.
 The Java Memory Model is introduced, as it defines important terms such as the
@@ -14,23 +40,66 @@ concurrent environment are then described. Section
 verification.
 
 Dynamic analysis of Java programs is then described, starting with an overview
-of Java Bytecode, and how it can be instrumented using the ASM framework. The
+of Java bytecode, and how it can be instrumented using the ASM framework. The
 RoadRunner framework for dynamic analysis is then introduced.
 
 
 \section{Multi-threaded Programming in Java}
 
 Java provides built-in support for multi-threaded programming. This section
-describes typical thread lifecycle, synchronization of threads, and interthread
-communication, as these are important in dynamic analysis using contracts.
+describes typical thread life cycle, synchronization of threads, and
+inter-thread communication, as these are important in dynamic analysis using
+contracts.
 
-A thread in Java is represented by a \texttt{Thread} object. To create a new
-thread, one can extend the \texttt{Thread} class and override the \texttt{run()}
-method, which will be the entrypoint of the new thread. To start the thread,
-the \texttt{start()} method must be called (which will in turn call the
-\texttt{run()} method). The thread will terminate upon returning from the
-\texttt{run()} method. The \texttt{join()} method can be used in other thread to
-wait for a thread to terminate \cite{javaTheCompleteReference}.
+A thread in Java is represented by a \texttt{Thread} object. There are two ways
+to create a thread: by extending the \texttt{Thread} class, or by implementing
+the \texttt{Runnable} interface. Both approaches produce a \texttt{Thread}
+instance which executes the \texttt{run} method in a new thread when started.
+
+To start a thread, the \texttt{start()} method must be called (which will in
+turn call the \texttt{run()} method). The thread will terminate upon returning
+from the \texttt{run()} method. The \texttt{join()} method is used in other
+thread to wait for a thread to terminate \cite{javaTheCompleteReference}.
+Figure \ref{threadExtend} shows a thread creation example by extending the
+\texttt{Thread} class, Figure \ref{threadRunnable} shows the same example
+achieved by implementing the \texttt{Runnable} interface.
+
+\begin{figure}[hbt]
+    \label{threadExtend}
+\begin{lstlisting}[language=java]
+class MyThread extends Thread {
+  @Override
+  public void run() {
+    System.out.println("This is executed in a new thread.");
+  }
+
+  public static void main(String args[]) {
+    MyThread t = new MyThread();
+    t.start();
+    t.join();
+  }
+}
+\end{lstlisting}
+    \caption{Creating a thread by extending the \texttt{Thread} class.}
+\end{figure}
+
+\begin{figure}[hbt]
+    \label{threadRunnable}
+\begin{lstlisting}[language=java]
+class MyRunnable implements Runnable {
+  public void run() {
+    System.out.println("This is executed in a new thread.");
+  }
+
+  public static void main(String args[]) {
+    Thread t = new Thread(new MyRunnable());
+    t.start();
+    t.join();
+  }
+}
+\end{lstlisting}
+    \caption{Creating a thread by implementing the \texttt{Runnable} interface.}
+\end{figure}
 
 When accessing a shared resource from multiple threads, proper synchronization
 is usually required. In Java, every object gets an implicit monitor, which can
@@ -38,7 +107,31 @@ be owned by only one thread at a given time. To enter the monitor, one must use
 either synchronized methods or synchronized statements. Synchronized statements
 are code blocks with explicitly specified object whose monitor is entered before
 executing the block. Synchronized methods enter the monitor of the instance they
-are called upon. \todo{reword}
+are called upon. Figure \ref{synchronized} shows examples of synchronized blocks
+and synchronized methods.
+
+\begin{figure}[hbt]
+    \label{synchronized}
+\begin{lstlisting}[language=java]
+class Example {
+  private int a = 0;
+
+  public synchronized void inc1() {
+    a++;
+  }
+
+  public void inc2() {
+    synchronized (this) {
+      a++;
+    }
+  }
+}
+\end{lstlisting}
+    \caption{The \texttt{inc1} method is \emph{synchronized}, on each call, the
+    \texttt{Example} instance's monitor is entered. The \texttt{inc2} method is
+    not synchronized, but contains a \emph{synchronized block} with explicitly
+    specified monitor.}
+\end{figure}
 
 Communication between threads is achieved using the following methods:
 \texttt{wait()}, \texttt{notify()}, and \texttt{notifyAll()}. All methods must
@@ -93,7 +186,7 @@ the first action in the new thread.
 \emph{happens-before} another, the first action is visible to and ordered before
 the second action. For two actions, \emph{x} and \emph{y}, \emph{hb(x,y)}
 denotes that action \emph{x} \emph{happens-before} action \emph{y}. If an action
-\emph{x} \emph{synchronizes-with} an action \emph{y}, then alsow \emph{hb(x,y)}.
+\emph{x} \emph{synchronizes-with} an action \emph{y}, then also \emph{hb(x,y)}.
 \todo{}.
 
 \section{Common Defects in Multi-threaded Programs}
@@ -206,7 +299,7 @@ method declared as \texttt{double m(int i, String s)} would be represented as
 the method returns \texttt{void}.
 
 \todo{describe the instructions - groups of instructions, representation,
-method invokation, constants}
+method invocation, constants}
 
 \subsection{The ASM framework}
 
@@ -280,7 +373,7 @@ information with memory locations, locks, or threads.
 
 \subsection{The RoadRunner Programming Interface}
 
-Every analyser in RoadRunner is based on the \texttt{Tool} class. Figure
+Every analyzer in RoadRunner is based on the \texttt{Tool} class. Figure
 \ref{toolclass} contains the most important methods of \texttt{Tool}. During the
 analysis, every time an action is detected, the appropriate method in
 \texttt{Tool} is called, along with an \texttt{Event} object that contains
@@ -328,11 +421,12 @@ program under analysis.
 
 
 \chapter{Contracts for Concurrency}
+\label{chThree}
 
 \todo{chapter contents}
 
 When developing software, one frequently uses modules created by someone else
-via it's programming interface. For example, in object oriented programming, the
+via its programming interface. For example, in object oriented programming, the
 interface consists of public methods of given class. Accessing the interface
 requires one to follow a protocol consisting of: (i) syntax, i.e. types of
 parameters and return values, (ii) semantics, i.e. the expected behavior for
@@ -483,13 +577,14 @@ target $\varrho \in \mathbb{R}$ if, and only if:
 
 
 \chapter{Design of a Dynamic Analyzer for Parametric Contracts with Spoilers}
+\label{chFour}
 
-This chapter describes the proposed dynamic analyser for parametric contracts
-with spoilers. The analyser should follow the method for dynamic analysis of
+This chapter describes the proposed dynamic analyzer for parametric contracts
+with spoilers. The analyzer should follow the method for dynamic analysis of
 contracts described in \cite{FITPUB11510}. \todo{chapter overview}
 
-The analyser should be built as a new tool (or a tool chain) for RoadRunner. The
-input will be a program under analysis, and a contract definition. The analyser
+The analyzer should be built as a new tool (or a tool chain) for RoadRunner. The
+input will be a program under analysis, and a contract definition. The analyzer
 will be able to detect contract violations in the program and report them. The
 RoadRunner framework will be modified to support obtaining method arguments and
 return values. For performance reasons, the RoadRunner framework should also be
@@ -497,7 +592,7 @@ modified to instrument only relevant actions of the program under analysis.
 
 \section{Restricting Parametric Contracts}
 
-The analyser should work with parametric contracts with spoilers (see
+The analyzer should work with parametric contracts with spoilers (see
 \todo{ref}). For \todo{which?} reasons, we decided to limit the usage of
 parameters in contracts. It is required that the value of all parameters in
 target or spoiler sequences must be determined by the first method in the
@@ -511,13 +606,13 @@ The method described in \cite{FITPUB11510} is based on program traces where
 every method represents a single event in the trace. However, the RoadRunner
 framework produces two events for every method -- method entry and method exit.
 Method arguments are available on method entry, the return value is available on
-method exit. The analyser must work around the fact that the return value (which
+method exit. The analyzer must work around the fact that the return value (which
 can be also parameter) is not available at the method entry. Alternatively, the
 contracts should be limited to not use parametrized return values.
 
 \section{Contract Representation}
 
-The analyser takes a contract definition as a parameter. Method names in
+The analyzer takes a contract definition as a parameter. Method names in
 contracts must be fully qualified (for example
 \texttt{java.lang.Object.toString}). Java allows method overloading, so the
 contract definition should allow for distinguishing methods based on the number
@@ -555,7 +650,7 @@ of a contract.
 
 \section{A Contract Validator Tool}
 
-The contract analyser should be implemented as a subclass of the \texttt{Tool}
+The contract analyzer should be implemented as a subclass of the \texttt{Tool}
 class. The following methods will be overridden:
 \begin{itemize}
     \item \texttt{enter()} and \texttt{exit()}, for detecting spoiler and target
@@ -567,7 +662,7 @@ class. The following methods will be overridden:
     \item \texttt{postJoin()}, for thread synchronization after joining.
 \end{itemize}
 
-Methods for detecting memory accesses will not be used by the analyser, and also
+Methods for detecting memory accesses will not be used by the analyzer, and also
 no data will be stored in shadow memory locations.
 
 For each thread, a \texttt{ShadowThread} object will be created that will store
@@ -578,7 +673,7 @@ store a vector clock for the lock.
 The vector clocks associated with threads and locks will be updated on actions,
 that impose a happens-before order of operations between threads. Forking or
 joining thread will update both threads' vector clocks. When a thread acquires a
-lock, the thread's vector clock is updated. When a lock is released, it's vector
+lock, the thread's vector clock is updated. When a lock is released, its vector
 clock is updated. The sole purpose of \texttt{acquire()}, \texttt{release()},
 \texttt{create()}, \texttt{preStart()}, and \texttt{postJoin()} methods is to
 update various vector clocks.
@@ -590,19 +685,21 @@ instances in a thread, and detect contract violations.
 
 \section{Testability}
 
-In order to properly test the analyser, it's implementation should not rely on
+In order to properly test the analyzer, its implementation should not rely on
 RoadRunner's internal data structures. It should be possible to feed the
-analyser a custom event stream without the need for the RoadRunner framework.
+analyzer a custom event stream without the need for the RoadRunner framework.
 
 
 
 \chapter{Implementation of a Contract Validator for RoadRunner}
+\label{chFive}
 
 \todo{}
 
 
 
 \chapter{Evaluation}
+\label{chSix}
 
 \todo{}
 
