@@ -166,15 +166,40 @@ order}, \emph{synchronization order}, and \emph{happens-before order}.
 
 The actions can be either \emph{intra-} or \emph{inter-thread}. An inter-thread
 action can be detected or influenced by another thread. An intra-thread action
-is for example adding two local variables and is not important to the model.
+is for example adding two local variables and it is not important to the model.
 Non-volatile reading or writing of shared variable is an inter-thread action.
 \emph{Synchronization actions} are inter-thread actions that include volatile
 reading or writing of variables, locking and unlocking of monitors, and starting
-and stopping of a thread.
+and stopping of a thread. Figure \ref{threadActions} shows examples of different
+kinds of actions.
+
+\begin{figure}[hbt]
+    \label{threadActions}
+\begin{lstlisting}[language=java]
+class MySharedData {
+  int mySharedVar = 0;
+
+  public synchronized void MyMethod() {
+    // synchronization action (entering a monitor)
+    // intra-thread action (writing a local variable)
+    int a = 42;
+    // 2 inter-thread actions (reading and writing a shared variable) 
+    mySharedVar += a;
+    // synchronization action (leaving a monitor)
+  }
+}
+\end{lstlisting}
+    \caption{Different program actions classified from the Java Memory Model
+    point of view. Entering and leaving \texttt{MyMethod} produces
+    \emph{synchronization actions}. Accessing \texttt{mySharedVar} is considered
+    as an \emph{inter-thread} action, but not as a synchronization action,
+    because \texttt{mySharedVar} is not declared as \texttt{volatile}.}
+\end{figure}
+
 
 \emph{Program order} is a total order over all inter-thread actions from a given
 thread. It reflects the order in which these actions would be executed if
-running \todo{} .
+run by the intra-thread semantics. \todo{Meaning what? Example?}
 
 \emph{Synchronization order} is a total order over all synchronization actions
 of an execution. Within each thread, the synchronization order is consistent
@@ -184,10 +209,37 @@ the first action in the new thread.
 
 \emph{Happens-before order} is a partial order. If an action
 \emph{happens-before} another, the first action is visible to and ordered before
-the second action. For two actions, \emph{x} and \emph{y}, \emph{hb(x,y)}
-denotes that action \emph{x} \emph{happens-before} action \emph{y}. If an action
-\emph{x} \emph{synchronizes-with} an action \emph{y}, then also \emph{hb(x,y)}.
-\todo{}.
+the second action. If \emph{x} and \emph{y} belong to the same thread and
+\emph{x} comes before \emph{y} in program order, the \emph{x happens-before y}.
+If \emph{x synchronizes-with y}, then \emph{x happens-before y}. Figures
+\ref{hb1} and \ref{hb2} illustrates the \emph{happens-before} relation in simple
+programs.
+
+A \emph{data race} occurs, when there are two accesses to the same variable, at
+least one of which is write, and these accesses are not ordered by
+\emph{happens-before}. This situation is illustrated in Figure \ref{hb2}.
+
+\begin{figure}[hbt]
+    \label{hb1}
+    \includegraphics[width=\textwidth]{figures/sync_correct.png}
+    \caption{\emph{Happens-before} relations in a correctly synchronized program
+    (each arrow represents a \emph{happens-before} relation). The red arrows
+    represent the program order, the green arrow represents the
+    \emph{synchronizes-with} relation. Grey arrows complete the transitive
+    closure. The conflicting accesses to variable \texttt{a} are not
+    conflicting, because they are ordered by \emph{happens-before}.
+    \todo{redraw}}
+\end{figure}
+
+\begin{figure}[hbt]
+    \label{hb2}
+    \includegraphics[width=\textwidth]{figures/sync_race.png}
+    \caption{\emph{Happens-before} relations in an incorrectly synchronized
+    program (each arrow represents a \emph{happens-before} relation). There is
+    no \emph{happens-before} relation between conflicting accesses \texttt{a=1}
+    and \texttt{print(a)}, creating a data race. \todo{redraw}}
+\end{figure}
+
 
 \section{Common Defects in Multi-threaded Programs}
 
