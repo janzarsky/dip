@@ -9,23 +9,43 @@ library and semantics of operations provided by the library. In concurrent
 environment, a new set of problems related to proper synchronization of threads
 is introduced.
 
-Contracts for concurrency enable library developers to define restrictions on
-the library usage in concurrent environment. It specifies which method sequences
-must be executed atomically.
+\emph{Contracts for concurrency} enable library developers to define
+restrictions on the library usage in concurrent environment. In its basic form,
+it specifies which method sequences must be executed atomically. There are two
+extensions for contracts for concurrency. \emph{Parametric contracts} allow to
+better identify methods that need to be executed atomically. Contracts with
+\emph{spoilers} allow finer control over which thread interleavings breach the
+contract. To verify that a program satisfies the restrictions given by contracts
+for concurrency, one may use either static or dynamic analysis, both offering
+different advantages.
 
-The goal of this thesis is to implement a dynamic analyzer that will be able to
-detect contract violations in Java programs. The analyzer will be written in the
-RoadRunner framework.
+The goal of this project is to design a dynamic analyzer that will be able to
+detect contract violations in Java programs. To observe the behavior of the
+program under analysis, the program must be modified to report all actions of
+interest to the analyzer. That is usually done at the byte code level, and it
+requires a lot of skill not to affect the behavior of the program under
+analysis. Fortunately, the RoadRunner framework takes care of the instrumenting
+and provides a simple interface for observing actions taken by the program under
+analysis. The contract analyzer will be built upon the RoadRunner interface.
 
-\todo{}
+In order to successfully perform the analysis, the following must be done. A
+grammar for contract definitions and a parser must be created. The
+instrumentation performed by RoadRunner needs to be extended to extract
+additional information about the program under analysis. Then finally, an
+analyzer for parametric contracts with spoilers must be implemented using the
+RoadRunner interface. This term project deals with the design of the analyzer
+and it will be followed by a master's thesis that will focus on implementation
+and evaluation of the analyzer.
 
-This thesis is structured as follows. Chapter \ref{chTwo} describes specifics of
-multi-threaded programming in Java and approaches to dynamic analysis of Java
-programs. Chapter \ref{chThree} introduces contracts for concurrency, their
-modified versions, and a method for dynamic detection of contract violations. In
-Chapter \ref{chFour}, a dynamic analyzer for contracts is designed. Chapter
-\ref{chFive} describes the analyzer implementation. The results achieved by the
-analyzer are presented in Chapter \ref{chSix}.
+This report is structured as follows. Chapter \ref{chTwo} describes specifics of
+multi-threaded programming in Java, Java memory model, and an overview of
+software defects related to concurrency. Approaches to dynamic analysis of Java
+programs and instrumentation techniques are described. Two important frameworks
+are presented, the ASM framework for byte code instrumentation, and the
+RoadRunner framework for writing dynamic analyzers. Chapter \ref{chThree}
+introduces contracts for concurrency, their modified versions, and a method for
+dynamic detection of contract violations. In Chapter \ref{chFour}, a dynamic
+analyzer for contracts is designed.
 
 
 
@@ -47,7 +67,7 @@ RoadRunner framework for dynamic analysis is then introduced.
 \section{Multi-threaded Programming in Java}
 
 Java provides built-in support for multi-threaded programming. This section
-describes typical thread life cycle, synchronization of threads, and
+describes a typical thread life cycle, synchronization of threads, and
 inter-thread communication, as these are important in dynamic analysis using
 contracts.
 
@@ -183,7 +203,7 @@ class MySharedData {
     // synchronization action (entering a monitor)
     // intra-thread action (writing a local variable)
     int a = 42;
-    // 2 inter-thread actions (reading and writing a shared variable) 
+    // 2 inter-thread actions (reading and writing a shared variable)
     mySharedVar += a;
     // synchronization action (leaving a monitor)
   }
@@ -199,7 +219,7 @@ class MySharedData {
 
 \emph{Program order} is a total order over all inter-thread actions from a given
 thread. It reflects the order in which these actions would be executed if
-run by the intra-thread semantics. \todo{Meaning what? Example?}
+run by the intra-thread semantics.
 
 \emph{Synchronization order} is a total order over all synchronization actions
 of an execution. Within each thread, the synchronization order is consistent
@@ -247,11 +267,29 @@ least one of which is write, and these accesses are not ordered by
 
 \subsection{Data Race}
 
-\todo{}
+A \emph{data race} occurs when two threads access the same data, at least
+one of these accesses is a write, and the threads do not use any mechanism to
+prevent the accesses from being simultaneous \cite{eraser}.
+
+\todo{conflict with JMM definition of data race}
+
+\todo{example}
 
 \subsection{Atomicity Violation}
 
-\todo{}
+A program that is free from data races may still run into problems caused by
+unexpected thread interference. Consider the following example: a code that
+first searches an arbitrary data structure to find an element, and then proceeds
+to modify the element. Both search and modification operations are synchronized
+methods, so there are no data races. But this still allows for another thread to
+delete the element between the search and the modification.
+
+The code block that searches and modifies the data structure should be atomic.
+Atomicity means that every program execution (regardless of the thread
+interleaving) will have the same behavior as if the code block was executed
+serially \cite{atomizer}. \todo{}
+
+\todo{example}
 
 \subsection{Order Violation}
 
@@ -405,8 +443,27 @@ and connect it to a \texttt{ClassWriter} (which is a subclass of
 effectively copying the class.
 
 \begin{figure}[hbt]
-    \includegraphics[width=\textwidth]{figures/asmschema.png}
-    \caption{Typical architecture for class transformation. \todo{redraw}}
+    \begin{tikzpicture}
+        % \draw[step=1cm,gray,very thin] (0,0) grid (12,10);
+        \draw (0,1.5) node {\texttt{.class} file};
+        \draw [->, thick] (0,1.2) -- (0,0.5);
+        \draw (-1.5,0.5) rectangle (1.5,-0.5);
+        \draw (0,0) node {\texttt{ClassReader}};
+        \draw [->, thick] (1.5,0) -- (2,0);
+        \draw (2,0.5) rectangle (5,-0.5);
+        \draw (3.5,0) node {\texttt{ClassVisitor}};
+        \draw [->, thick] (5,0) -- (5.5,0);
+        \draw (5.5,0.5) rectangle (8.5,-0.5);
+        \draw (7,0) node {\texttt{ClassVisitor}};
+        \draw [->, thick] (8.5,0) -- (9,0);
+        \draw (9.5,0) node {\ldots};
+        \draw [->, thick] (10,0) -- (10.5,0);
+        \draw (10.5,0.5) rectangle (13.5,-0.5);
+        \draw (12,0) node {\texttt{ClassWriter}};
+        \draw [->, thick] (12,-0.5) -- (12,-1.2);
+        \draw (12,-1.5) node {\texttt{.class} file};
+    \end{tikzpicture}
+    \caption{Typical architecture for class transformation.}
 \end{figure}
 
 Typical class transformation uses the following architecture: a
@@ -751,20 +808,6 @@ instances in a thread, and detect contract violations.
 In order to properly test the analyzer, its implementation should not rely on
 RoadRunner's internal data structures. It should be possible to feed the
 analyzer a custom event stream without the need for the RoadRunner framework.
-
-
-
-\chapter{Implementation of a Contract Validator for RoadRunner}
-\label{chFive}
-
-\todo{}
-
-
-
-\chapter{Evaluation}
-\label{chSix}
-
-\todo{}
 
 
 

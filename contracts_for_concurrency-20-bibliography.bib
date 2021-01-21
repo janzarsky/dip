@@ -43,14 +43,20 @@
 }
 
 @inproceedings{RoadRunner,
-    author = {Flanagan, Cormac and Freund, Stephen},
+    author = {Flanagan, Cormac and Freund, Stephen N.},
+    title = {The RoadRunner Dynamic Analysis Framework for Concurrent Programs},
     year = {2010},
-    month = {01},
-    %pages = {1-8},
-    title = {The RoadRunner dynamic analysis framework for concurrent programs},
-    journal = {ACM SIGPLAN/SIGSOFT Workshop on Program Analysis for Software
-        Tools and Engineering},
-    doi = {10.1145/1806672.1806674}
+    isbn = {9781450300827},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/1806672.1806674},
+    doi = {10.1145/1806672.1806674},
+    booktitle = {Proceedings of the 9th ACM SIGPLAN-SIGSOFT Workshop on Program Analysis for Software Tools and Engineering},
+    pages = {1–8},
+    numpages = {8},
+    keywords = {dynamic analysis, concurrency},
+    location = {Toronto, Ontario, Canada},
+    series = {PASTE '10}
 }
 
 @book{javaTheCompleteReference,
@@ -94,6 +100,63 @@
     edition = {2},
     pages = {269-336},
 }
+
+@article{eraser,
+    author = {Savage, Stefan and Burrows, Michael and Nelson, Greg and Sobalvarro, Patrick and Anderson, Thomas},
+    title = {Eraser: A Dynamic Data Race Detector for Multithreaded Programs},
+    year = {1997},
+    issue_date = {Nov. 1997},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {15},
+    number = {4},
+    issn = {0734-2071},
+    url = {https://doi.org/10.1145/265924.265927},
+    doi = {10.1145/265924.265927},
+    journal = {ACM Trans. Comput. Syst.},
+    month = nov,
+    pages = {391–411},
+    numpages = {21},
+    keywords = {binary code modification, multithreaded programming, race detection}
+}
+
+@inproceedings{10.1145/964001.964023,
+author = {Flanagan, Cormac and Freund, Stephen N},
+title = {Atomizer: A Dynamic Atomicity Checker for Multithreaded Programs},
+year = {2004},
+isbn = {158113729X},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/964001.964023},
+doi = {10.1145/964001.964023},
+abstract = {Ensuring the correctness of multithreaded programs is difficult, due to the potential for unexpected interactions between concurrent threads. Much previous work has focused on detecting race conditions, but the absence of race conditions does not by itself prevent undesired thread interactions. We focus on the more fundamental non-interference property of atomicity; a method is atomic if its execution is not affected by and does not interfere with concurrently-executing threads. Atomic methods can be understood according to their sequential semantics, which significantly simplifies (formal and informal) correctness arguments.This paper presents a dynamic analysis for detecting atomicity violations. This analysis combines ideas from both Lipton's theory of reduction and earlier dynamic race detectors. Experience with a prototype checker for multithreaded Java code demonstrates that this approach is effective for detecting errors due to unintended interactions between threads. In particular, our atomicity checker detects errors that would be missed by standard race detectors, and it produces fewer false alarms on benign races that do not cause atomicity violations. Our experimental results also indicate that the majority of methods in our benchmarks are atomic, supporting our hypothesis that atomicity is a standard methodology in multithreaded programming.},
+booktitle = {Proceedings of the 31st ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+pages = {256–267},
+numpages = {12},
+keywords = {atomicity, dynamic analysis, reduction},
+location = {Venice, Italy},
+series = {POPL '04}
+}
+
+@article{atomizer,
+    author = {Flanagan, Cormac and Freund, Stephen N},
+    title = {Atomizer: A Dynamic Atomicity Checker for Multithreaded Programs},
+    year = {2004},
+    issue_date = {January 2004},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {39},
+    number = {1},
+    issn = {0362-1340},
+    url = {https://doi.org/10.1145/982962.964023},
+    doi = {10.1145/982962.964023},
+    journal = {SIGPLAN Not.},
+    month = jan,
+    pages = {256–267},
+    numpages = {12},
+    keywords = {atomicity, dynamic analysis, reduction}
+}
+
 %    @BOOK{Pravidla,
 %      author =       "Zdeněk Hlavsa and others",
 %      title =        "Pravidla českého pravopisu",
