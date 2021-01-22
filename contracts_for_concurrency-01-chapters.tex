@@ -348,18 +348,17 @@ Static analysis is performed without executing the software.
 \section{Instrumentation of Java Bytecode}
 
 Instrumentation is the act of inserting instructions to an existing program to
-extract useful information at runtime \todo{citation needed}. Instrumentation
-can be used to measure performance, to log events, or to perform dynamic
-analysis \todo{citation needed}. The running program should not be aware that it
-is being instrumented and the result of the computation should remain the same.
-Instrumentation may add significant overhead to the program. For example,
-programs instrumented by the RoadRunner framework are roughly 10 times slower
-\cite{RoadRunner}.
+extract useful information at runtime. Instrumentation can be used to measure
+performance, to log events, or to perform dynamic analysis. The running program
+should not be aware that it is being instrumented and the result of the
+computation should remain the same.  Instrumentation may add significant
+overhead to the program. For example, programs instrumented by the RoadRunner
+framework are roughly 10 times slower \cite{RoadRunner}.
 
 In Java, instrumentation is done by changing the bytecode. There are several
 general purpose frameworks for modifying the Java bytecode. In this section, the
 ASM framework is described as it is used by the RoadRunner framework, which is
-the basis of this diploma thesis.
+the basis of this master's thesis.
 
 \subsection{Java Bytecode Overview}
 
@@ -378,9 +377,37 @@ containing the following sections \cite{asmguide}:
 
 Java class files also contains a \emph{constant pool} section that holds all
 numeric, type, and string constants which are then referenced from other
-sections of the file.
+sections of the file. The whole structure is shown in Table \ref{classfile}.
+The Java class file format is described in detail in the Java Virtual Machine
+Specification \cite{jvmspec}.
 
-\todo{here will be Figure 2.1 from the ASM4 guide}
+\begin{table}
+    \begin{center}
+        \label{classfile}
+        \begin{tabular}{|l|l|l|}
+            \hline
+            \multicolumn{2}{|l|}{Modifiers, name, super class, interfaces} \\
+            \hline
+            \multicolumn{2}{|l|}{Constant pool} \\
+            \hline
+            \multicolumn{2}{|l|}{Annotations} \\
+            \hline
+            \multicolumn{2}{|l|}{Attributes} \\
+            \hline
+            \multirow{3}{*}{Fields} & Modifiers, name, type \\
+            & Annotations \\
+            & Attributes \\
+            \hline
+            \multirow{3}{*}{Methods} & Modifiers, name, return and parameter types \\
+            & Annotations \\
+            & Attributes \\
+            & Code \\
+            \hline
+        \end{tabular}
+        \caption{Structure of the Java class file. Adapted from \cite{asmguide},
+        simplified.}
+    \end{center}
+\end{table}
 
 Compiled classes do not contain any \texttt{package} or \texttt{import}
 statements, so all type names must be fully qualified. Internally, class files
