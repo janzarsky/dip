@@ -241,23 +241,23 @@ least one of which is write, and these accesses are not ordered by
 
 \begin{figure}[hbt]
     \label{hb1}
-    \includegraphics[width=\textwidth]{figures/sync_correct.png}
+    \input{figures/hbexample.tex}
     \caption{\emph{Happens-before} relations in a correctly synchronized program
-    (each arrow represents a \emph{happens-before} relation). The red arrows
-    represent the program order, the green arrow represents the
-    \emph{synchronizes-with} relation. Grey arrows complete the transitive
-    closure. The conflicting accesses to variable \texttt{a} are not
-    conflicting, because they are ordered by \emph{happens-before}.
-    \todo{redraw}}
+    consisting of threads $t_1$ and $t_2$. Each arrow represents a
+    \emph{happens-before} relation. The red arrows represent the program order,
+    the blue arrow represents the \emph{synchronizes-with} relation. Grey arrows
+    complete the transitive closure. The conflicting accesses to variable
+    \texttt{a} are not a data race, because they are ordered by
+    \emph{happens-before} (the black arrow).}
 \end{figure}
 
 \begin{figure}[hbt]
     \label{hb2}
-    \includegraphics[width=\textwidth]{figures/sync_race.png}
+    \input{figures/hbexample2.tex}
     \caption{\emph{Happens-before} relations in an incorrectly synchronized
-    program (each arrow represents a \emph{happens-before} relation). There is
-    no \emph{happens-before} relation between conflicting accesses \texttt{a=1}
-    and \texttt{print(a)}, creating a data race. \todo{redraw}}
+    program (each solid arrow represents a \emph{happens-before} relation).
+    There is no \emph{happens-before} relation between conflicting accesses
+    \texttt{a=42} and \texttt{print(a)} (the dashed line), creating a data race.}
 \end{figure}
 
 
@@ -443,26 +443,7 @@ and connect it to a \texttt{ClassWriter} (which is a subclass of
 effectively copying the class.
 
 \begin{figure}[hbt]
-    \begin{tikzpicture}
-        % \draw[step=1cm,gray,very thin] (0,0) grid (12,10);
-        \draw (0,1.5) node {\texttt{.class} file};
-        \draw [->, thick] (0,1.2) -- (0,0.5);
-        \draw (-1.5,0.5) rectangle (1.5,-0.5);
-        \draw (0,0) node {\texttt{ClassReader}};
-        \draw [->, thick] (1.5,0) -- (2,0);
-        \draw (2,0.5) rectangle (5,-0.5);
-        \draw (3.5,0) node {\texttt{ClassVisitor}};
-        \draw [->, thick] (5,0) -- (5.5,0);
-        \draw (5.5,0.5) rectangle (8.5,-0.5);
-        \draw (7,0) node {\texttt{ClassVisitor}};
-        \draw [->, thick] (8.5,0) -- (9,0);
-        \draw (9.5,0) node {\ldots};
-        \draw [->, thick] (10,0) -- (10.5,0);
-        \draw (10.5,0.5) rectangle (13.5,-0.5);
-        \draw (12,0) node {\texttt{ClassWriter}};
-        \draw [->, thick] (12,-0.5) -- (12,-1.2);
-        \draw (12,-1.5) node {\texttt{.class} file};
-    \end{tikzpicture}
+    \input{figures/asm.tex}
     \caption{Typical architecture for class transformation.}
 \end{figure}
 
