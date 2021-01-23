@@ -301,8 +301,7 @@ The goal of software verification is to make sure that the software meets all
 requirements. This section provides summary of testing, dynamic and static
 analysis, abstract interpretation, theorem proving and model checking.
 
-\subsection{Testing}
-
+\paragraph{Testing}
 \emph{Testing} consists of running the software under different conditions and
 checking the results of the computation (or observing other behavior of the
 software). To gain enough confidence that the software operates correctly in all
@@ -317,42 +316,35 @@ by the thread scheduler. Threads are interleaved in a different way on each
 execution which means that errors may or may not appear. This makes discovering
 defects in multi-threaded programs difficult.
 
-\subsection{Dynamic Analysis}
-
+\paragraph{Dynamic Analysis}
 \emph{Dynamic analysis} works with information gathered during an execution of a
 program. The information may be analyzed during program execution
 (\emph{on-the-fly}) or at the end (\emph{post-mortem}). Even though the analysis
 works with information from a single execution, it can in some cases find errors
 that were not observed during the execution, but may demonstrate themselves in
-similar executions \cite{letko}.
+similar executions \cite{letko}. Dynamic analysis also suffers from
+nondeterministic scheduling. The program under analysis may also behave
+differently due to being observed by the analyzer.
 
-Dynamic analysis also suffers from nondeterministic scheduling. The program
-under analysis may also behave differently due to being observed by the
-analyzer.
-
-\subsection{Static Analysis}
-
+\paragraph{Static Analysis}
 \emph{Static analysis} is performed at compile time and it does not require the
 program to be running. The analysis is theoretically able to cover all possible
 executions of a program. In practice, it is limited by the fact that the number
 of thread interleavings in multi-threaded programs grows exponentially
 \cite{letko}.
 
-\subsection{Abstract Interpretation}
-
+\paragraph{Abstract Interpretation}
 \emph{Abstract interpretation} takes the source code and symbolically executes
 it line by line, approximating the semantics of the program without performing
 all the calculations. It suffers from similar problems as static analysis.
 
-\subsection{Model Checking}
-
+\paragraph{Model Checking}
 \emph{Model checking} is a technique for checking whether a system satisfies a
 certain correctness specification \cite{letko}. It is based on systematic or
 heuristic exploration of the state space. The drawback of this technique is that
 the state space of the program model can be huge.
 
-\subsection{Theorem Proving}
-
+\paragraph{Theorem Proving}
 \emph{Theorem proving} is a semi-automated approach to proving that a certain
 facts are satisfied in the system. It is based on assumptions and general
 theorems about the system, and uses mathematical reasoning.
@@ -507,9 +499,8 @@ that the event is properly detected and the event handler is called. To store
 the state of the analysis, RoadRunner provides support for associating
 information with memory locations, locks, or threads.
 
-\todo{tool composition}
-
-\todo{optional: debugging, comparing analyses}
+% \todo{tool composition}
+% \todo{optional: debugging, comparing analyses}
 
 \subsection{The RoadRunner Programming Interface}
 
@@ -521,7 +512,28 @@ information about the event.
 
 \begin{figure}[hbt]
     \label{toolclass}
-    \caption{\todo{Here will be the most important methods of the Tool class}}
+    \begin{lstlisting}[language=java]
+public abstract class Tool {
+  // event handlers for accessing a memory location
+  public void access(AccessEvent fae) { }
+  public void volatileAccess(VolatileAccessEvent fae) { }
+  // event handlers for entering and exiting methods
+  public void enter(MethodEvent me) { }
+  public void exit(MethodEvent me) { }
+  // event handlers for locking
+  public void acquire(AcquireEvent ae) { }
+  public void release(ReleaseEvent re) { }
+  // event handlers for thread events
+  public void preJoin(JoinEvent je) { }
+  public void postJoin(JoinEvent je) { }
+  public void preStart(StartEvent se) { }
+  public void postStart(StartEvent se) { }
+  // shadow location initialization
+  public ShadowVar makeShadowVar(AccessEvent ae) { }
+}
+    \end{lstlisting}
+    \caption{The abstract class \texttt{Tool}. Only selected public methods are
+    shown.}
 \end{figure}
 
 The following events are detected by the RoadRunner framework:
@@ -550,14 +562,14 @@ not forwarded, the tool becomes a filter over the event stream. This can be used
 to filter out events that are not interesting to a particular analysis and then
 performing the analysis in the next tool.
 
-\subsection{Instrumentation Performed by RoadRunner}
-
-RoadRunner uses a modified version of the ASM framework to instrument the
-program under analysis.
-
-\todo{how are fields instrumented}
-
-\todo{how are methods instrumented}
+% \subsection{Instrumentation Performed by RoadRunner}
+%
+% RoadRunner uses a modified version of the ASM framework to instrument the
+% program under analysis.
+% 
+% \todo{how are fields instrumented}
+% 
+% \todo{how are methods instrumented}
 
 
 \chapter{Contracts for Concurrency}
