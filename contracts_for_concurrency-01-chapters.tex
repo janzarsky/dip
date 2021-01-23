@@ -551,8 +551,6 @@ program under analysis.
 \chapter{Contracts for Concurrency}
 \label{chThree}
 
-\todo{chapter contents}
-
 When developing software, one frequently uses modules created by someone else
 via its programming interface. For example, in object oriented programming, the
 interface consists of public methods of given class. Accessing the interface
@@ -560,7 +558,7 @@ requires one to follow a protocol consisting of: (i) syntax, i.e. types of
 parameters and return values, (ii) semantics, i.e. the expected behavior for
 given input parameters, and (iii) access restrictions. Access restrictions
 include the domain of valid values, dependencies on other services, and
-atomicity violations \cite{FITPUB11510}.
+atomicity violations \cite{contracts}.
 
 \emph{Contracts for concurrency} \cite{FITPUB10817},
 \cite{DBLP:journals/corr/SousaDFL15}, are a case of a software protocol that
@@ -570,9 +568,12 @@ can be extended with parameters to reflect the data flow between the methods (so
 that only methods manipulating the same data must be executed atomically).
 Another extension adds so called \emph{spoilers} (so that given sequence must be
 executed atomically only with respect to only certain sequences). Both
-extensions can be combined \cite{FITPUB11510}.
+extensions can be combined \cite{contracts}.
+
+\todo{chapter contents}
 
 \section{Basic Contracts}
+\label{basicContracts}
 
 \emph{Contract} is formally defined in \cite{FITPUB10817} as follows. Let
 $\Sigma_\mathbb{M}$ be a set of all public method names (the API) of a module or
@@ -585,63 +586,69 @@ over the same object.
 \emph{Example.} Consider a map implementation with the following operations:
 \texttt{put(key, value)}, \texttt{get(key)}, \texttt{remove(key)}, and
 \texttt{contains(key)}. Then a contract for this class may contain the following
-clauses: \todo{formatting} \newline
-    $(\varrho_1)$ \texttt{put get} \newline
-    $(\varrho_2)$ \texttt{contains (put|get|remove)} \newline
+clauses:
+\begin{align*}
+    (\varrho_1) &\ \texttt{put get}\\
+    (\varrho_2) &\ \texttt{contains (put|get|remove)}
+\end{align*}
 Clause $\varrho_1$ states that when an element is put into the map and then
 retrieved, it should be executed atomically (because the element may be removed
 between the calls). Clause $\varrho_2$ states that when the program modifies the
 map based on the result of the \texttt{contains} call, it should be atomic.
 
-\todo{optional: clause composition}
-
-
 \section{Parametric Contracts}
+\label{parametricContracts}
 
 In some situations, the definition of contracts may be to restrictive, producing
-false alarms. In \cite{FITPUB11510}, contracts are extended with parameters to
+false alarms. In \cite{contracts}, contracts are extended with parameters to
 reflect the data flow between methods. Consider the following example:
-\todo{formatting}\newline
-\texttt{if (q.contains(42)) q.remove(42);} \newline
+\begin{lstlisting}[language=java]
+if (q.contains(42)) q.remove(42);
+\end{lstlisting}
+
 These two calls must be executed atomically only if they share the same
 argument. This dependency can be expressed using \emph{meta-variables} placed as
 the parameters or return values of methods. Parameters that should not be taken
 into account are marked with free meta-variable (denoted with underscore).
 
-\emph{Example.} The example from \todo{ref} can be extended with parameters:
-\todo{formatting} \newline
-    $(\varrho_1)$ \texttt{put(X) \_ = get(X)} \newline
-    $(\varrho_2)$ \texttt{\_ = contains(X) ( put(X,\_) | \_ = get(X) | remove(X) )}
-    \newline
+\emph{Example.} The example from section \ref{basicContracts} can be extended
+with parameters:
+\begin{align*}
+    (\varrho_1) &\ \texttt{put(X) \_ = get(X)}\\
+    (\varrho_2) &\ \texttt{\_ = contains(X) ( put(X,\_) | \_ = get(X) |
+    remove(X) )}
+\end{align*}
 
 The basic definition of contracts in fact contains one implicit parameter, the
 object that the method was called upon (\texttt{this} in Java)
 \cite{FITPUB10817}. To better illustrate this, the example can be rewritten as:
-\todo{formatting} \newline
-    $(\varrho_1)$ \texttt{X.put(Y) \_ = X.get(Y)} \newline
-    $(\varrho_2)$ \texttt{\_ = X.contains(Y) ( X.put(Y,\_) | \_ = X.get(Y) | X.remove(Y) )}
+\begin{align*}
+    (\varrho_1) &\ \texttt{X.put(Y) \_ = X.get(Y)}\\
+    (\varrho_2) &\ \texttt{\_ = X.contains(Y) ( X.put(Y,\_) | \_ = X.get(Y) |
+    X.remove(Y) )}
+\end{align*}
 
 
 \section{Contracts with Spoilers}
+\label{contractsWithSpoilers}
 
-In \cite{FITPUB11510}, contracts are extended with contextual information to
+In \cite{contracts}, contracts are extended with contextual information to
 distinguish which method sequences violates the contract. Each clause of the
 basic contract is called a \emph{target}, and is assigned a set of so called
 \emph{spoilers}. A spoiler is a set of method sequences that may violate its
 target.
 
-Consider the clause $\varrho_1$ from example \todo{ref example in Basic
-Contracts}. If the element that was put to the map is concurrently removed or
-updated before the \texttt{get} call, a contract violation should be detected.
-However, calling \texttt{contains} or \texttt{get} on the element will not
-affect the computation and should not be marked as a contract violation. In this
-example, sequences \texttt{put} and \texttt{remove} are spoilers for a target
- $\varrho_1$, denoted as \texttt{put get} $\leftsquigarrow$
-\texttt{put|remove}.
+Consider the clause $\varrho_1$ from example in section \ref{basicContracts}. If
+the element that was put into the map is concurrently removed or updated before
+the \texttt{get} call, a contract violation should be detected.  However,
+calling \texttt{contains} or \texttt{get} on the element will not affect the
+computation and should not be marked as a contract violation. In this example,
+methods \texttt{put} and \texttt{remove} are spoilers for a target
+$\varrho_1$, denoted as \texttt{put get} $\leftsquigarrow$ \texttt{put|remove}.
 
 % TODO: this is basically copied - is it ok?
 
-Formally, as defined in \cite{FITPUB11510}, let $\mathbb{R}$ be the set of
+Formally, as defined in \cite{contracts}, let $\mathbb{R}$ be the set of
 \emph{target} clauses where each target $\varrho \in \mathbb{R}$ is a regular
 expression over $\Sigma_\mathbb{M}$. Let $\mathbb{S}$ be the set of
 \emph{spoilers} where each spoiler $\sigma \in \mathbb{S}$ is a regular
@@ -653,18 +660,34 @@ Contract violation is observed when a target sequence $\varrho \in \mathbb{R}$
 is fully interleaved by a spoiler sequence $\sigma \in \mathbb{C}(\varrho)$, and
 the sequences are executed on the same object.
 
-\emph{Example.} The example from \todo{ref} can be extended with spoilers:
-\todo{formatting} \newline
-    $(\varrho_1)$ \texttt{put get} $\leftsquigarrow$ \texttt{put|remove} \newline
-    $(\varrho_2)$ \texttt{contains (put|get|remove)} $\leftsquigarrow$
-    \texttt{put|remove} \newline
+\emph{Example.} The example from section \ref{basicContracts} can be extended
+with spoilers:
+\begin{align*}
+    (\varrho_1) &\ \texttt{put get} \leftsquigarrow \texttt{put|remove}\\
+    (\varrho_2) &\ \texttt{contains (put|get|remove)} \leftsquigarrow
+    \texttt{put|remove}
+\end{align*}
 
-\todo{combining spoilers and parameters}
+When combining parametric contracts with spoilers, the spoilers may also contain
+parameters. Then a contract violation is detected only when spoiler arguments
+match target arguments.
+
+\emph{Example.} Examples from sections \ref{parametricContracts} and
+\ref{contractsWithSpoilers} combined together:
+\begin{align*}
+    (\varrho_1) &\ \texttt{X.put(Y) \_ = X.get(Y)} \leftsquigarrow
+    \texttt{X.put(Y,\_)|X.remove(Y)}\\
+    (\varrho_2) &\ \texttt{\_ = X.contains(Y) ( X.put(Y,\_) | \_ = X.get(Y) |
+    X.remove(Y) )}\\
+    &\quad \leftsquigarrow \texttt{X.put(Y,\_)|X.remove(Y)}
+\end{align*}
 
 
 \section{Dynamic Contract Validation}
 
-\todo{section intro}
+In \cite{contracts}, a dynamic contract validation method is proposed for
+contracts with spoilers. Parametric contracts are not included in the method.
+This section provides an overview of the method.
 
 \subsection{Multi-threaded Program Traces}
 
@@ -689,9 +712,76 @@ sequence $\tau = e_1 \hdots e_n \in \mathbb{E}^+$.
 Given a trace $\tau = e_1 \hdots e_n \in \mathbb{E}^+$, we call its subsequence
 $r = e_{i_1} e_{i_2} \hdots e_{i_k}$, $1 < k \leq n$, an \emph{instance} of a
 target $\varrho \in \mathbb{R}$ if, and only if:
-\begin{itemize}
-    \item \todo{}
-\end{itemize}
+\begin{enumerate}
+    \item $r$ consists of well-paired method enter and exit events,
+    \item all enter events of $r$ match the regular expression of $\varrho$,
+    \item apart from events $e_{i_1},\ldots,e_{i_k}$, there is no event from the
+        alphabet of $\varrho$ executed by $t$ between events $e_{i_1}$ and
+        $e_{i_k}$.
+\end{enumerate}
+
+\emph{Example.} Given target $\varrho = abc$, and a trace $\tau_1 = adbdc$,
+there is a target instance $r = e_1 e_3 e_4$. In trace $\tau_2 = acbdc$, there
+is no target instance.
+
+A \emph{spoiler instance} $s$ of a spoiler $\sigma \in \mathbb{S}$ is defined in
+a similar fashion. We let $start(r) = e_{i_1}$ and $end(r) = e_{i_k}$ to denote
+the first and last event of a target, respectively. Likewise, $start(s)$ and
+$end(s)$ denotes the first and last event of a spoiler, respectively.
+
+\subsection{Contract Violation}
+
+A contract is violated when there is a target instance that is fully interleaved
+with a spoiler instance. The interleaving is defined using a
+\emph{happens-before} relation, which is in context of contracts defined as
+follows \cite{contracts}. A \emph{happens-before relation} $\prec_{hb}$ over a
+trace $\tau = e_1 \ldots e_n \in \mathbb{E}^+$ is the smallest transitively
+closed relation on the set of events from $\tau$ such that $e_j \prec_{hb} e_k$
+holds when $j < k$ and one of the following holds:
+\begin{enumerate}
+    \item both $e_j$ and $e_k$ are executed by the same thread,
+    \item both $e_j$ and $e_k$ acquire or release the same lock,
+    \item one of $e_j$ and $e_k$ is a fork or a join performed by thread $t$,
+        and the other is executed by thread $u$.
+\end{enumerate}
+
+A contract $(\varrho,\sigma) \in \mathbb{C}$ is \emph{violated} in a trace
+$\tau$ if, and only if there is a target instance $r$ in the trace and a spoiler
+instance $s$ in the trace such that:
+\begin{align*}
+    start(s) \nprec_{hb} start(r) \wedge end(r) \nprec_{hb} end(s)
+\end{align*}
+The violation occurs when the spoiler may have started after the target started
+and it may have ended before the target ended. When given a complete program
+execution trace, all target and spoiler instances can be detected, the
+happens-before relation can be deduced, and all contracts can be easily checked
+for violations. The trace, however, can get large and make this approach
+unpractical. For this reason, several optimizations are introduced in
+\cite{contracts}, which are presented in the next section.
+
+% TODO: examples of traces
+
+\subsection{On-the-fly Contract Validation}
+
+In order to check contract validations, it is not required to keep the entire
+program execution trace. A \emph{trace window} is kept instead. Events are moved
+to the trace window as soon as they become available and are removed under
+certain conditions. The goal is to keep the window as small as possible.
+
+Spoiler instances can be safely removed from the window whenever a contract
+violation that would be detected with the spoiler can be detected without it. A
+spoiler instance can be removed from the window whenever a newer instance of the
+same spoiler is detected \cite{contracts}.
+
+A target instance $r$ can be safely removed with respect to a spoiler instance
+$s$ whenever a contract violation that would be detected between $r$ and $s$,
+can be detected between $s$ and another target instance too. Note that target
+instances may be removed only with respect to a given spoiler, not in general
+\cite{contracts}.
+
+To further reduce the required information about the trace, \emph{vector clocks}
+are used. For each target and spoiler instance in the trace window, only vector
+clocks of their beginning and end needs to be kept.
 
 \todo{}
 
@@ -709,7 +799,7 @@ target $\varrho \in \mathbb{R}$ if, and only if:
 
 This chapter describes the proposed dynamic analyzer for parametric contracts
 with spoilers. The analyzer should follow the method for dynamic analysis of
-contracts described in \cite{FITPUB11510}. \todo{chapter overview}
+contracts described in \cite{contracts}. \todo{chapter overview}
 
 The analyzer should be built as a new tool (or a tool chain) for RoadRunner. The
 input will be a program under analysis, and a contract definition. The analyzer
@@ -730,7 +820,7 @@ is still unknown. The free meta-variables (\texttt{\_}) do not have to be
 determined. For example, the sequence \texttt{a(X,Y) b(\_) c(Y)} is valid. This
 restriction enables simple detection of method sequences. \todo{explain why}
 
-The method described in \cite{FITPUB11510} is based on program traces where
+The method described in \cite{contracts} is based on program traces where
 every method represents a single event in the trace. However, the RoadRunner
 framework produces two events for every method -- method entry and method exit.
 Method arguments are available on method entry, the return value is available on
