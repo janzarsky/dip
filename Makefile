@@ -36,7 +36,7 @@ vlna:
 	vlna -l $(CO)-*.tex
 
 normostrany:
-	echo "scale=2; `detex -n $(CO)-[01]*.tex | wc -c`/1800;" | bc
+	echo "scale=2; (`detex -n $(CO)-[01]*.tex | wc -c`+860+860+570)/1800;" | bc
 
 text:
 	detex -n $(CO)-[01]*.tex | sed 's/\n\n/xxxendxxx/g' | sed 's/\n/ /g' | sed 's/xxxendxxx/\r\r/g' > $(CO).txt
