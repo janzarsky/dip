@@ -298,18 +298,12 @@ more threads waiting for a signal, and the signal is never delivered.
 % Carlo Ghezzi, Mehdi Jazayeri, Dino Mandrioli: Fundamentals of Software Engineering, Prentice Hall, ISBN 0-13-099183-X
 
 The goal of software verification is to make sure that the software meets all
-requirements. There are two approaches to software verification:
-\emph{experimentation} and \emph{analysis}. The experimentation approach
-consists of observing the behavior of the software under different conditions,
-in other words \emph{testing} the software. Analysis inspects the software to
-determine its properties and capabilities. Analysis can be either static or
-dynamic. \emph{Dynamic analysis} studies the software while it is running,
-\emph{static analysis} is based on static model of the software
-\cite{fundamentals}.
+requirements. This section provides summary of testing, dynamic and static
+analysis, abstract interpretation, theorem proving and model checking.
 
 \subsection{Testing}
 
-Testing consists of running the software under different conditions and
+\emph{Testing} consists of running the software under different conditions and
 checking the results of the computation (or observing other behavior of the
 software). To gain enough confidence that the software operates correctly in all
 conditions, suitable set of \emph{test cases} must be found, which is difficult,
@@ -323,16 +317,45 @@ by the thread scheduler. Threads are interleaved in a different way on each
 execution which means that errors may or may not appear. This makes discovering
 defects in multi-threaded programs difficult.
 
-\subsection{Static Analysis}
-
-Static analysis is performed without executing the software.
-
-\todo{}
-
 \subsection{Dynamic Analysis}
 
-\todo{}
+\emph{Dynamic analysis} works with information gathered during an execution of a
+program. The information may be analyzed during program execution
+(\emph{on-the-fly}) or at the end (\emph{post-mortem}). Even though the analysis
+works with information from a single execution, it can in some cases find errors
+that were not observed during the execution, but may demonstrate themselves in
+similar executions \cite{letko}.
 
+Dynamic analysis also suffers from nondeterministic scheduling. The program
+under analysis may also behave differently due to being observed by the
+analyzer.
+
+\subsection{Static Analysis}
+
+\emph{Static analysis} is performed at compile time and it does not require the
+program to be running. The analysis is theoretically able to cover all possible
+executions of a program. In practice, it is limited by the fact that the number
+of thread interleavings in multi-threaded programs grows exponentially
+\cite{letko}.
+
+\subsection{Abstract Interpretation}
+
+\emph{Abstract interpretation} takes the source code and symbolically executes
+it line by line, approximating the semantics of the program without performing
+all the calculations. It suffers from similar problems as static analysis.
+
+\subsection{Model Checking}
+
+\emph{Model checking} is a technique for checking whether a system satisfies a
+certain correctness specification \cite{letko}. It is based on systematic or
+heuristic exploration of the state space. The drawback of this technique is that
+the state space of the program model can be huge.
+
+\subsection{Theorem Proving}
+
+\emph{Theorem proving} is a semi-automated approach to proving that a certain
+facts are satisfied in the system. It is based on assumptions and general
+theorems about the system, and uses mathematical reasoning.
 
 \section{Instrumentation of Java Bytecode}
 
