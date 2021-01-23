@@ -783,14 +783,13 @@ To further reduce the required information about the trace, \emph{vector clocks}
 are used. For each target and spoiler instance in the trace window, only vector
 clocks of their beginning and end needs to be kept.
 
-\todo{}
-
-\todo{ \newline
-    * trace windows \newline
-    * discarding spoilers and targets \newline
-    * main algorithm \newline
-    * optimizations, vector clocks, happens-before \newline
-}
+The method for contract validation on-the-fly does the following. At method
+entry events, target and spoiler sequences are detected. At method exit events,
+it is detected whether a target or a spoiler instance has ended. When a target
+instance ends, spoiler instances from the trace window are checked if they
+violate the target. When a spoiler instance ends, target instances from the
+trace window are checked if they are violated by the spoiler. At method exit,
+target and spoiler instances are also discarded when no longer needed.
 
 
 
