@@ -12,11 +12,11 @@
 % zpracování / processing: make, make pdf, make clean
 %==============================================================================
 % Soubory, které je nutné upravit nebo smazat: / Files which have to be edited or deleted:
-%   contracts_for_concurrency-20-literatura-bibliography.bib - literatura / bibliography
-%   contracts_for_concurrency-01-kapitoly-chapters.tex - obsah práce / the thesis content
-%   contracts_for_concurrency-01-kapitoly-chapters-en.tex - obsah práce v angličtině / the thesis content in English
-%   contracts_for_concurrency-30-prilohy-appendices.tex - přílohy / appendices
-%   contracts_for_concurrency-30-prilohy-appendices-en.tex - přílohy v angličtině / appendices in English
+%   xzarsk03-contracts-for-concurrency-20-literatura-bibliography.bib - literatura / bibliography
+%   xzarsk03-contracts-for-concurrency-01-kapitoly-chapters.tex - obsah práce / the thesis content
+%   xzarsk03-contracts-for-concurrency-01-kapitoly-chapters-en.tex - obsah práce v angličtině / the thesis content in English
+%   xzarsk03-contracts-for-concurrency-30-prilohy-appendices.tex - přílohy / appendices
+%   xzarsk03-contracts-for-concurrency-30-prilohy-appendices-en.tex - přílohy v angličtině / appendices in English
 %==============================================================================
 %\documentclass[]{fitthesis} % bez zadání - pro začátek práce, aby nebyl problém s překladem
 %\documentclass[english]{fitthesis} % without assignment - for the work start to avoid compilation problem
@@ -234,7 +234,7 @@
 
   % Text prace / Thesis text
   % ----------------------------------------------
-  \input{contracts_for_concurrency-01-chapters}
+  \input{xzarsk03-contracts-for-concurrency-01-chapters}
   
   % Kompilace po částech (viz výše, nutno odkomentovat)
   % Compilation piecewise (see above, it is necessary to uncomment it)
@@ -265,7 +265,7 @@
   \fi
 \fi
   \begin{flushleft}
-  \bibliography{contracts_for_concurrency-20-bibliography}
+  \bibliography{xzarsk03-contracts-for-concurrency-20-bibliography}
   \end{flushleft}
 
   % vynechani stranky v oboustrannem rezimu
@@ -324,10 +324,10 @@
   \fi
   
   % Přílohy / Appendices
-  \input{contracts_for_concurrency-30-appendices}
+  \input{xzarsk03-contracts-for-concurrency-30-appendices}
   
   % Kompilace po částech (viz výše, nutno odkomentovat)
   % Compilation piecewise (see above, it is necessary to uncomment it)
-  %\subfile{contracts_for_concurrency-30-prilohy-appendices}
+  %\subfile{xzarsk03-contracts-for-concurrency-30-prilohy-appendices}
   
 \end{document}

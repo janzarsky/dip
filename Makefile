@@ -3,7 +3,7 @@
 # E-mail: bidlom AT fit vutbr cz
 # Edited by: dytrych AT fit vutbr cz
 #===========================================
-CO=contracts_for_concurrency
+CO=xzarsk03-contracts-for-concurrency
 
 all: $(CO).pdf
 

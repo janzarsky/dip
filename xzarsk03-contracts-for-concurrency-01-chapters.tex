@@ -566,9 +566,9 @@ then performing the analysis in the next tool.
 %
 % RoadRunner uses a modified version of the ASM framework to instrument the
 % program under analysis.
-% 
+%
 % \todo{how are fields instrumented}
-% 
+%
 % \todo{how are methods instrumented}
 
 
@@ -823,7 +823,8 @@ target and spoiler instances are also discarded when no longer needed.
 
 This chapter describes the proposed dynamic analyzer for parametric contracts
 with spoilers. The analyzer should follow the method for dynamic analysis of
-contracts described in \cite{contracts}.
+contracts described in \cite{contracts} and extend it to support parametric
+contracts.
 
 % \todo{chapter overview}
 
@@ -856,13 +857,23 @@ the contracts should be limited to not use parametrized return values.
 
 \section{Contract Representation}
 
-The analyzer takes a contract definition as a parameter. Method names in
-contracts must be fully qualified (for example
-\texttt{java.lang.Object.toString}). Java allows method overloading, so the
-contract definition should allow for distinguishing methods based on the number
-and type of their parameters.
+The analyzer takes a contract definition as a parameter. At the top level, the
+definition will contain target spoiler pairs. Each target and spoiler will be
+represented by a regular expression over methods. Each method will be
+parametrized, including arguments, return value, and the object it is called
+upon (\texttt{this}).
+
+Method in contracts must be specified unambiguously. Method names must be fully
+qualified (for example \texttt{java.lang.Object.toString}). Java allows method
+overloading, so the contract definition should allow for distinguishing methods
+based on the number and type of their parameters. It should be possible to
+include a constructor in a contract.
 
 % \todo{grammar for contract configuration files}
+
+Internally, each target and spoiler will be converted from a regular expression
+to a finite automaton, represented by the \texttt{FiniteAutomaton} class, where
+each transition contains a method definition and parameters.
 
 \section{Changes to Instrumentation Performed by RoadRunner}
 
@@ -924,6 +935,37 @@ update various vector clocks.
 
 Methods \texttt{enter()} and \texttt{exit()} will track target and spoiler
 instances in a thread, and detect contract violations.
+
+\subsection{Detection of Target and Spoiler Instances}
+
+For each thread, a \texttt{Window} object is kept during the analysis. It
+contains a reference to the thread, a vector clock, and information about target
+and spoiler instances present in the trace window. An instance contains a
+reference to the spoiler or target finite automaton, the current state of the
+automaton, and the values of parameters.
+
+When a window is created, for each target and spoiler, an empty \emph{template}
+instance is added that will be used for detecting new instances in the trace
+window. These instances will remain unchanged during the lifetime of the window.
+
+On method entry, the analyzer will try to advance all instances in a window.
+When a template instance can be advanced, it means that a new instance is
+detected. The template instance is copied, the value of parameters is stored in
+the instance, and the instance is advanced to the next state. When an already
+running instance can be advanced, the analyzer must check if the method
+arguments match those stored in the instance.
+
+\subsection{Contract Validation}
+
+On method exit, for all target instances that were just fully accepted, it is
+checked if there is a spoiler instance in other windows that can violate this
+target. Likewise, for all accepted spoiler instances, it is checked if there is
+a target instance in other windows that can be violated by this spoiler. If a
+violation is found, it is reported and the analysis ends. If not, the instance
+is replaced by a template instance, which contains the same finite automaton,
+parameter values, and vector clocks of the instance that has just ended. This
+ensures that when a new instance with the same parameter values is detected, it
+will have access to the previously detected instance.
 
 % \todo{synchronization of the tool itself}
 
