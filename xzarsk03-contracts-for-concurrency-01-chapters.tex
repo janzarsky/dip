@@ -160,6 +160,7 @@ either \texttt{notify()} or \texttt{notifyAll()}.
 
 Multi-threaded programs may use the \texttt{volatile} type modifier. It tells
 the compiler that the variable may be modified outside of the current thread.
+\todo{elaborate}
 
 \section{Java Memory Model}
 
@@ -223,14 +224,14 @@ run by the intra-thread semantics.
 \emph{Synchronization order} is a total order over all synchronization actions
 of an execution. Within each thread, the synchronization order is consistent
 with the program order. The \emph{synchronized-with} relation is defined on
-certain actions. For Example: starting a thread is \emph{synchronized-with}
+certain actions. For example: starting a thread is \emph{synchronized-with}
 the first action in the new thread.
 
 \emph{Happens-before order} is a partial order. If an action
 \emph{happens-before} another, the first action is visible to and ordered before
-the second action. If \emph{x} and \emph{y} belong to the same thread and
-\emph{x} comes before \emph{y} in program order, the \emph{x happens-before y}.
-If \emph{x synchronizes-with y}, then \emph{x happens-before y}. Figures
+the second action. If actions \emph{x} and \emph{y} belong to the same thread
+and \emph{x} comes before \emph{y} in program order, then \emph{x happens-before
+y}.  If \emph{x synchronizes-with y}, then \emph{x happens-before y}. Figures
 \ref{hb1} and \ref{hb2} illustrates the \emph{happens-before} relation in simple
 programs.
 
@@ -413,6 +414,15 @@ Specification \cite{jvmspec}.
     \end{center}
 \end{table}
 
+The Java Virtual Machine operates on two kinds of types: \emph{primitive types}
+and \emph{reference types}. Examples of primitive types are \texttt{int},
+\texttt{long}, \texttt{boolean}, or \texttt{double}. There are three kinds of
+reference types: class types, array types, and interface types. The array type
+consists of a component type which can also be an array type. For example,
+\texttt{int[]} represents an array type with component type of \texttt{int}. All
+reference types may hold a special null reference, which is also the default
+value of reference types.
+
 Compiled classes do not contain any \texttt{package} or \texttt{import}
 statements, so all type names must be fully qualified. Internally, class files
 use slashes instead of dots in type names, so for example
@@ -420,9 +430,9 @@ use slashes instead of dots in type names, so for example
 Java types are represented with \emph{type descriptors}. Each primitive type is
 assigned a single character: \texttt{I} for \texttt{int}, \texttt{D} for
 \texttt{Double}, and so on. Classes and interfaces are written with prefix
-\texttt{L} and semicolon at the end, so string becomes
+\texttt{L} and semicolon at the end, so \texttt{String} becomes
 \texttt{Ljava/lang/String;}. Arrays are represented using a
-\texttt{\leftbracket} and the element type, so integer arrays is
+\texttt{\leftbracket} and the element type, so an array of integers is
 \texttt{\leftbracket I}, an array of strings is \texttt{\leftbracket
 Ljava/lang/String;}. Similarly, \emph{method descriptors} are used to represent
 the return type of a method and types of all method parameters. For example, a
@@ -430,8 +440,72 @@ method declared as \texttt{double m(int i, String s)} would be represented as
 \texttt{(ILjava/lang/String;)D}. In method descriptors, \texttt{V} is used when
 the method returns \texttt{void}.
 
-% \todo{describe the instructions - groups of instructions, representation,
-% method invocation, constants}
+When executing, on each method invocation, the Java Virtual Machine creates a
+new \emph{frame}. Each frame contains its own local variables and an operand
+stack. When the method invocation is completed, the frame is destroyed.
+
+Local variables are addressed by indexing. Each variable can hold a single value
+of a primitive or reference type with the exception of \texttt{long} and
+\texttt{double} which require a pair of variables. At index 0, there is a
+reference to the object the method was invoked on (the value of \texttt{this} in
+Java). Class methods (marked as \texttt{static} in Java) do not use this index.
+Starting at index 1 (or 0 in case of class methods), method parameters are
+stored. After the parameters, local variables may be stored.
+
+Each frame contains an \emph{operand stack}, which is initially empty. Various
+instructions are used to load values onto the stack, either from local variables
+or fields. Other instructions take operands from the stack and push the result
+back. When calling other methods, the parameters are also prepared on the stack.
+
+Java Virtual Machine instructions can be divided into several categories. Load
+and store instructions move values between local variables and the operand
+stack. For example, instruction \texttt{iload\_3} pushes the value (which is of
+type \texttt{int}) from the local variable at index 3 to the operand stack.
+Arithmetic instructions usually take two values from the operand stack, compute
+the result, and store it back on the stack. For example, instruction
+\texttt{fmul} will multiply two values of type \texttt{float}. Type conversion
+instructions convert the value on the top of the stack. Control transfer
+instructions, such as \texttt{ifeq} or \texttt{goto}, cause the execution of
+instruction other then the immediately following.
+
+To create new arrays and objects, instructions \texttt{new}, \texttt{newarray},
+and \texttt{anewarray} are used. Methods are invoked using these five
+instructions: \texttt{invokevirtual}, \texttt{invokeinterface},
+\texttt{invokespecial}, \texttt{invokestatic}, and \texttt{invokedynamic}, each
+used in slightly different circumstances. Exceptions are thrown using the
+\texttt{athrow} instruction. An example of a method represented by bytecode is
+shown in Figure \ref{bytecodeExample}.
+
+\begin{figure}[hbt]
+    \label{bytecodeExample}
+    \begin{lstlisting}
+public void foo(java.io.FileWriter, int, int)
+  descriptor: (Ljava/io/FileWriter;II)V
+  flags: (0x0001) ACC_PUBLIC
+  Code:
+    stack=2, locals=5, args_size=4
+       0: iload_2
+       1: iload_3
+       2: iadd
+       3: istore        4
+       5: aload_1
+       6: iload         4
+       8: invokevirtual #2    // Method java/io/FileWriter.write:(I)V
+      11: aload_1
+      12: invokevirtual #3    // Method java/io/FileWriter.close:()V
+      15: return
+    \end{lstlisting}
+    \caption{An example of a method bytecode viewed using the \texttt{javap}
+    command. The method takes three parameters: a file writer and two integers.
+    There are 5 local variables: the object the method was called on (index 0),
+    method parameters (indices 1 to 3), and a local variable (index 5). On lines
+    0 to 3, the two integers are loaded on to the operand stack, added together,
+    and the result is stored in a local variable. Lines 5 to 7 calls the
+    \texttt{write} method on the file writer, lines 11 and 12 calls the
+    \texttt{close} method. Operands on lines 8 and 12 are indices to the
+    constant pool section.}
+\end{figure}
+
 
 \subsection{The ASM framework}
 
@@ -474,13 +548,14 @@ and connect it to a \texttt{ClassWriter} (which is a subclass of
 effectively copying the class.
 
 \begin{figure}[hbt]
+    \label{asmArchitecture}
     \input{figures/asm.tex}
     \caption{Typical architecture for class transformation.}
 \end{figure}
 
-The typical class transformation uses the following architecture: a
-\texttt{ClassReader} instance reads the class, then one or more
-\texttt{ClassVisitor} instances modify the class, and then a
+The typical class transformation uses the following architecture (see Figure
+\ref{asmArchitecture}): a \texttt{ClassReader} instance reads the class, then
+one or more \texttt{ClassVisitor} instances modify the class, and then a
 \texttt{ClassWriter} instance writes the modified class back to a file.
 
 \section{Dynamic Analysis using RoadRunner}
@@ -499,8 +574,8 @@ that the event is properly detected and the event handler is called. To store
 the state of the analysis, RoadRunner provides support for associating data with
 memory locations, locks, or threads.
 
-% \todo{tool composition}
-% \todo{optional: debugging, comparing analyses}
+\todo{tool composition}
+\todo{optional: debugging, comparing analyses}
 
 \subsection{The RoadRunner Programming Interface}
 
@@ -562,14 +637,14 @@ is not forwarded, the tool becomes a filter over the event stream. This can be
 used to filter out events that are not interesting to a particular analysis and
 then performing the analysis in the next tool.
 
-% \subsection{Instrumentation Performed by RoadRunner}
-%
-% RoadRunner uses a modified version of the ASM framework to instrument the
-% program under analysis.
-%
-% \todo{how are fields instrumented}
-%
-% \todo{how are methods instrumented}
+\subsection{Instrumentation Performed by RoadRunner}
+
+RoadRunner uses a modified version of the ASM framework to instrument the
+program under analysis.
+
+\todo{how are fields instrumented}
+
+\todo{how are methods instrumented}
 
 
 \chapter{Contracts for Concurrency}
@@ -826,7 +901,7 @@ with spoilers. The analyzer should follow the method for dynamic analysis of
 contracts described in \cite{contracts} and extend it to support parametric
 contracts.
 
-% \todo{chapter overview}
+\todo{chapter overview}
 
 The analyzer should be built as a new tool (or a toolchain) for RoadRunner. The
 input will be a program under analysis and a contract definition. The analyzer
@@ -855,6 +930,8 @@ method exit. The analyzer must work around the fact that the return value (which
 can be also a parameter) is not available at the method entry. Alternatively,
 the contracts should be limited to not use parametrized return values.
 
+\todo{overlapping instances}
+
 \section{Contract Representation}
 
 The analyzer takes a contract definition as a parameter. At the top level, the
@@ -869,7 +946,7 @@ overloading, so the contract definition should allow for distinguishing methods
 based on the number and type of their parameters. It should be possible to
 include a constructor in a contract.
 
-% \todo{grammar for contract configuration files}
+\todo{grammar for contract configuration files}
 
 Internally, each target and spoiler will be converted from a regular expression
 to a finite automaton, represented by the \texttt{FiniteAutomaton} class, where
@@ -967,13 +1044,20 @@ parameter values, and vector clocks of the instance that has just ended. This
 ensures that when a new instance with the same parameter values is detected, it
 will have access to the previously detected instance.
 
-% \todo{synchronization of the tool itself}
+\todo{synchronization of the tool itself}
 
 \section{Testability}
 
 To properly test the analyzer, its implementation should not rely on
 RoadRunner's internal data structures. It should be possible to feed the
 analyzer a custom event stream without the need for the RoadRunner framework.
+
+
+
+\chapter{Implementation}
+\label{chFive}
+
+\todo{TODO}
 
 
 
