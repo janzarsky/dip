@@ -640,11 +640,71 @@ then performing the analysis in the next tool.
 \subsection{Instrumentation Performed by RoadRunner}
 
 RoadRunner uses a modified version of the ASM framework to instrument the
-program under analysis.
+program under analysis. Classes are instrumented when they are loaded.
+\todo{summary of the rest of the subsection}
+
+For each field, two new methods are added, one for reading and one for writing
+to the field. In these methods, write and read events are generated. In the
+rest of the class, all \texttt{getfield} and \texttt{putfield} instructions are
+replaced with calls to the corresponding methods. For each field, a new field is
+created which holds arbitrary data provided by the tools. Figures
+\ref{rrInstBefore} and \ref{rrInstField} shows a simple class before and after
+field instrumentation.
+
+\begin{figure}[hbt]
+    \label{rrInstBefore}
+    \begin{lstlisting}
+private int bar;
+
+public void foo();
+   0: aload_0
+   1: aload_0
+   2: getfield      #2    // Field bar:I
+   5: bipush        42
+   7: iadd
+   8: putfield      #2    // Field bar:I
+  11: return\end{lstlisting}
+    \caption{An example class bytecode viewed using the \texttt{javap} tool,
+    simplified.}
+\end{figure}
+
+\begin{figure}[hbt]
+    \label{rrInstField}
+    \begin{lstlisting}
+public int bar;
+
+public transient rr.state.ShadowVar __$rr_bar;
+
+public void __$rr_put_bar(int, int, rr.state.ShadowThread)
+  (code omitted)
+
+public int __$rr_get_bar(int, rr.state.ShadowThread)
+  (code omitted)
+
+public void foo();
+   0: invokestatic  #51 // Method rr/state/ShadowThread
+                        // .getCurrentShadowThread:()Lrr/state/ShadowThread;
+   3: astore_2
+   4: aload_0
+   5: aload_0
+   6: iconst_1
+   7: aload_2
+   8: invokespecial #56 // Method __$rr_get_bar:(ILrr/state/ShadowThread;)I
+  11: bipush        42
+  13: iadd
+  14: iconst_2
+  15: aload_2
+  16: invokespecial #53 // Method __$rr_put_bar:(IILrr/state/ShadowThread;)V
+  19: return\end{lstlisting}
+    \caption{\todo{}}
+\end{figure}
+
 
 \todo{how are fields instrumented}
 
 \todo{how are methods instrumented}
+\lipsum[1]
+
 
 
 \chapter{Contracts for Concurrency}
