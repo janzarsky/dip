@@ -473,8 +473,10 @@ and \texttt{anewarray} are used. Methods are invoked using these five
 instructions: \texttt{invokevirtual}, \texttt{invokeinterface},
 \texttt{invokespecial}, \texttt{invokestatic}, and \texttt{invokedynamic}, each
 used in slightly different circumstances. Exceptions are thrown using the
-\texttt{athrow} instruction. An example of a method represented by bytecode is
-shown in Figure \ref{bytecodeExample}.
+\texttt{athrow} instruction. Entering a monitor is achieved by
+\texttt{monitorenter} and \texttt{monitorexit} instructions, which are used by
+synchronized statements in Java. An example of a method represented by bytecode
+is shown in Figure \ref{bytecodeExample}.
 
 \begin{figure}[hbt]
     \label{bytecodeExample}
@@ -643,16 +645,20 @@ then performing the analysis in the next tool.
 \subsection{Instrumentation Performed by RoadRunner}
 
 RoadRunner uses a modified version of the ASM framework to instrument the
-program under analysis. Classes are instrumented when they are loaded.
-\todo{summary of the rest of the subsection}
+program under analysis. Before a class is loaded, it is instrumented. The
+instrumented code will then produce events that will be sent to the tool chain
+for an analysis. Three important kinds of actions are instrumented: field
+accesses, method invocations, and monitor entries and exits.
 
-For each field, two new methods are added, one for reading and one for writing
-to the field. In these methods, write and read events are generated. In the
-rest of the class, all \texttt{getfield} and \texttt{putfield} instructions are
-replaced with calls to the corresponding methods. For each field, a new field is
-created which holds arbitrary data provided by the tools. Figures
-\ref{rrInstBefore} and \ref{rrInstField} shows a simple class before and after
-field instrumentation.
+Field accesses are instrumented by adding two new methods for each field: one
+for reading and one for writing to the field. In these methods, write and read
+events are generated. In the rest of the code, all \texttt{getfield} and
+\texttt{putfield} instructions are replaced with calls to the corresponding
+access methods. RoadRunner allows tools to store arbitrary data related to a
+field in \emph{shadow variables}. For each field, a new field of the
+\texttt{ShadowVar} type is created to store the data. Figures \ref{rrInstBefore}
+and \ref{rrInstField} shows a simple class before and after field
+instrumentation.
 
 \begin{figure}[hbt]
     \label{rrInstBefore}
@@ -707,16 +713,15 @@ public void foo();
     an argument which is obtained by calling \texttt{getCurrentShadowThread}.}
 \end{figure}
 
-In RoadRunner, to obtain information about method invocations, most methods are
-instrumented by creating a wrapper around them. The original method is renamed,
-but otherwise left intact (the code may however be further instrumented to
-obtain other information, such as field accesses). Then a wrapper method with
-the same name as the original one is created. The wrapper method generates enter
-and exit events. In order to detect abnormal method exits that are caused by an
-exception being thrown, the call to the original method is wrapped in a try
-block. When an exception is caught, the exit method is generated and the
-exception is re-thrown. An example of a method instrumented by RoadRunner is
-shown in Figure \ref{rrInstMethod}.
+Method invocations are tracked by creating a wrapper method for each method. The
+original method is renamed, but otherwise left intact (the code may however be
+further instrumented to obtain other information, such as field accesses). Then
+a wrapper method with the same name as the original one is created. The wrapper
+method generates enter and exit events. In order to detect abnormal method exits
+that are caused by an exception being thrown, the call to the original method is
+wrapped in a try block. When an exception is caught, the exit event is generated
+and the exception is re-thrown. An example of a method instrumented by
+RoadRunner is shown in Figure \ref{rrInstMethod}.
 
 \begin{figure}[hbt]
     \label{rrInstMethod}
@@ -755,11 +760,20 @@ public int foo(int);
     enter and exit events and calls the original method.}
 \end{figure}
 
-\subsection{RoadRunner Configuration options}
-
-\todo{what features can be turned on and off}
-{\color{blue}\lipsum[2]}
-
+Monitor entries and exits are handled differently for synchronized statements
+and synchronized methods. Synchronized statements in Java are represented by
+\texttt{monitorenter} and \texttt{monitorexit} instructions. RoadRunner extends 
+all occurrences of these instructions with calls to methods that generate
+acquire and release events. Synchronized methods in Java do not need
+\texttt{monitorenter} and \texttt{monitorexit} instructions, the locking is
+performed implicitly by the Java Virtual Machine. In RoadRunner, synchronized
+methods are replaced with synchronized statements that are then instrumented as
+described above. For each synchronized method, a wrapper method is created. The
+original method's synchronized flag is cleared. The wrapper method, which is
+also not synchronized, contains a synchronized statement with call to the
+original method. Synchronized methods are in the end wrapped twice, the first
+wrapper generates synchronization events and the second one generates method
+invocation events.
 
 \chapter{Contracts for Concurrency}
 \label{chThree}
