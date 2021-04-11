@@ -1029,23 +1029,22 @@ target and spoiler instances are also discarded when no longer needed.
 \label{chFour}
 
 This chapter describes the proposed dynamic analyzer for parametric contracts
-with spoilers. The analyzer should follow the method for dynamic analysis of
-contracts described in \cite{contracts} and extend it to support parametric
-contracts.
+with spoilers. The analyzer follows the method for dynamic analysis of contracts
+described in \cite{contracts} and extends it to support parametric contracts.
 
 \todo{chapter overview}
 
-The analyzer should be built as a new tool (or a toolchain) for RoadRunner. The
-input will be a program under analysis and a contract definition. The analyzer
-will be able to detect contract violations in the program and report them. The
-RoadRunner framework will be modified to support obtaining method arguments and
-return values. For performance reasons, the RoadRunner framework should also be
-modified to instrument only relevant actions of the program under analysis.
+The analyzer is built as a new tool for RoadRunner. The input is a program under
+analysis and a contract definition. The analyzer is able to detect contract
+violations in the program and report them. The RoadRunner framework was modified
+to support obtaining method arguments and return values. \todo{was it though?}
+For performance reasons, the RoadRunner framework should also be modified to
+instrument only relevant actions of the program under analysis.
 
 \section{Restricting Parametric Contracts}
 
-The analyzer should work with parametric contracts with spoilers (see Chapter
-\ref{chThree}). For performance reasons, the analyzer will validate only a
+The analyzer works with parametric contracts with spoilers (see Chapter
+\ref{chThree}). For performance reasons, the analyzer validates only a
 restricted variant of contracts. It is required that the value of all parameters
 in target or spoiler sequences must be determined by the first method in the
 sequence. For example, method sequence \texttt{a(X,Y) b(Y,Z)} is illegal,
@@ -1057,13 +1056,23 @@ restriction will limit the number of instances in the trace window.
 The method described in \cite{contracts} is based on program traces where
 every method represents a single event in the trace. However, the RoadRunner
 framework produces two events for every method -- method entry and method exit.
-Method arguments are available on method entry, the return value is available on
-method exit. The analyzer must work around the fact that the return value (which
-can be also a parameter) is not available at the method entry. Alternatively,
-the contracts should be limited to not use parametrized return values.
+For parametric contracts, we need to obtain values of parameters and also the
+return value, which is available only on method exit. For convenience, the
+analyzer should use only the method exit event. This means that the analyzer may
+produce unexpected results when the program under analysis contains nested calls
+to methods that are part of the contract. Consider the following methods that
+are both part of a contract:
 
-\todo{overlapping instances, entry and exit solved together}
-{\color{blue}\lipsum[2]}
+\begin{lstlisting}[language=java]
+public void a() { b(); }
+public void b() { ... }
+\end{lstlisting}
+
+After calling method \texttt{a()}, the trace recorded by the analyzer will be
+\texttt{b() a()} instead of more intuitive \texttt{a() b()}.
+
+\todo{discussion about invalidating instances}
+{\color{blue}\lipsum[1]}
 
 \section{Contract Representation}
 
@@ -1099,19 +1108,28 @@ value through its API. The \texttt{enter} and \texttt{exit} methods both take a
     \item Call site location -- where was the method invoked.
 \end{itemize}
 
-The \texttt{MethodEvent} class should be extended for storing method arguments
-and the return value. In RoadRunner, each method call is wrapped in another, so
-RoadRunner has access to these values. RoadRunner does not need to provide
-argument types, since they are already available in the method descriptor
-(stored in \texttt{MethodInfo}). Also, the analysis performs only identity
-comparison (in the case of objects). Primitive types must be handled correctly
-and compared by their value.
+The \texttt{MethodEvent} class was extended for storing method arguments and the
+return value. The following methods were added:
 
-\todo{figure with extended MethodEvent}
-{\color{blue}\lipsum[2]}
+\begin{lstlisting}[language=java]
+public Object[] getArgs();
+public void setArgs(Object[] args);
+public Object getReturnValue();
+public void setReturnValue(Object returnValue);
+\end{lstlisting}
 
-\todo{changes to the Tool class - method exit, entry}
-{\color{blue}\lipsum[2-3]}
+Arguments and return values which are reference values (class instances or
+arrays) can be stored directly in the \texttt{Object} data type. Primitive
+values (such as \texttt{int} or \texttt{float}) cannot be stored in
+\texttt{Object} directly, they must be wrapped in a class instance. Each
+primitive type has a corresponding object wrapper class, for example
+\texttt{int} is wrapped in the \texttt{java.lang.Integer} class. The
+\texttt{getArgs()} method should return an array of size 0 for a method that
+takes no arguments and it should return \texttt{null} when the arguments are not
+available, for example when the argument instrumentation is turned off. The
+\texttt{getReturnValue()} should return \texttt{null} when the value is not
+available (for example on method entry), when the method throws an exception, or
+when the method returns \texttt{void}.
 
 For dynamic analysis of contracts for concurrency, only a subset of all events
 is required. The RoadRunner framework should be configured or modified to
@@ -1184,6 +1202,9 @@ parameter values, and vector clocks of the instance that has just ended. This
 ensures that when a new instance with the same parameter values is detected, it
 will have access to the previously detected instance.
 
+\todo{comparing parameters - equals or == ?}
+{\color{blue}\lipsum[2]}
+
 \todo{synchronization of the tool itself}
 
 \section{Testability}
@@ -1213,8 +1234,95 @@ analyzer a custom event stream without the need for the RoadRunner framework.
 {\color{blue}\lipsum[1-2]}
 
 \section{Changes in Instrumentation}
-\todo{TODO}
-{\color{blue}\lipsum[1-3]}
+RoadRunner was modified to obtain method arguments and return values during the
+analysis. The implementation is based on changes described in \cite{janousek},
+the final version however fixes several major issues. The initial implementation
+adds new fields to the \texttt{MethodEvent} class which holds information about
+a method invocation. These changes were taken without changes from
+\cite{janousek}.
+
+The main logic is contained in class \todo{break it}
+\texttt{rr.instrument.classes.SyncAndMethodThunkInserter}, in method
+\texttt{createMethodThunk}. The method creates a new method that will generate
+enter and exit events and call the original method. At the beginning, the values
+of method parameters needs to be stored, at the end, return value must be
+stored. The initial implementation described in \cite{janousek} contained
+several issues. Static methods could not be instrumented because of incorrect
+indexing of the local variables. Methods with parameters of type \texttt{double}
+or \texttt{long} could not be instrumented, because the implementation was not
+taking into account that these values require two local variables. These issues
+have been fixed and an extensive test suite was created to verify the final
+implementation.
+
+Each method is instrumented as follows. A new array of type \texttt{Object} is
+allocated with size equal to the number of parameters (taken from the method
+descriptor). Then for each parameter, its value is loaded onto the operand
+stack. Reference values are stored directly in the array. Primitive values are
+wrapped in an object by calling the \texttt{valueOf()} method in the
+corresponding class depending on the primitive type. For example, \texttt{int}
+values are passed to the \texttt{java.lang.Integer.valueOf()} function. After
+processing all arguments, the array is stored in a local variable.
+
+The original method is then called in a try-catch block. On normal exit, the
+return value is converted to an object, the same way parameters are converted.
+Then a method exit event is generated, containing both the array of arguments
+and the return value. If an exception is caught, the return value is set to
+\texttt{null} and an exit event is generated containing the arguments.
+
+\begin{figure}[hbt]
+    \label{paramInst}
+    \begin{lstlisting}
+public int foo(int, java.lang.String);
+ 0: invokestatic  #20   // Method rr/state/ShadowThread
+                        // .getCurrentShadowThread:()Lrr/state/ShadowThread;
+ 3: astore        5
+ 5: aload_0
+ 6: sipush        508
+ 9: aload         5
+11: invokestatic  #27   // Method rr/tool/RREventGenerator
+                        // .enter:(Ljava/lang/Object;ILrr/state/ShadowThread;)V
+14: iconst_2
+15: anewarray     #3    // class java/lang/Object
+18: astore_3
+19: aload_3
+20: iconst_0
+21: iload_1
+22: invokestatic  #33   // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+25: aastore
+26: aload_3
+27: iconst_1
+28: aload_2
+29: aastore
+30: aload_0
+31: iload_1
+32: aload_2
+33: invokespecial #35   // Method __$rr_foo__$rr__Original_:(ILjava/lang/String;)I
+36: dup
+37: invokestatic  #33   // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+40: astore        4
+42: aload         5
+44: aload_3
+45: aload         4
+47: invokestatic  #39   // Method rr/tool/RREventGenerator.exit:
+                // (Lrr/state/ShadowThread;[Ljava/lang/Object;Ljava/lang/Object;)V
+50: goto          61
+53: aload         5
+55: aload_3
+56: aconst_null
+57: invokestatic  #39   // Method rr/tool/RREventGenerator.exit:
+                // (Lrr/state/ShadowThread;[Ljava/lang/Object;Ljava/lang/Object;)V
+60: athrow
+61: ireturn\end{lstlisting}
+    \caption{Method instrumented to obtain arguments and the return value. On
+    lines 5 to 11, the enter event is generated. On lines 14 to 18, an array for
+    arguments is created and stored in a local variable. On lines 19 to 25, the
+    first argument is wrapped in a object and stored in the array on index 0. On
+    lines 26 to 29, the second argument is stored directly in the array on index
+    1. On lines 30 to 33, the original method is called. On lines 36 to 40, the
+    return value is wrapped and stored in a local variable. Lines 42 to 50
+    generate the exit event. Lines 53 to 60 contain a catch block in case an
+    exception is thrown in the original function.}
+\end{figure}
 
 \section{Testing}
 \todo{TODO}
