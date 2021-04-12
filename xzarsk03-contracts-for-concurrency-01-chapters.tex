@@ -842,7 +842,7 @@ into account are marked with free meta-variable (denoted with an underscore).
 \emph{Example.} The example from section \ref{basicContracts} can be extended
 with parameters:
 \begin{align*}
-    (\varrho_1) &\ \texttt{put(X) \_ = get(X)}\\
+    (\varrho_1) &\ \texttt{put(X,\_) \_ = get(X)}\\
     (\varrho_2) &\ \texttt{\_ = contains(X) ( put(X,\_) | \_ = get(X) |
     remove(X) )}
 \end{align*}
@@ -851,7 +851,7 @@ The basic definition of contracts contains one implicit parameter, the object
 that the method was called upon (\texttt{this} in Java) \cite{FITPUB10817}. To
 better illustrate this, the example can be rewritten as:
 \begin{align*}
-    (\varrho_1) &\ \texttt{X.put(Y) \_ = X.get(Y)}\\
+    (\varrho_1) &\ \texttt{X.put(Y,\_) \_ = X.get(Y)}\\
     (\varrho_2) &\ \texttt{\_ = X.contains(Y) ( X.put(Y,\_) | \_ = X.get(Y) |
     X.remove(Y) )}
 \end{align*}
@@ -903,7 +903,7 @@ match target arguments.
 \emph{Example.} Examples from sections \ref{parametricContracts} and
 \ref{contractsWithSpoilers} combined together:
 \begin{align*}
-    (\varrho_1) &\ \texttt{X.put(Y) \_ = X.get(Y)} \leftsquigarrow
+    (\varrho_1) &\ \texttt{X.put(Y,\_) \_ = X.get(Y)} \leftsquigarrow
     \texttt{X.put(Y,\_)|X.remove(Y)}\\
     (\varrho_2) &\ \texttt{\_ = X.contains(Y) ( X.put(Y,\_) | \_ = X.get(Y) |
     X.remove(Y) )}\\
@@ -1074,26 +1074,66 @@ After calling method \texttt{a()}, the trace recorded by the analyzer will be
 \todo{discussion about invalidating instances}
 {\color{blue}\lipsum[1]}
 
+\todo{why is kleene star not allowed}
+{\color{blue}\lipsum[2]}
+
 \section{Contract Representation}
 
 The analyzer takes a contract definition as a parameter. At the top level, the
-definition will contain target spoiler pairs. Each target and spoiler will be
-represented by a regular expression over methods. Each method will be
-parametrized, including arguments, return value, and the object it is called
-upon (\texttt{this}).
+definition contains pairs of targets and spoilers. Each target and spoiler is
+represented by a regular expression over methods. Each method is parametrized,
+including arguments, return value, and the object it is called upon
+(\texttt{this}).
 
-Method in contracts must be specified unambiguously. Method names must be fully
-qualified (for example \texttt{java.lang.Object.toString}). Java allows method
-overloading, so the contract definition should allow for distinguishing methods
-based on the number and type of their parameters. It should be possible to
-include a constructor in a contract.
+To specify methods unambiguously, method names are fully qualified (for example
+\texttt{java/lang/Object.toString}). Java allows method overloading, so to
+distinguish methods with the same name but different number and type of their
+parameters, the contract definition contains the method descriptor (for example
+\texttt{(Ljava/lang/Object;)V}. \todo{It should be possible to include a
+constructor in a contract.} Each method in a contract definition consists of the
+enclosing class, the method name, the method descriptor, and a list of
+meta-variables. For example:
 
-\todo{grammar for contract configuration files}
+\begin{lstlisting}
+test/sanity/ArrayList.indexOf(Ljava/lang/Object;)I (X,Y,_)
+\end{lstlisting}
+
+This represents the \texttt{indexOf} method called on an \texttt{ArrayList} from
+the \texttt{test.sanity} package. The first meta-variable \texttt{X} refers to
+the \texttt{ArrayList} instance, the second one, |texttt{Y}, refers to the
+method parameter, and the last one, denoted by an underscore, refers to the
+return value.
+
+Targets and spoilers are defined using a limited regular expression over
+methods. Concatenation is achieved simply by writing two methods, one after
+another, alternation is denoted by a vertical bar (\texttt{|}). The Kleene star
+operator (\texttt{*}) is not allowed. An example of a target definition:
+
+\begin{lstlisting}
+Test.a()V (X) ( Test.b()V (X) | Test.c()V (X) )
+\end{lstlisting}
+
+A contract clause is defined as two regular expressions over methods, separated
+by an arrow and a semicolon at the end. A contract is then a list of clauses. An
+example of a full contract is shown in Figure \ref{contract}.
+
+\begin{figure}[hbt]
+    \label{contract}
+    \begin{lstlisting}
+Map.put(ID)V (M,K,_,_) Map.get(I)D (M,K,_)
+    <- Map.put(ID)V (M,K,_,_) | Map.remove(I)D (M,K,\_) ;
+
+Map.contains(D)Z (M,V,\_)
+  ( Map.put(ID)V (M,K,_,_) | Map.get(I)D (M,K,_) | Map.remove(I)D (M,K,\_) )
+  <- Map.put(ID)V (M,K,_,_) | Map.remove(I)D (M,K,\_) ;
+\end{lstlisting}
+    \caption{Contract from Chapter \ref{chThree} written for a Map with
+    \texttt{int} keys and \texttt{double} values. \todo{}}
+\end{figure}
+
+
+\todo{grammar for contract configuration files (as an appendix?)}
 {\color{blue}\lipsum[1-3]}
-
-Internally, each target and spoiler will be converted from a regular expression
-to a finite automaton, represented by the \texttt{FiniteAutomaton} class, where
-each transition contains a method definition and parameters.
 
 \section{Changes to Instrumentation Performed by RoadRunner}
 
