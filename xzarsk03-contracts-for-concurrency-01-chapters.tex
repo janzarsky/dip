@@ -805,7 +805,7 @@ validation of contracts for concurrency is presented.
 A \emph{contract} is formally defined in \cite{FITPUB10817} as follows. Let
 $\Sigma_\mathbb{M}$ be a set of all public method names (the API) of a module or
 a library. A \emph{contract} is a set $\mathbb{R}$ of \emph{clauses}. Each
-clause $\varrho \in \mathbb{R}$ is a star-free regular expression over
+clause $\varrho \in \mathbb{R}$ is a regular expression over
 $\Sigma_\mathbb{M}$. A contract violation occurs when any of the sequences in a
 contract is interleaved with an execution of a method from $\Sigma_\mathbb{M}$
 over the same object.
@@ -1041,17 +1041,116 @@ to support obtaining method arguments and return values. \todo{was it though?}
 For performance reasons, the RoadRunner framework should also be modified to
 instrument only relevant actions of the program under analysis.
 
-\section{Restricting Parametric Contracts}
+\section{Constraining Analyzer Capabilities}
 
-The analyzer works with parametric contracts with spoilers (see Chapter
-\ref{chThree}). For performance reasons, the analyzer validates only a
-restricted variant of contracts. It is required that the value of all parameters
-in target or spoiler sequences must be determined by the first method in the
-sequence. For example, method sequence \texttt{a(X,Y) b(Y,Z)} is illegal,
-because after the call to method \texttt{a}, the value of parameter \texttt{Z}
-is still unknown. Free meta-variables (\texttt{\_}) do not have to be
-determined. For example, the sequence \texttt{a(X,Y) b(\_) c(Y)} is valid. This
-restriction will limit the number of instances in the trace window.
+The analyzer is designed with several restrictions based on the previous work,
+such as \cite{janousek} or \cite{FITPUB10817}, to improve its performance.
+First, a restriction is placed on the parameters in contract definitions with
+the aim of reducing the number of instances in a trace window. Then the
+conditions for removing an instances from the trace window are discussed and a
+related contract restriction is introduced.  Finally, it is described how nested
+method calls should be handled.
+
+\subsection{Avoiding Cloning of Target and Spoiler Instances}
+
+The method for analyzing contracts described in \cite{janousek} produces
+enormous number of instances being tracked at the same time. The large number of
+instances is caused by the necessity to clone target and spoiler instances
+before they are advanced. Consider the following target: \texttt{a(X) b(Y)
+c(X,Y)} and the following program trace: \texttt{a(1) b(2) b(3) c(1,3)}.  When
+\texttt{a(1)} enters the trace window, a new instance is created and the value
+of \texttt{X} is set to 1. But when processing \texttt{b(2)}, the analyzer
+cannot reliably decide whether the method call belongs to the instance or not
+(there might be \texttt{c(1,2)} later in the trace). The only option is keep the
+instance and create a duplicate which is advanced (while setting \texttt{Y} to
+2).
+
+To prevent duplication of instances, the following restriction was put on the
+contract definition. All target and spoiler parameters must be assigned in the
+first call of given target or spoiler. This ensures that there is no ambiguity
+in deciding whether a given method call advances an instance or not. For
+example, the target from the previous example is invalid because after the first
+method call, the value of \texttt{Y} remains unknown.
+
+\subsection{Invalidating Instances}
+
+A target or spoiler instance, as defined in Chapter \ref{chThree}, requires that
+no method belonging to the alphabet of a given target or spoiler may be called
+between the events that form the instance. In practice, it means that a running
+instance must be discarded when a method belonging to the target or spoiler is
+called. For example, consider target \texttt{abc} and the following program
+trace: \texttt{aa}. After the first \texttt{a}, a new instance is created. After
+accepting the second \texttt{a}, the instance must be discarded.
+
+When tracking parametric contracts, instances cannot be easily discarded.
+Consider a running instance of a target (or a spoiler), all of its parameters
+are assigned a value. When a method is called that belongs to the alphabet of
+the instance's target, three kinds of situations can happen:
+\begin{enumerate}
+    \item The method matches the target definition and method arguments match
+        the values of instance parameters. The instance is advanced with the
+        method.
+    \item The method matches the target definition but method arguments conflict
+        with the values assigned to the instance. The instance cannot be
+        advanced but it also should not be discarded. The method call most
+        likely belongs to another instance.
+    \item The method does not match the target definition. According to the
+        definition in Chapter \ref{chThree}, the instance should be discarded.
+        But the analyzer does not know if the method call is in any way related
+        to the instance.
+\end{enumerate}
+
+The second situation can be illustrated on the following example. Consider
+target \texttt{a(X) b(X)} and a program trace \texttt{a(1) b(2) b(1)}. After
+\texttt{a(1)}, an instance is created with \texttt{X} set to 1. When
+\texttt{b(2)} is called, the value of \texttt{X} conflicts with the value
+stored in the instance. However, the instance should not be discarded as we can
+see that a matching call exists later in the trace.
+
+An example of the third situation. Consider target \texttt{a(X) b(X)} and a
+program trace \texttt{a(1) a(2) b(1) b(2)}. Intuitively, there should be two
+instances detected, one with \texttt{X} set to 1, and one with \texttt{X} set to
+2. After \texttt{a(1)}, the first instance with \texttt{X=1} is created. When
+\texttt{a(2)} is accepted, the instance cannot be discarded even though it
+belongs to the alphabet of the target.
+
+The problems described above mean that the analyzer will never discard already
+running instance, the only option is to advance it. Another option is to modify
+the behavior in the third situation so that the analyzer will try to guess
+whether a method call belongs to the current instance or not. With simple
+contracts, the decision can be easy. Consider the target from the previous
+paragraph: \texttt{a(X) b(X)}. In this case, every time a method \texttt{b()} is
+called, the analyzer can decide whether it belongs to currently tracked instance
+or not based on the value of \texttt{X}. The decision is less clear when a
+target contains the same method multiple times with different parameters. For
+example, consider target \texttt{a(X,Y) b(X) b(Y)} and a program trace
+containing two interleaved instances with different parameters: \texttt{a(1,2)
+a(2,3) b(2) b(1) b(2) b(3)}. After \texttt{a(1,2)}, a new instance is created
+with \texttt{X=1} and \texttt{Y=2}. After \texttt{a(2,3)}, another instance is
+created with \texttt{X=2} and \texttt{Y=3}. When \texttt{b(2)} is encountered,
+the second instance is advanced, because it matches the target. The analyzer may
+however discard the first instance, because \texttt{b(2)} is contained in the
+target as \texttt{b(Y)}, but the expected method was \texttt{b(X)}. It is not
+clear, what the proper behavior should be. The analyzer should therefore never
+discard running instances.
+
+\subsection{Kleene Star in Contract Definition}
+
+The analyzer never invalidates a running instance. This fact allows for an
+optimization in contract definitions. As defined in Chapter \ref{chThree}, a
+target or a spoiler is a regular expression over methods. The analyzer should
+therefore recognize contracts defined using all three basic operations:
+concatenation (\texttt{ab}), alternation (\texttt{a|b}), and Kleene star
+(\texttt{a*}). Due to the fact, that no method call can invalidate a running
+instance, the Kleene star operation is not needed. All parts of an expression
+that are also operands of a Kleene star operation can be removed with no impact
+on the analysis. For example, a regular expression \texttt{ab*c} can be replaced
+with \texttt{ac}. Calls to method \texttt{b} will be simply ignored. These
+simplified regular expressions, when converted to a finite automaton, do not
+create any loops. This allows for simpler structures in the implementation of
+the analyzer.
+
+\subsection{Nested Method Calls}
 
 The method described in \cite{contracts} is based on program traces where
 every method represents a single event in the trace. However, the RoadRunner
@@ -1070,12 +1169,6 @@ public void b() { ... }
 
 After calling method \texttt{a()}, the trace recorded by the analyzer will be
 \texttt{b() a()} instead of more intuitive \texttt{a() b()}.
-
-\todo{discussion about invalidating instances}
-{\color{blue}\lipsum[1]}
-
-\todo{why is kleene star not allowed}
-{\color{blue}\lipsum[2]}
 
 \section{Contract Representation}
 
