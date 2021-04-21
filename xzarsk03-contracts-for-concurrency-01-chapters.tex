@@ -1369,8 +1369,23 @@ analyzer a custom event stream without the need for the RoadRunner framework.
 {\color{blue}\lipsum[2]}
 
 \section{ASM 7.0 and Java 11}
-\todo{TODO}
-{\color{blue}\lipsum[2-3]}
+The analyzer was built on RoadRunner version 0.5 from 2017. It contains the
+following dependencies: the ASM framework in version 5.0.2 with custom
+modifications, JFlex in version 1.4.2, and CUP in version 11a. The project was
+written for Java 8 and was built using Ant. For easier implementation of the
+analyzer several components were upgraded.
+
+The ASM framework was upgraded to version 7.0 which supports Java 11. RoadRunner
+can therefore analyze programs compiled for Java 11. Before the upgrade took
+place, the custom modifications of the ASM framework were isolated to a series
+of patches against the unmodified ASM version 5.0.2. Then, for each new version
+up to 7.0, the ASM was always replaced with a newer version and the custom
+patches were reapplied and modified if necessary. As a result, the ASM framework
+can be easily upgraded in the future by reapplying the custom patch series. The
+RoadRunner itself was modified in order to be built for Java 11.
+
+\todo{more details?}
+{\color{blue}\lipsum[3]}
 
 \section{General Approaches}
 \todo{usage of vavr.io}
