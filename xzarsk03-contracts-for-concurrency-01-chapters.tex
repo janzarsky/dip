@@ -1388,8 +1388,60 @@ RoadRunner itself was modified in order to be built for Java 11.
 {\color{blue}\lipsum[3]}
 
 \section{General Approaches}
-\todo{usage of vavr.io}
-{\color{blue}\lipsum[1]}
+The implementation of the analyzer was guided by several principles or
+approaches that are described in this section.
+
+\subsection{Immutable Data Structures}
+
+The data structures used by the analyzer are \emph{immutable}. Immutable object
+is an object whose internal state remains constant after it has been created.
+This property brings several benefits. The object can be shared among multiple
+threads without the need for synchronization. Immutable objects are always in a
+consistent state. The public methods of a given class will always behave the
+same way on an object. Immutable objects are also easy to test and reason about.
+
+In Java, immutability is achieved by following rules. Immutable classes should
+be \texttt{final} to avoid overriding of methods. All fields of a class
+should be \texttt{private} and \texttt{final}. All fields should reference only
+immutable objects or, if not possible, the fields should not be modified in the
+class. All methods that would normally modify the object should return new
+updated object instead. See Figure \ref{immutable} for an example.
+
+\begin{figure}[hbt]
+    \label{immutable}
+    \begin{lstlisting}[language=java]
+public final class FiniteAutomaton {
+    private final State start;
+    private final State current;
+
+    public FiniteAutomaton(State start) { this(start, start); }
+
+    private FiniteAutomaton(State start, State current) {
+        this.start = start;
+        this.current = current;
+    }
+
+    public FiniteAutomaton advance(Signature sig, Args args) {
+        return new FiniteAutomaton(start, current.advance(sig, args));
+    }
+
+    public FiniteAutomaton reset() {
+        return new FiniteAutomaton(start, start);
+    }
+
+    public boolean isRunning() { return current != start; }
+}
+\end{lstlisting}
+    \caption{Simplified implementation of an immutable finite automaton. The
+    automaton consists of references to the starting state and to the current
+    state. The public constructor allows creating automatons that are in their
+    starting states, ensuring consistency. The advance method does not update
+    the current state but creates a new finite automaton with updated current
+    state.}
+\end{figure}
+
+In order to use immutable objects effectively, the Vavr collection library was
+used. It provides immutable replacements for standard Java collections.
 
 \section{Contract File Parsing}
 One of the inputs to the analyzer is a contract definition. The syntax of the
