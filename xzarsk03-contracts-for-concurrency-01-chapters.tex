@@ -1170,7 +1170,94 @@ public void b() { ... }
 After calling method \texttt{a()}, the trace recorded by the analyzer will be
 \texttt{b() a()} instead of more intuitive \texttt{a() b()}.
 
-\section{Contract Definition Syntax}
+\section{Changes to Instrumentation Performed by RoadRunner}
+
+The RoadRunner framework does not expose the method arguments or the return
+value through its API. The \texttt{enter} and \texttt{exit} methods both take a
+\texttt{MethodEvent} parameter containing the following information:
+\begin{itemize}
+    \item Target -- \texttt{null} for static methods, the value of \texttt{this}
+        for instance methods.
+    \item A \texttt{MethodInfo} object -- static information about the method
+        definition (name, descriptor, whether it is synchronized or static).
+    \item Call site location -- where was the method invoked.
+\end{itemize}
+
+The \texttt{MethodEvent} class was extended for storing method arguments and the
+return value. The following methods were added:
+
+\begin{lstlisting}[language=java]
+public Object[] getArgs();
+public void setArgs(Object[] args);
+public Object getReturnValue();
+public void setReturnValue(Object returnValue);
+\end{lstlisting}
+
+Arguments and return values which are reference values (class instances or
+arrays) can be stored directly in the \texttt{Object} data type. Primitive
+values (such as \texttt{int} or \texttt{float}) cannot be stored in
+\texttt{Object} directly, they must be wrapped in a class instance. Each
+primitive type has a corresponding object wrapper class, for example
+\texttt{int} is wrapped in the \texttt{java.lang.Integer} class. The
+\texttt{getArgs()} method should return an array of size 0 for a method that
+takes no arguments and it should return \texttt{null} when the arguments are not
+available, for example when the argument instrumentation is turned off. The
+\texttt{getReturnValue()} should return \texttt{null} when the value is not
+available (for example on method entry), when the method throws an exception, or
+when the method returns \texttt{void}.
+
+\subsection{Parameter Matching}
+When trying to advance a running instance, method arguments must be checked, if
+they match the previously assigned parameters. For reference types, the equality
+operator (\texttt{==}) is used which compares the addresses of both objects. For
+primitive values that are wrapped in an object, the \texttt{equals()} method
+must be used. As a result, the analyzer will always compare instances of wrapper
+classes (such as \texttt{Integer}) by calling the \texttt{equals()} method, even
+if the instance was created by the program under analysis. This may or may not
+be the intended behavior and the user of the analyzer should be aware of this.
+
+\subsection{Instrumenting Only Contract Methods}
+\todo{For dynamic analysis of contracts for concurrency, only a subset of all
+events is required. The RoadRunner framework should be configured or modified to
+instrument only the necessary actions of the program under analysis. Event types
+that are not used at all, such as memory accesses, should not be instrumented.
+Method entries and exits should be instrumented only in case the method is part
+of a contract.}
+
+\section{Overview of the Contract Analyzer}
+
+This section provides a high-level overview of the contract analyzer. The
+\texttt{ContractAnalyzer} class is the core of the analyzer. It receives events
+from the program under analysis, detects target and spoiler instances, and looks
+for contract violations. It manages data stored with threads and locks, such as
+trace windows and vector clocks. The \texttt{ContractAnalyzer} class can be
+instantiated without any dependencies from the RoadRunner project, which is
+useful for testing purposes. Detailed description of \texttt{ContractAnalyzer}
+can be found in Section \ref{contractAnalyzer}.
+
+The \texttt{ContractTool} class is a subclass of RoadRunner's \texttt{Tool}
+class. During the initialization of \texttt{ContractTool}, the contract
+definition file is parsed and \texttt{ContractAnalyzer} is created. In
+\texttt{ContractTool}, relevant methods are overridden to receive events from
+RoadRunner, such as lock acquire and release or method exit. These events are
+then processed and sent to \texttt{ContractAnalyzer}. Section \ref{contractTool}
+provides a detailed description of \texttt{ContractTool} and Section
+\ref{contracts} describes parsing and representation of contracts.
+
+For each thread, a \texttt{Window} instance is created by
+\texttt{ContractAnalyzer}. It stores information about target and spoiler
+instances in a trace window. On method exit, existing instances are advanced,
+new instances are started, and for all finished instances, contract violations
+are checked.
+
+\section{Contracts}
+\label{contracts}
+\todo{rename}
+
+\todo{section overview}
+{\color{blue}\lipsum[2]}
+
+\subsection{Contract Definition Syntax}
 
 The analyzer takes a contract definition as a parameter. At the top level, the
 definition contains pairs of targets and spoilers. Each target and spoiler is
@@ -1231,92 +1318,6 @@ Map.contains(I)Z M(K)
     replacing the value or by removing it.}
 \end{figure}
 
-\section{Changes to Instrumentation Performed by RoadRunner}
-
-The RoadRunner framework does not expose the method arguments or the return
-value through its API. The \texttt{enter} and \texttt{exit} methods both take a
-\texttt{MethodEvent} parameter containing the following information:
-\begin{itemize}
-    \item Target -- \texttt{null} for static methods, the value of \texttt{this}
-        for instance methods.
-    \item A \texttt{MethodInfo} object -- static information about the method
-        definition (name, descriptor, whether it is synchronized or static).
-    \item Call site location -- where was the method invoked.
-\end{itemize}
-
-The \texttt{MethodEvent} class was extended for storing method arguments and the
-return value. The following methods were added:
-
-\begin{lstlisting}[language=java]
-public Object[] getArgs();
-public void setArgs(Object[] args);
-public Object getReturnValue();
-public void setReturnValue(Object returnValue);
-\end{lstlisting}
-
-Arguments and return values which are reference values (class instances or
-arrays) can be stored directly in the \texttt{Object} data type. Primitive
-values (such as \texttt{int} or \texttt{float}) cannot be stored in
-\texttt{Object} directly, they must be wrapped in a class instance. Each
-primitive type has a corresponding object wrapper class, for example
-\texttt{int} is wrapped in the \texttt{java.lang.Integer} class. The
-\texttt{getArgs()} method should return an array of size 0 for a method that
-takes no arguments and it should return \texttt{null} when the arguments are not
-available, for example when the argument instrumentation is turned off. The
-\texttt{getReturnValue()} should return \texttt{null} when the value is not
-available (for example on method entry), when the method throws an exception, or
-when the method returns \texttt{void}.
-
-\subsection{Parameter Matching}
-When trying to advance a running instance, method arguments must be checked, if
-they match the previously assigned parameters. For reference types, the equality
-operator (\texttt{==}) is used which compares the addresses of both objects. For
-primitive values that are wrapped in an object, the \texttt{equals()} method
-must be used. As a result, the analyzer will always compare instances of wrapper
-classes (such as \texttt{Integer}) by calling the \texttt{equals()} method, even
-if the instance was created by the program under analysis. This may or may not
-be the intended behavior and the user of the analyzer should be aware of this.
-
-\subsection{Instrumenting Only Contract Methods}
-\todo{For dynamic analysis of contracts for concurrency, only a subset of all
-events is required. The RoadRunner framework should be configured or modified to
-instrument only the necessary actions of the program under analysis. Event types
-that are not used at all, such as memory accesses, should not be instrumented.
-Method entries and exits should be instrumented only in case the method is part
-of a contract.}
-
-\section{A Contract Validator Tool}
-
-The contract analyzer is implemented as a subclass of the \texttt{Tool} class.
-The following methods are overridden:
-\begin{itemize}
-    \item \texttt{exit()}, for detecting spoiler and target instances;
-    \item \texttt{acquire()} and \texttt{release()}, for detecting
-        synchronization between threads;
-    \item \texttt{create()}, for creating shadow data for the new thread;
-    \item \texttt{preStart()} and \texttt{postJoin()}, for thread
-        synchronization.
-\end{itemize}
-
-Methods for detecting memory accesses will not be used by the analyzer, and also
-no data will be stored in shadow memory locations.
-
-For each thread, a \texttt{ShadowThread} object will be created that will store
-a \emph{vector clock} for the thread, and information about target and spoiler
-instances. For each lock, a \texttt{ShadowLock} object will be created that will
-store a vector clock for the lock.
-
-The vector clocks associated with threads and locks will be updated on actions,
-that impose a happens-before order of operations between threads. Forking or
-joining thread will update both threads' vector clocks. When a thread acquires a
-lock, the thread's vector clock is updated. When a lock is released, its vector
-clock is updated. The sole purpose of \texttt{acquire()}, \texttt{release()},
-\texttt{create()}, \texttt{preStart()}, and \texttt{postJoin()} methods is to
-update various vector clocks.
-
-Methods \texttt{exit()} will track target and spoiler instances in a thread, and
-detect contract violations.
-
 \subsection{Contract Representation}
 All parts of a contract definition are parsed into a corresponding class
 instance. Each method in a target or spoiler is represented by a
@@ -1351,6 +1352,10 @@ a set of all method signatures used in the contract is extracted. During the
 analysis, the set of signatures is used to filter method invocations so that
 only relevant methods are processed by the analyzer.
 
+\section{Contract Analyzer}
+\label{contractAnalyzer}
+The main class, \texttt{ContractAnalyzer}
+
 \subsection{Tracking of Target and Spoiler Instances}
 
 \todo{FiniteAutomaton, Instance, InstanceCollection, Window}
@@ -1374,7 +1379,7 @@ running instance can be advanced, the analyzer must check if the method
 arguments match those stored in the instance.}
 {\color{blue}\lipsum[2]}
 
-\subsection{Contract Validation}
+\subsection{Detection of Contract Violation}
 
 \todo{On method exit, for all target instances that were just fully accepted, it
 is checked if there is a spoiler instance in other windows that can violate this
@@ -1392,6 +1397,41 @@ will have access to the previously detected instance.}
 {\color{blue}\lipsum[2]}
 
 \todo{synchronization of the tool itself}
+
+\section{A Contract Validator Tool}
+\label{contractTool}
+
+The contract analyzer is implemented as a subclass of the \texttt{Tool} class.
+The following methods are overridden:
+\begin{itemize}
+    \item \texttt{exit()}, for detecting spoiler and target instances and for
+        checking contract violations;
+    \item \texttt{create()}, for creating shadow data for a new thread;
+    \item \texttt{acquire()} and \texttt{release()}, for detecting
+        synchronization between threads caused by a synchronized method or a
+        synchronized statement;
+    \item \texttt{preStart()} and \texttt{postJoin()}, for detecting thread
+        synchronization caused by the fork or join operation.
+\end{itemize}
+
+Methods for detecting memory accesses will not be used by the analyzer, and also
+no data will be stored in shadow memory locations.
+
+For each thread, a \texttt{ShadowThread} object will be created that will store
+a \emph{vector clock} for the thread, and information about target and spoiler
+instances. For each lock, a \texttt{ShadowLock} object will be created that will
+store a vector clock for the lock.
+
+The vector clocks associated with threads and locks will be updated on actions,
+that impose a happens-before order of operations between threads. Forking or
+joining thread will update both threads' vector clocks. When a thread acquires a
+lock, the thread's vector clock is updated. When a lock is released, its vector
+clock is updated. The sole purpose of \texttt{acquire()}, \texttt{release()},
+\texttt{create()}, \texttt{preStart()}, and \texttt{postJoin()} methods is to
+update various vector clocks.
+
+Methods \texttt{exit()} will track target and spoiler instances in a thread, and
+detect contract violations.
 
 \section{Testability}
 
