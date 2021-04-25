@@ -561,6 +561,7 @@ one or more \texttt{ClassVisitor} instances modify the class, and then a
 \texttt{ClassWriter} instance writes the modified class back to a file.
 
 \section{Dynamic Analysis using RoadRunner}
+\label{roadRunnerUsage}
 
 The RoadRunner framework is used for the dynamic analysis of concurrent programs
 written in Java. RoadRunner instruments programs to obtain a stream of events
@@ -1250,12 +1251,12 @@ instances in a trace window. On method exit, existing instances are advanced,
 new instances are started, and for all finished instances, contract violations
 are checked.
 
-\section{Contracts}
+\section{Contracts Definition and Parsing}
 \label{contracts}
-\todo{rename}
 
-\todo{section overview}
-{\color{blue}\lipsum[2]}
+Before the start of the analysis, a contract must be specified. This section
+describes the syntax of a contract configuration file, how it is parsed, and how
+it is represented in the analyzer.
 
 \subsection{Contract Definition Syntax}
 
@@ -1354,7 +1355,35 @@ only relevant methods are processed by the analyzer.
 
 \section{Contract Analyzer}
 \label{contractAnalyzer}
-The main class, \texttt{ContractAnalyzer}
+The main class, \texttt{ContractAnalyzer} receives events from the program under
+analysis, detects target and spoiler instances in all threads, and looks for
+contract violations when a target or spoiler instance finishes. The
+\texttt{ContractAnalyzer} class provides the following interface:
+\begin{itemize}
+    \item A constructor that takes a \texttt{Contract} instance.
+    \item \texttt{exit} method that is called on method exit. It takes a thread
+        identifier, a method signature, and method arguments (also containing
+        the return value). When a contract violation is detected, the
+        \texttt{exit} method will throw an exception.
+    \item \texttt{acquire} and \texttt{release} methods that are called when a
+        synchronized block or a synchronized method is entered and exited. The
+        methods both take a thread identifier and a lock identifier.
+    \item \texttt{create} method that is called when a new thread is created. It
+        takes a thread identifier.
+    \item \texttt{fork} and \texttt{join} methods that take two thread
+        identifiers.
+\end{itemize}
+
+The \texttt{ContractAnalyzer} class manages data stored with threads and locks.
+When created by calling \texttt{create}, each thread will get a trace window and
+a vector clock. Methods \texttt{acquire}, \texttt{release}, \texttt{fork}, and
+\texttt{join} only modify vector clocks of threads and locks.
+
+The \texttt{exit} method calls the trace window associated with a given thread.
+The trace window receives method signature and arguments so that it can try to
+advance all of its target and spoiler instances. It also receives the current
+vector clock and references to trace windows of other threads so that it can
+look for contract violations.
 
 \subsection{Tracking of Target and Spoiler Instances}
 
@@ -1401,37 +1430,51 @@ will have access to the previously detected instance.}
 \section{A Contract Validator Tool}
 \label{contractTool}
 
-The contract analyzer is implemented as a subclass of the \texttt{Tool} class.
-The following methods are overridden:
+The \texttt{ContractAnalyzer} class described in Section \ref{contractAnalyzer}
+is not meant to be called directly by RoadRunner because it contains only
+methods specific to the validation of contracts. The \texttt{ContractTool} class
+was created as a layer between RoadRunner and \texttt{ContractAnalyzer}. Its
+purpose is to load a contract from a file, create a \texttt{ContractAnalyzer}
+instance, and forward relevant events from RoadRunner to
+\texttt{ContractAnalyzer}.
+
+The \texttt{ContractTool} class is a subclass of the \texttt{Tool} class (see
+Section \ref{roadRunnerUsage}). The following methods are overridden:
 \begin{itemize}
-    \item \texttt{exit()}, for detecting spoiler and target instances and for
-        checking contract violations;
-    \item \texttt{create()}, for creating shadow data for a new thread;
-    \item \texttt{acquire()} and \texttt{release()}, for detecting
-        synchronization between threads caused by a synchronized method or a
-        synchronized statement;
-    \item \texttt{preStart()} and \texttt{postJoin()}, for detecting thread
-        synchronization caused by the fork or join operation.
+    \item \texttt{init}, which is called before the analysis, after
+        command-line options are processed;
+    \item \texttt{exit}, which is called when a method exits;
+    \item \texttt{create}, which is called when a new thread is created;
+    \item \texttt{acquire} and \texttt{release()}, which is called when a
+        synchronized method or synchronized block is entered or exited;
+    \item \texttt{preStart}, which is called before a new thread is started
+        (after a fork operation);
+    \item \texttt{postJoin}, which is called after a thread is joined with
+        another thread.
 \end{itemize}
 
-Methods for detecting memory accesses will not be used by the analyzer, and also
-no data will be stored in shadow memory locations.
+Methods for detecting memory accesses will not be used by the tool, and also no
+data will be stored in shadow memory locations, except for vector clocks stored
+with locks.
 
-For each thread, a \texttt{ShadowThread} object will be created that will store
-a \emph{vector clock} for the thread, and information about target and spoiler
-instances. For each lock, a \texttt{ShadowLock} object will be created that will
-store a vector clock for the lock.
+In its \texttt{init} method, the tool loads a contract definition from a file
+and calls the contract parser. After the contract is parsed, it constructs
+\texttt{ContractAnalyzer}.
 
-The vector clocks associated with threads and locks will be updated on actions,
-that impose a happens-before order of operations between threads. Forking or
-joining thread will update both threads' vector clocks. When a thread acquires a
-lock, the thread's vector clock is updated. When a lock is released, its vector
-clock is updated. The sole purpose of \texttt{acquire()}, \texttt{release()},
-\texttt{create()}, \texttt{preStart()}, and \texttt{postJoin()} methods is to
-update various vector clocks.
+The \texttt{exit} method extracts relevant data from \texttt{MethodEvent} that
+is supplied by RoadRunner. Then it checks, if the method exists in the contract,
+and if it does, \texttt{ContractAnalyzer} is called. The method filtering
+happens in \texttt{ContractTool} and not in \texttt{ContractAnalyzer} because it
+is not essential to the analysis and also, there are several filtering solutions
+available. In this master's thesis, the filtering is done by comparing method
+signatures during the analysis. Better approach, which might be implemented in
+the future, is to instrument only methods contained in a contract. In that case,
+no filtering during analysis is needed as it is guaranteed that each method
+event produced will belong to a method in the contract.
 
-Methods \texttt{exit()} will track target and spoiler instances in a thread, and
-detect contract violations.
+The rest of the methods, \texttt{create}, \texttt{acquire}, \texttt{release},
+\texttt{preStart}, and \texttt{postJoin}, just pick relevant information from
+events provided by RoadRunner and forward it to \texttt{ContractAnalyzer}.
 
 \section{Testability}
 
