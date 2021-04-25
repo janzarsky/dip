@@ -257,7 +257,8 @@ least one of which is write, and these accesses are not ordered by
     \caption{\emph{Happens-before} relations in an incorrectly synchronized
     program (each solid arrow represents a \emph{happens-before} relation).
     There is no \emph{happens-before} relation between conflicting accesses
-    \texttt{a=42} and \texttt{print(a)} (the dashed line), creating a data race.}
+    \texttt{a=42} and \texttt{print(a)} (the dashed line), creating a data
+    race.}
 \end{figure}
 
 
@@ -1389,26 +1390,73 @@ look for contract violations.
 
 \todo{FiniteAutomaton, Instance, InstanceCollection, Window}
 
-\todo{For each thread, a \texttt{Window} object is kept during the analysis. It
-contains a reference to the thread, a vector clock, and information about target
-and spoiler instances present in the trace window. An instance contains a
-reference to the spoiler or target finite automaton, the current state of the
-automaton, and the values of parameters.}
+For each thread, a \texttt{Window} object is kept during the analysis. It
+contains target and spoiler instances present in a trace window. When a method
+invocation is detected in a thread, all target and spoiler instances are
+advanced (if possible) and new instances are started.
 
-\todo{When a window is created, for each target and spoiler, an empty
-\emph{template} instance is added that will be used for detecting new instances
-in the trace window. These instances will remain unchanged during the lifetime
-of the window.}
+An instance is bound to a target or spoiler from the contract definition. The
+instance is created by encountering the first method signature in a target or
+spoiler. The instance is advanced to the next state and waits for the next
+method as defined in given target or spoiler. During the first transition,
+values of all parameters are assigned. There can be multiple instances of the
+same target or spoiler that vary only by the value of their parameters. Each
+instance remembers the vector clock of their beginning.
 
-\todo{On method entry, the analyzer will try to advance all instances in a
-window.  When a template instance can be advanced, it means that a new instance
-is detected. The template instance is copied, the value of parameters is stored
-in the instance, and the instance is advanced to the next state. When an already
-running instance can be advanced, the analyzer must check if the method
-arguments match those stored in the instance.}
-{\color{blue}\lipsum[2]}
+When an instance is advanced using the last method in the target or spoiler
+definition, it reaches an accepting state. At this point, the analyzer checks
+for contract violations (see Section \ref{violations}). Then the instance is
+reset. That means that the instance again waits for the first method signature
+in a given target or spoiler. The value of parameters will however stay
+unchanged. The vector clocks of the beginning and the end of the instance are
+saved. So when an instance is running for the second time, it has access to the
+vector clocks of previously encountered instance. See Figure
+\ref{instanceLifeCycle} for illustration of an instance life cycle.
+
+\begin{figure}[hbt]
+    \begin{center}
+        \label{instanceLifeCycle}
+        \input{figures/instancelifecycle.tex}
+        \input{figures/instancelifecycle2.tex}
+        \input{figures/instancelifecycle3.tex}
+        \input{figures/instancelifecycle4.tex}
+        \caption{An example of an instance life cycle. In the first step, the
+        instance is created when a method call \texttt{a(42)} is encountered.
+        The vector clock of beginning is set and the parameters are assigned a
+        value. In step 2, the instance is fully accepted. At this point, the
+        analyzer looks for contract violations. Then the instance is reset, the
+        vector clock of beginning is reset, and vector clocks of last instance
+        are set. In step 3, method \texttt(a) is called with an argument that
+        matches the value of \texttt{X} in the instance. The instance is started
+        again. }
+    \end{center}
+\end{figure}
+
+When a method call enters the trace window, all running instances (those with
+parameters already assigned) are advanced. The method call may however also
+start a new instance that is not yet part of the trace window. The analyzer
+tries to create new instances from targets and spoilers from the contract. These
+new instances are added to the trace window only if there is no matching
+instance already present in the trace window. Two instances are matching, if
+they are bound to the same target or spoiler, their parameters share the same
+values, and they both just started (they accepted the same first method). In
+practice, the only difference between these matching instances is that one
+contains information about the previously encountered instance while the does
+not.
+
+\emph{Example.} Consider target \texttt{a(X) b(X)} and a program trace
+\texttt{a(1) b(1) a(2) b(2) a(1)}. After \texttt{a(1)}, the analyzer adds a new
+instance $i_1$ to the window with \texttt{X=1}. After \texttt{b(1)}, $i_1$ is
+advanced, accepted, and reset. No new instance is started, because there is no
+target starting with method \texttt{b}. After \texttt{a(2)}, $i_1$ cannot be
+advanced, because the parameters do not match. New instance $i_2$ with
+\texttt{X=2} is added to the trace window. After \texttt{b(2)}, $i_2$ is
+advanced, accepted, and reset.  When \texttt{a(1)} is encountered again, $i_1$
+is advanced but no new instance is added because $i_1$ would match the newly
+created instance.
 
 \subsection{Detection of Contract Violation}
+\label{violations}
 
 \todo{On method exit, for all target instances that were just fully accepted, it
 is checked if there is a spoiler instance in other windows that can violate this
