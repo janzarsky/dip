@@ -24,19 +24,20 @@ detect contract violations in Java programs. To observe the behavior of the
 program under analysis, the program must be modified to report all actions of
 interest to the analyzer. That is usually done at the byte code level, and it
 requires a lot of skill not to affect the behavior of the program under
-analysis. Fortunately, the RoadRunner framework takes care of the instrumenting
-and provides a simple interface for observing actions taken by the program under
-analysis. The contract analyzer will be built upon the RoadRunner interface.
+analysis. Fortunately, the \emph{RoadRunner} framework takes care of the
+instrumenting and provides a simple interface for observing actions taken by the
+program under analysis. The contract analyzer will be built upon the RoadRunner
+interface.
 
 To successfully perform the analysis, the following must be done. A grammar for
 contract definitions and a parser must be created. The instrumentation performed
 by RoadRunner needs to be extended to extract additional information about the
 program under analysis. Then finally, an analyzer for parametric contracts with
-spoilers must be implemented using the RoadRunner interface. This term project
-deals with the design of the analyzer and it will be followed by a master's
-thesis that will focus on implementation and evaluation of the analyzer.
+spoilers must be implemented using the RoadRunner interface. This master's
+thesis deals with the design of the analyzer, its implementation, and the
+evaluation of the analyzer.
 
-This report is structured as follows. Chapter \ref{chTwo} describes specifics of
+The thesis is structured as follows. Chapter \ref{chTwo} describes specifics of
 multi-threaded programming in Java, Java memory model, and an overview of
 software errors related to concurrency. Approaches to the dynamic analysis of
 Java programs and instrumentation techniques are described. Two important
@@ -44,23 +45,24 @@ frameworks are presented, the ASM framework for byte code instrumentation, and
 the RoadRunner framework for writing dynamic analyzers. Chapter \ref{chThree}
 introduces contracts for concurrency, their modified versions, and a method for
 dynamic detection of contract violations. In Chapter \ref{chFour}, a dynamic
-analyzer for contracts is designed.
+analyzer for contracts is designed. Chapter \ref{chFive} provides implementation
+details and testing approaches.
 
 
 
 \chapter{Dynamic Analysis of Multi-threaded Programs in Java}
 \label{chTwo}
 
-This chapter starts with the necessary basics of multithreaded programming in
-Java.  The Java Memory Model is introduced, as it defines important terms such
-as the \emph{happens-before} relation or a \emph{data race}. Common defects in
-a concurrent environment are then described. Section
+This chapter starts with the necessary basics of multi-threaded programming in
+Java.  The \emph{Java Memory Model} is introduced, as it defines important terms
+such as the \emph{happens-before} relation or a \emph{data race}. Common defects
+in a concurrent environment are then described. Section
 \ref{approachesToSwVerification} provides an overview of approaches to software
 verification.
 
 Dynamic analysis of Java programs is then described, starting with an overview
-of Java bytecode, and how it can be instrumented using the ASM framework. The
-RoadRunner framework for dynamic analysis is then introduced.
+of Java bytecode, and how it can be instrumented using the \emph{ASM framework}.
+The RoadRunner framework for dynamic analysis is then introduced.
 
 
 \section{Multi-threaded Programming in Java}
@@ -75,9 +77,9 @@ to create a thread: by extending the \texttt{Thread} class, or by implementing
 the \texttt{Runnable} interface. Both approaches produce a \texttt{Thread}
 instance that executes the \texttt{run} method in a new thread when started.
 
-To start a thread, the \texttt{start()} method must be called (which will in
-turn call the \texttt{run()} method). The thread will terminate upon returning
-from the \texttt{run()} method. The \texttt{join()} method is used in other
+To start a thread, the \texttt{start} method must be called (which will in
+turn call the \texttt{run} method). The thread will terminate upon returning
+from the \texttt{run} method. The \texttt{join} method is used in other
 threads to wait for a thread to terminate \cite{javaTheCompleteReference}.
 Figure \ref{threadExtend} shows a thread creation example by extending the
 \texttt{Thread} class, Figure \ref{threadRunnable} shows the same example
@@ -123,11 +125,11 @@ class MyRunnable implements Runnable {
 When accessing a shared resource from multiple threads, proper synchronization
 is usually required. In Java, every object gets an implicit monitor, which can
 be owned by only one thread at a given time. To enter the monitor, one must use
-either synchronized methods or synchronized statements. Synchronized statements
-are code blocks with an explicitly specified object whose monitor is entered
-before executing the block. Synchronized methods enter the monitor of the
-instance they are called upon. Figure \ref{synchronized} shows examples of
-synchronized blocks and synchronized methods.
+either synchronized methods or synchronized statements.  \emph{Synchronized
+statements} are code blocks with an explicitly specified object whose monitor is
+entered before executing the block. \emph{Synchronized methods} enter the
+monitor of the instance they are called upon. Figure \ref{synchronized} shows
+examples of synchronized blocks and synchronized methods.
 
 \begin{figure}[hbt]
     \label{synchronized}
@@ -149,14 +151,14 @@ class Example {
     \caption{The \texttt{inc1} method is \emph{synchronized}, on each call, the
     \texttt{Example} instance's monitor is entered. The \texttt{inc2} method is
     not synchronized but contains a \emph{synchronized block} with an explicitly
-    specified monitor.}
+    specified monitor (\texttt{this}).}
 \end{figure}
 
 Communication between threads is achieved using the following methods:
-\texttt{wait()}, \texttt{notify()}, and \texttt{notifyAll()}. All methods must
-be called within a synchronized context. Calling \texttt{wait()} will suspend
-the calling thread until some other thread enters the same monitor and calls
-either \texttt{notify()} or \texttt{notifyAll()}.
+\texttt{wait}, \texttt{notify}, and \texttt{notifyAll}. All methods must be
+called within a synchronized context. Calling \texttt{wait} will suspend the
+calling thread until some other thread enters the same monitor and calls either
+\texttt{notify} or \texttt{notifyAll}.
 
 Multi-threaded programs may use the \texttt{volatile} type modifier. It tells
 the compiler that the variable may be modified outside of the current thread.
@@ -181,11 +183,11 @@ instructions when it does not affect the result of the computation.
 In multi-threaded programs, the reordering of instructions has to be limited
 when the threads interact with each other. In the model, only certain program
 \emph{actions} are considered. There are several orders defined over the actions
-which are used by the dynamic contract analysis: \emph{program order},
-\emph{synchronization order}, and \emph{happens-before order}.
+which are used by the dynamic contract analysis: program order, synchronization
+order, and happens-before order.
 
-The actions can be either \emph{intra-} or \emph{inter-thread}. An inter-thread
-action can be detected or influenced by another thread. An intra-thread action
+The actions can be either intra- or inter-thread. An \emph{inter-thread} action
+can be detected or influenced by another thread. An \emph{intra-thread} action
 is for example adding two local variables and it is not important to the model.
 Non-volatile reading or writing of a shared variable is an inter-thread action.
 \emph{Synchronization actions} are inter-thread actions that include volatile
@@ -247,7 +249,7 @@ least one of which is write, and these accesses are not ordered by
     \emph{happens-before} relation. The red arrows represent the program order,
     the blue arrow represents the \emph{synchronizes-with} relation. Grey arrows
     complete the transitive closure. The conflicting accesses to variable
-    \texttt{a} are not a data race, because they are ordered by
+    \texttt{a} are not data races, because they are ordered by
     \emph{happens-before} (the black arrow).}
 \end{figure}
 
@@ -353,13 +355,13 @@ theorems about the system and uses mathematical reasoning.
 
 \section{Instrumentation of Java Bytecode}
 
-Instrumentation is the act of inserting instructions into an existing program to
-extract useful information at runtime. Instrumentation can be used to measure
-performance, log events, or perform dynamic analysis. The running program should
-not be aware that it is being instrumented and the result of the computation
-should remain the same. Instrumentation may add significant overhead to the
-program. For example, programs instrumented by the RoadRunner framework are
-roughly 10 times slower \cite{RoadRunner}.
+\emph{Instrumentation} is the act of inserting instructions into an existing
+program to extract useful information at runtime. Instrumentation can be used to
+measure performance, log events, or perform dynamic analysis. The running
+program should not be aware that it is being instrumented and the result of the
+computation should remain the same. Instrumentation may add significant overhead
+to the program. For example, programs instrumented by the RoadRunner framework
+are roughly 10 times slower \cite{RoadRunner}.
 
 In Java, the instrumentation is done by changing the bytecode. There are several
 general-purpose frameworks for modifying the Java bytecode. In this section, the
@@ -460,11 +462,11 @@ back. When calling other methods, the parameters are also prepared on the stack.
 
 Java Virtual Machine instructions can be divided into several categories. Load
 and store instructions move values between local variables and the operand
-stack. For example, instruction \texttt{iload\_3} pushes the value (which is of
-type \texttt{int}) from the local variable at index 3 to the operand stack.
+stack. For example, the \texttt{iload\_3} instruction pushes the value (which is
+of type \texttt{int}) from the local variable at index 3 to the operand stack.
 Arithmetic instructions usually take two values from the operand stack, compute
-the result, and store it back on the stack. For example, instruction
-\texttt{fmul} will multiply two values of type \texttt{float}. Type conversion
+the result, and store it back on the stack. For example, the \texttt{fmul}
+instruction will multiply two values of type \texttt{float}. Type conversion
 instructions convert the value on the top of the stack. Control transfer
 instructions, such as \texttt{ifeq} or \texttt{goto}, cause the execution of
 instruction other then the immediately following.
