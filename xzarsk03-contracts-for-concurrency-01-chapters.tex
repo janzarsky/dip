@@ -1034,16 +1034,49 @@ This chapter describes the proposed dynamic analyzer for parametric contracts
 with spoilers. The analyzer follows the method for dynamic analysis of contracts
 described in \cite{contracts} and extends it to support parametric contracts.
 
-\todo{chapter overview}
+The analyzer is built as a new tool for the RoadRunner framework. The input is a
+program under analysis and a contract definition. The analyzer is then able to
+detect contract violations in the program and report them. The RoadRunner
+framework was modified to support obtaining method arguments and return values.
 
-The analyzer is built as a new tool for RoadRunner. The input is a program under
-analysis and a contract definition. The analyzer is able to detect contract
-violations in the program and report them. The RoadRunner framework was modified
-to support obtaining method arguments and return values. \todo{was it though?}
-For performance reasons, the RoadRunner framework should also be modified to
-instrument only relevant actions of the program under analysis.
+Section \ref{overview} provides an architectural overview of the analyzer
+itself. Section \ref{constraining} describes several restrictions that were
+placed on the analyzer in the design phase. In Section \ref{instrChanges},
+necessary changes to RoadRunner itself are presented. Section \ref{contracts}
+describes how a contract is defined and processed before the analysis is
+started. The core function of the analyzer is described in Section
+\ref{contractAnalyzer}. Section \ref{contractTool} describes how the analyzer
+interacts with RoadRunner.
+
+\section{Overview of the Contract Analyzer}
+\label{overview}
+
+This section provides a high-level overview of the contract analyzer. The
+\texttt{ContractAnalyzer} class is the core of the analyzer. It receives events
+from the program under analysis, detects target and spoiler instances, and looks
+for contract violations. It manages data stored with threads and locks, such as
+trace windows and vector clocks. The \texttt{ContractAnalyzer} class can be
+instantiated without any dependencies from the RoadRunner project, which is
+useful for testing purposes. Detailed description of \texttt{ContractAnalyzer}
+can be found in Section \ref{contractAnalyzer}.
+
+The \texttt{ContractTool} class is a subclass of RoadRunner's \texttt{Tool}
+class. During the initialization of \texttt{ContractTool}, the contract
+definition file is parsed and \texttt{ContractAnalyzer} is created. In
+\texttt{ContractTool}, relevant methods are overridden to receive events from
+RoadRunner, such as lock acquire and release or method exit. These events are
+then processed and sent to \texttt{ContractAnalyzer}. Section \ref{contractTool}
+provides a detailed description of \texttt{ContractTool} and Section
+\ref{contracts} describes parsing and representation of contracts.
+
+For each thread, a \texttt{Window} instance is created by
+\texttt{ContractAnalyzer}. It stores information about target and spoiler
+instances in a trace window. On method exit, existing instances are advanced,
+new instances are started, and for all finished instances, contract violations
+are checked.
 
 \section{Constraining Analyzer Capabilities}
+\label{constraining}
 
 The analyzer is designed with several restrictions based on the previous work,
 such as \cite{janousek} or \cite{FITPUB10817}, to improve its performance.
@@ -1173,10 +1206,15 @@ After calling method \texttt{a()}, the trace recorded by the analyzer will be
 \texttt{b() a()} instead of more intuitive \texttt{a() b()}.
 
 \section{Changes to Instrumentation Performed by RoadRunner}
+\label{instrChanges}
 
 The RoadRunner framework does not expose the method arguments or the return
-value through its API. The \texttt{enter} and \texttt{exit} methods both take a
-\texttt{MethodEvent} parameter containing the following information:
+value through its API. For the tracking of parametric contracts, it is necessary
+to obtain method arguments and return values so that the contract parameters
+can be assigned values.
+
+The \texttt{enter} and \texttt{exit} of RoadRunner's \texttt{Tool} class methods
+both take a \texttt{MethodEvent} parameter containing the following information:
 \begin{itemize}
     \item Target -- \texttt{null} for static methods, the value of \texttt{this}
         for instance methods.
@@ -1225,32 +1263,6 @@ instrument only the necessary actions of the program under analysis. Event types
 that are not used at all, such as memory accesses, should not be instrumented.
 Method entries and exits should be instrumented only in case the method is part
 of a contract.}
-
-\section{Overview of the Contract Analyzer}
-
-This section provides a high-level overview of the contract analyzer. The
-\texttt{ContractAnalyzer} class is the core of the analyzer. It receives events
-from the program under analysis, detects target and spoiler instances, and looks
-for contract violations. It manages data stored with threads and locks, such as
-trace windows and vector clocks. The \texttt{ContractAnalyzer} class can be
-instantiated without any dependencies from the RoadRunner project, which is
-useful for testing purposes. Detailed description of \texttt{ContractAnalyzer}
-can be found in Section \ref{contractAnalyzer}.
-
-The \texttt{ContractTool} class is a subclass of RoadRunner's \texttt{Tool}
-class. During the initialization of \texttt{ContractTool}, the contract
-definition file is parsed and \texttt{ContractAnalyzer} is created. In
-\texttt{ContractTool}, relevant methods are overridden to receive events from
-RoadRunner, such as lock acquire and release or method exit. These events are
-then processed and sent to \texttt{ContractAnalyzer}. Section \ref{contractTool}
-provides a detailed description of \texttt{ContractTool} and Section
-\ref{contracts} describes parsing and representation of contracts.
-
-For each thread, a \texttt{Window} instance is created by
-\texttt{ContractAnalyzer}. It stores information about target and spoiler
-instances in a trace window. On method exit, existing instances are advanced,
-new instances are started, and for all finished instances, contract violations
-are checked.
 
 \section{Contracts Definition and Parsing}
 \label{contracts}
@@ -1386,9 +1398,11 @@ advance all of its target and spoiler instances. It also receives the current
 vector clock and references to trace windows of other threads so that it can
 look for contract violations.
 
-\subsection{Tracking of Target and Spoiler Instances}
+The \texttt{ContractAnalyzer} class is created and called by the
+\texttt{ContractTool} class which directly uses the RoadRunner API. The
+\texttt{ContractTool} class is described in Section \ref{contractTool}.
 
-\todo{FiniteAutomaton, Instance, InstanceCollection, Window}
+\subsection{Tracking of Target and Spoiler Instances}
 
 For each thread, a \texttt{Window} object is kept during the analysis. It
 contains target and spoiler instances present in a trace window. When a method
@@ -1470,12 +1484,9 @@ will have access to the previously detected instance.}
 
 {\color{blue}\lipsum[2]}
 
-\todo{comparing parameters - equals or == ?}
-{\color{blue}\lipsum[2]}
-
 \todo{synchronization of the tool itself}
 
-\section{A Contract Validator Tool}
+\section{A Contract Analyzer Tool}
 \label{contractTool}
 
 The \texttt{ContractAnalyzer} class described in Section \ref{contractAnalyzer}
@@ -1523,12 +1534,6 @@ event produced will belong to a method in the contract.
 The rest of the methods, \texttt{create}, \texttt{acquire}, \texttt{release},
 \texttt{preStart}, and \texttt{postJoin}, just pick relevant information from
 events provided by RoadRunner and forward it to \texttt{ContractAnalyzer}.
-
-\section{Testability}
-
-To properly test the analyzer, its implementation should not rely on
-RoadRunner's internal data structures. It should be possible to feed the
-analyzer a custom event stream without the need for the RoadRunner framework.
 
 
 
