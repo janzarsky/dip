@@ -1764,13 +1764,44 @@ public int foo(int, java.lang.String);
 \end{figure}
 
 \section{Testing}
-\todo{TODO}
-\begin{itemize}
-    \item unit testing of classes
-    \item testing of instrumentation
-    \item functional testing of whole analyzer
-\end{itemize}
-{\color{blue}\lipsum[1-4]}
+
+Each part of the analyzer was thoroughly tested using several different
+approaches. The core analyzer functionality was tested using unit tests written
+in JUnit 5. The instrumentation of method arguments and returns values was
+tested using a custom RoadRunner tool. The integration of all parts was tested
+using Bash scripts that prepare contract files, programs under analysis, and
+launch RoadRunner. This section describes approaches used for testing different
+parts of the analyzer. See Appendix \ref{manual} for instructions for running
+the tests.
+
+The analyzer was implemented so that there is almost no need to work with
+RoadRunner's internal structures when testing the analyzer. The
+\texttt{ContractTool} class serves as a wrapper for \texttt{ContractAnalyzer}.
+All structures, such as \texttt{MethodEvent}, are transformed into objects
+specific to the contract analyzer. In tests, \texttt{ContractAnalyzer} is used
+directly. RoadRunner is not executed, the events coming from the program under
+analysis are created by tests which allows for tests that do not rely on the
+thread scheduler and are very fast.
+
+The contract parser is tested using JUnit 5 tests. The contract definition is
+passed to the parser and the produced \texttt{Contract} instance is compared
+with a \texttt{Contract} instance constructed directly in code. The contract for
+comparison is constructed by creating appropriate objects such as method
+signatures, meta-variables, and finite automaton states.
+
+Changes to instrumentation were tested by preparing custom subclass of
+RoadRunner's \texttt{Tool} class that overrides the \texttt{exit} method and
+prints arguments and the return value to the standard output. A testing Java
+program was created that calls methods with various number and type of
+parameters. The test consists of analyzing the testing program with RoadRunner
+using the custom tool. The tool prints method arguments and return values to the
+output and the values must match those in the testing program. The whole process
+is automated using a Bash script.
+
+The integration of all parts is again automated using bash scripts. Testing
+programs and files with contract definitions are prepared. The script compiles
+the testing program and analyzes it with RoadRunner that is using the contract
+tool. Then it verifies if a contract violation has been found.
 
 
 
