@@ -1561,31 +1561,40 @@ events provided by RoadRunner and forward it to \texttt{ContractAnalyzer}.
 \chapter{Implementation and Testing}
 \label{chFive}
 
-\todo{chapter intro}
-{\color{blue}\lipsum[2]}
-
-\section{ASM 7.0 and Java 11}
-The analyzer was built on RoadRunner version 0.5 from 2017. It contains the
-following dependencies: the ASM framework in version 5.0.2 with custom
-modifications, JFlex in version 1.4.2, and CUP in version 11a. The project was
-written for Java 8 and was built using Ant. For easier implementation of the
-analyzer several components were upgraded.
-
-The ASM framework was upgraded to version 7.0 which supports Java 11. RoadRunner
-can therefore analyze programs compiled for Java 11. Before the upgrade took
-place, the custom modifications of the ASM framework were isolated to a series
-of patches against the unmodified ASM version 5.0.2. Then, for each new version
-up to 7.0, the ASM was always replaced with a newer version and the custom
-patches were reapplied and modified if necessary. As a result, the ASM framework
-can be easily upgraded in the future by reapplying the custom patch series. The
-RoadRunner itself was modified in order to be built for Java 11.
-
-\todo{more details?}
-{\color{blue}\lipsum[3]}
+The analyzer described in Chapter \ref{chFour} was successfully implemented.
+This chapter provides implementation details and clarifies decisions made during
+the implementation. Section \ref{approaches} describes approaches and principles
+that shaped the implementation. Before the implementation took place, several
+RoadRunner dependencies were upgraded, see Section \ref{asmAndJava}. In Section
+\ref{cfParsing}, the contract file parser is described. Changes to the
+instrumentation performed by RoadRunner are described in detail in Section
+\ref{instrImpl}. Finally, Section \ref{testing} describes testing approaches.
 
 \section{General Approaches}
+\ref{approaches}
 The implementation of the analyzer was guided by several principles or
 approaches that are described in this section.
+
+\subsection{Functional Programming}
+The analyzer implementation uses several concepts from functional programming
+which are briefly described in this section.
+
+\paragraph{Immutable data structures}
+All classes except for \texttt{ContractAnalyzer} and \texttt{ContractTool} are
+immutable. Once created, the internal state of objects do not change. All
+operations produce new object instead of modifying the current one. See the next
+section for more details.
+
+\paragraph{Side effects and pure functions}
+Most methods in the analyzer are pure functions, which means that each call can
+be always replaced with a resulting value of the call. For example, consider
+pure function \texttt{int sum(int a, int b)}. Then the method call
+\texttt{sum(2,3)} can be always replaced with \texttt{5} without changing
+program behavior. Pure functions perform no side effects (such as writing to a
+file).
+
+\paragraph{Higher-order function}
+The analyzer contains and uses methods that take functions as parameters.
 
 \subsection{Immutable Data Structures}
 
@@ -1639,14 +1648,38 @@ public final class FiniteAutomaton {
 In order to use immutable objects effectively, the Vavr collection library was
 used. It provides immutable replacements for standard Java collections.
 
-\subsection{Functional Programming}
-\todo{side effects}
-{\color{blue}\lipsum[1]}
+\subsection{Dependency Inversion Principle}
+Several parts of the analyzer was designed with the dependency inversion
+principle in mind. Classes holding low-level data, such as method signatures,
+method arguments, or contract parameters, are not used directly by the analyzer
+but via interfaces. For example, there is the \texttt{JvmSignature} class that
+implements the \texttt{Signature} interface.
 
-\todo{referential transparency}
-{\color{blue}\lipsum[1]}
+The collection that stores target and spoiler instances in a trace window is
+abstracted in the \texttt{InstanceCollection} interface. The
+\texttt{MultimapInstanceCollection} implements the collection using Vavr's
+\texttt{Multimap} data structure. This approach makes it easy to create
+alternative implementations of the collection.
+
+\section{ASM 7.0 and Java 11}
+\label{asmAndJava}
+The analyzer was built on RoadRunner version 0.5 from 2017. It contains the
+following dependencies: the ASM framework in version 5.0.2 with custom
+modifications, JFlex in version 1.4.2, and CUP in version 11a. The project was
+written for Java 8 and was built using Ant. For easier implementation of the
+analyzer several components were upgraded.
+
+The ASM framework was upgraded to version 7.0 which supports Java 11. RoadRunner
+can therefore analyze programs compiled for Java 11. Before the upgrade took
+place, the custom modifications of the ASM framework were isolated to a series
+of patches against the unmodified ASM version 5.0.2. Then, for each new version
+up to 7.0, the ASM was always replaced with a newer version and the custom
+patches were reapplied and modified if necessary. As a result, the ASM framework
+can be easily upgraded in the future by reapplying the custom patch series. The
+RoadRunner itself was modified in order to be built for Java 11.
 
 \section{Contract File Parsing}
+\label{cfParsing}
 One of the inputs to the analyzer is a contract definition. The syntax of the
 definition is described in Chapter \ref{chFour}. Due to its length, it is passed
 to the analyzer in a text file. The file name is specified using a command-line
@@ -1671,10 +1704,16 @@ exception. Each method in a contract is parsed as a finite-state machine with a
 single state. The whole target or spoiler definition is constructed either by
 concatenating or alternating two states from left to right.
 
-\todo{regex limitation (ab|ac) not allowed}
-{\color{blue}\lipsum[1]}
+The current implementation of the parser introduces a limitation to the range of
+allowed regular expressions. When the alternation operation is used (denoted by
+\texttt{|}), the expressions cannot start with the same method. For example, the
+regular expression \texttt{(ab|ac)} is not allowed. The resulting finite
+automaton would be nondeterministic. The current implementation does not perform
+any conversion, all expressions must be converted by the user. In the previous
+example, the expression would need to be converted to \texttt{a(b|c)}.
 
 \section{Changes in Instrumentation}
+\label{instrImpl}
 RoadRunner was modified to obtain method arguments and return values during the
 analysis. The implementation is based on changes described in \cite{janousek},
 the final version however fixes several major issues. The initial implementation
@@ -1766,6 +1805,7 @@ public int foo(int, java.lang.String);
 \end{figure}
 
 \section{Testing}
+\label{testing}
 
 Each part of the analyzer was thoroughly tested using several different
 approaches. The core analyzer functionality was tested using unit tests written
