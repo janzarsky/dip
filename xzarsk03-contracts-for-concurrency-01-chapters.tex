@@ -53,17 +53,117 @@ details and testing approaches.
 \chapter{Dynamic Analysis of Multi-threaded Programs in Java}
 \label{chTwo}
 
-This chapter starts with the necessary basics of multi-threaded programming in
-Java.  The \emph{Java Memory Model} is introduced, as it defines important terms
-such as the \emph{happens-before} relation or a \emph{data race}. Common defects
-in a concurrent environment are then described. Section
-\ref{approachesToSwVerification} provides an overview of approaches to software
-verification.
+This chapter focuses on a dynamic analysis that detects errors related to
+improper synchronization between threads in multi-threaded Java programs. In the
+first section, dynamic analysis is compared with other approaches to software
+verification. Then the most common types of errors found in multi-threaded
+programs are presented. The following section explains the basics of
+multi-threaded programming in Java. Then the most important concepts from the
+Java memory model are described.
 
-Dynamic analysis of Java programs is then described, starting with an overview
-of Java bytecode, and how it can be instrumented using the \emph{ASM framework}.
-The RoadRunner framework for dynamic analysis is then introduced.
+The second part of this chapter deals with the techniques used for dynamic
+analysis of Java programs. The ASM framework for Java bytecode manipulation is
+introduced along with brief overview of the Java virtual machine. Finally, the
+RoadRunner framework is described in detail, as it is the basis for
+implementation of the contract analyzer.
 
+
+\section{Approaches to Software Verification}
+\label{approachesToSwVerification}
+
+The goal of software verification is to make sure that the software meets all
+requirements. There are several approaches to software verification, each of
+them having its own advantages and disadvantages. This section provides a
+summary of testing, dynamic and static analysis, abstract interpretation,
+theorem proving, and model checking.
+
+\paragraph{Testing}
+\emph{Testing} consists of running the software under different conditions and
+checking the results of the computation (or observing other behavior of the
+software). To gain enough confidence that the software operates correctly in all
+conditions, a suitable set of \emph{test cases} must be found, which is
+difficult, and sometimes impossible. Testing is best suited for confirming
+the presence of defects in software, not for proving their absence
+\cite{fundamentals}.
+
+An important property of test cases is their \emph{repeatability}, meaning that
+a certain test case will always yield the same result. When testing
+multi-threaded programs, this property does not hold because of the
+non-determinism introduced by the thread scheduler. Threads are interleaved
+differently on each execution which means that errors may or may not appear.
+This makes discovering defects in multi-threaded programs difficult.
+
+\paragraph{Dynamic Analysis}
+\emph{Dynamic analysis} works with information gathered during an execution of a
+program. The information may be analyzed during program execution
+(\emph{on-the-fly}) or at the end (\emph{post-mortem}). Even though the analysis
+works with information from a single execution, it can in some cases find errors
+that were not observed during the execution but may demonstrate themselves in
+similar executions \cite{letko}. The dynamic analysis also suffers from
+nondeterministic scheduling. The program under analysis may also behave
+differently due to being observed by the analyzer.
+
+The analyzer proposed in this thesis performs on-the-fly dynamic analysis of
+contracts for concurrency and detects contract violations that occurred not only
+in the given run but also those that may have occurred in similar runs.
+
+\paragraph{Static Analysis}
+\emph{Static analysis} is performed at compile-time and it does not require the
+program to be running. The analysis is theoretically able to cover all possible
+executions of a program. In practice, it is limited by the fact that the number
+of thread interleavings in multi-threaded programs grows exponentially
+\cite{letko}.
+
+\paragraph{Abstract Interpretation}
+\emph{Abstract interpretation} takes the source code and symbolically executes
+it line by line, approximating the semantics of the program without performing
+all the calculations. It suffers from similar problems as static analysis.
+
+\paragraph{Model Checking}
+\emph{Model checking} is a technique for checking whether a system satisfies
+certain correctness specification \cite{letko}. It is based on systematic or
+heuristic exploration of the state space. The drawback of this technique is that
+the state space of the program model can be huge.
+
+\paragraph{Theorem Proving}
+\emph{Theorem proving} is a semi-automated approach to proving that a certain
+facts are satisfied in the system. It is based on assumptions and general
+theorems about the system and uses mathematical reasoning.
+
+
+\section{Safety Errors in Multi-threaded Programs}
+
+Contracts for concurrency specify rules on using a set of methods in a
+concurrent setting. They aim at discovering errors specific to a concurrent
+environment. When compared to single-threaded programs, multi-threaded programs
+may encounter a whole new class of errors related to sharing memory between
+threads. Errors presented in this section are classified as \emph{safety errors}
+in \cite{letko} as these are usually checked in various dynamic analyses.
+
+\paragraph{Data Race}
+A \emph{data race} occurs when there are two unsynchronized accesses to a shared
+variable and at least one of them is a write access.
+
+\paragraph{Atomicity Violation}
+When a code block is required to be atomic, all program executions must be
+equivalent to an execution where the block is executed serially. Contract for
+concurrency primarily focus on atomicity violations \cite{contracts}.
+
+\paragraph{Order Violation}
+When certain operations are required to be executed
+in a certain order, and the order is not met in a given program execution, an
+\emph{order violation} occurs. Contracts for concurrency can also detect order
+violations \cite{contracts}.
+
+\paragraph{Deadlock}
+General definition of a deadlock is presented in
+\cite{letko}. A program state contains a set $S$ of deadlocked threads if, and
+only if each thread in $S$ is blocked and waiting for some event that could
+unblock it, but such an event could only be generated by a thread from $S$.
+
+\paragraph{Missed Signal}
+A \emph{missed signal} is present in a program execution when one or more
+threads are waiting for a signal, and the signal is never delivered.
 
 \section{Multi-threaded Programming in Java}
 
@@ -170,9 +270,13 @@ the compiler that the variable may be modified outside of the current thread.
 % https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.4.5
 
 \emph{Java memory model} describes how threads in Java interact with each other
-using shared memory. The model takes a program and an execution trace, and for
-each read operation decides if it is valid or not. The decision depends on the
-write operation that modified the data before the read operation. The compiler,
+using shared memory. The model defines several relations that are used by the
+dynamic analysis of contracts for concurrency, most notably the
+\emph{happens-before} relation and the \emph{synchronizes-with} relation.
+
+Java memory model takes a program and an execution trace, and for each read
+operation decides if it is valid or not. The decision depends on the write
+operation that modified the data before the read operation. The compiler,
 runtime, and hardware must ensure that all executions of a program produce
 execution traces that are valid according to the model \cite{jmmspec}.
 
@@ -263,95 +367,6 @@ least one of which is write, and these accesses are not ordered by
     race.}
 \end{figure}
 
-
-\section{Safety Errors in Multi-threaded Programs}
-
-When compared to single-threaded programs, multi-threaded programs may encounter
-a whole new class of errors related to sharing memory between threads. Errors
-presented in this section are classified as \emph{safety errors} in \cite{letko}
-as these are usually checked in various dynamic analyses.
-
-\paragraph{Data Race}
-A \emph{data race} occurs when there are two unsynchronized accesses to a shared
-variable and at least one of them is a write access.
-
-\paragraph{Atomicity Violation}
-When a code block is required to be atomic, all
-program executions must be equivalent to an execution where the block is
-executed serially.
-
-\paragraph{Order Violation}
-When certain operations are required to be executed
-in a certain order, and the order is not met in a given program execution, an
-\emph{order violation} occurs.
-
-\paragraph{Deadlock}
-General definition of a deadlock is presented in
-\cite{letko}. A program state contains a set $S$ of deadlocked threads if, and
-only if each thread in $S$ is blocked and waiting for some event that could
-unblock it, but such an event could only be generated by a thread from $S$.
-
-\paragraph{Missed Signal}
-A \emph{missed signal} is present in a program execution when one or more
-threads are waiting for a signal, and the signal is never delivered.
-
-\section{Approaches to Software Verification}
-\label{approachesToSwVerification}
-
-% Carlo Ghezzi, Mehdi Jazayeri, Dino Mandrioli: Fundamentals of Software Engineering, Prentice Hall, ISBN 0-13-099183-X
-
-The goal of software verification is to make sure that the software meets all
-requirements. This section provides a summary of testing, dynamic and static
-analysis, abstract interpretation, theorem proving, and model checking.
-
-\paragraph{Testing}
-\emph{Testing} consists of running the software under different conditions and
-checking the results of the computation (or observing other behavior of the
-software). To gain enough confidence that the software operates correctly in all
-conditions, a suitable set of \emph{test cases} must be found, which is
-difficult, and sometimes impossible. Testing is best suited for confirming
-the presence of defects in software, not for proving their absence
-\cite{fundamentals}.
-
-An important property of test cases is their \emph{repeatability}, meaning that
-a certain test case will always yield the same result. When testing
-multi-threaded programs, this property does not hold because of the
-non-determinism introduced by the thread scheduler. Threads are interleaved
-differently on each execution which means that errors may or may not appear.
-This makes discovering defects in multi-threaded programs difficult.
-
-\paragraph{Dynamic Analysis}
-\emph{Dynamic analysis} works with information gathered during an execution of a
-program. The information may be analyzed during program execution
-(\emph{on-the-fly}) or at the end (\emph{post-mortem}). Even though the analysis
-works with information from a single execution, it can in some cases find errors
-that were not observed during the execution but may demonstrate themselves in
-similar executions \cite{letko}. The dynamic analysis also suffers from
-nondeterministic scheduling. The program under analysis may also behave
-differently due to being observed by the analyzer.
-
-\paragraph{Static Analysis}
-\emph{Static analysis} is performed at compile-time and it does not require the
-program to be running. The analysis is theoretically able to cover all possible
-executions of a program. In practice, it is limited by the fact that the number
-of thread interleavings in multi-threaded programs grows exponentially
-\cite{letko}.
-
-\paragraph{Abstract Interpretation}
-\emph{Abstract interpretation} takes the source code and symbolically executes
-it line by line, approximating the semantics of the program without performing
-all the calculations. It suffers from similar problems as static analysis.
-
-\paragraph{Model Checking}
-\emph{Model checking} is a technique for checking whether a system satisfies
-certain correctness specification \cite{letko}. It is based on systematic or
-heuristic exploration of the state space. The drawback of this technique is that
-the state space of the program model can be huge.
-
-\paragraph{Theorem Proving}
-\emph{Theorem proving} is a semi-automated approach to proving that a certain
-facts are satisfied in the system. It is based on assumptions and general
-theorems about the system and uses mathematical reasoning.
 
 \section{Instrumentation of Java Bytecode}
 
@@ -1874,6 +1889,8 @@ analyzers.
 In the future, the synchronization of the analyzer can be improved for faster
 analysis. Better performance may be achieved by further restricting the range of
 allowed targets and spoiler definitions.
+
+\todo{noise injection}
 
 \todo{}
 {\color{blue}\lipsum[1-3]}
