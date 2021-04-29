@@ -9,7 +9,6 @@
    ISBN = "978-1-5090-6032-0",
    doi = "10.1109/ICST.2017.25",
    language = "english",
-   url = "https://www.fit.vut.cz/research/publication/11510"
 }
 
 @INPROCEEDINGS{FITPUB10817,
@@ -22,7 +21,6 @@
    publisher = "The Universidad de Las Palmas de Gran Canaria",
    ISBN = "978-84-606-5438-4",
    language = "english",
-   url = "https://www.fit.vut.cz/research/publication/10817"
 }
 
 @article{DBLP:journals/corr/SousaDFL15,
@@ -34,7 +32,6 @@
   journal   = {CoRR},
   volume    = {abs/1505.02951},
   year      = {2015},
-  url       = {http://arxiv.org/abs/1505.02951},
   archivePrefix = {arXiv},
   eprint    = {1505.02951},
   timestamp = {Mon, 13 Aug 2018 16:48:09 +0200},
@@ -49,7 +46,6 @@
     isbn = {9781450300827},
     publisher = {Association for Computing Machinery},
     address = {New York, NY, USA},
-    url = {https://doi.org/10.1145/1806672.1806674},
     doi = {10.1145/1806672.1806674},
     booktitle = {Proceedings of the 9th ACM SIGPLAN-SIGSOFT Workshop on Program Analysis for Software Tools and Engineering},
     pages = {1–8},
@@ -111,7 +107,6 @@
     volume = {15},
     number = {4},
     issn = {0734-2071},
-    url = {https://doi.org/10.1145/265924.265927},
     doi = {10.1145/265924.265927},
     journal = {ACM Trans. Comput. Syst.},
     month = nov,
@@ -127,7 +122,6 @@ year = {2004},
 isbn = {158113729X},
 publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
-url = {https://doi.org/10.1145/964001.964023},
 doi = {10.1145/964001.964023},
 abstract = {Ensuring the correctness of multithreaded programs is difficult, due to the potential for unexpected interactions between concurrent threads. Much previous work has focused on detecting race conditions, but the absence of race conditions does not by itself prevent undesired thread interactions. We focus on the more fundamental non-interference property of atomicity; a method is atomic if its execution is not affected by and does not interfere with concurrently-executing threads. Atomic methods can be understood according to their sequential semantics, which significantly simplifies (formal and informal) correctness arguments.This paper presents a dynamic analysis for detecting atomicity violations. This analysis combines ideas from both Lipton's theory of reduction and earlier dynamic race detectors. Experience with a prototype checker for multithreaded Java code demonstrates that this approach is effective for detecting errors due to unintended interactions between threads. In particular, our atomicity checker detects errors that would be missed by standard race detectors, and it produces fewer false alarms on benign races that do not cause atomicity violations. Our experimental results also indicate that the majority of methods in our benchmarks are atomic, supporting our hypothesis that atomicity is a standard methodology in multithreaded programming.},
 booktitle = {Proceedings of the 31st ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
@@ -175,7 +169,6 @@ series = {POPL '04}
     year = 2012,
     location = "Brno, CZ",
     language = "english",
-    url = "https://www.fit.vut.cz/study/phd-thesis/364/"
 }
 
 @mastersthesis{janousek,
@@ -186,7 +179,24 @@ series = {POPL '04}
     year = 2017,
     location = "Brno, CZ",
     language = "czech",
-    url = "https://www.fit.vut.cz/study/thesis/19444/"
+}
+
+@article{fasttrack,
+    author = {Flanagan, Cormac and Freund, Stephen N.},
+    title = {FastTrack: Efficient and Precise Dynamic Race Detection},
+    year = {2010},
+    issue_date = {November 2010},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {53},
+    number = {11},
+    issn = {0001-0782},
+    doi = {10.1145/1839676.1839699},
+    abstract = {Multithreaded programs are notoriously prone to race conditions. Prior work developed precise dynamic race detectors that never report false alarms. However, these checkers employ expensive data structures, such as vector clocks (VCs), that result in significant performance overhead.This paper exploits the insight that the full generality of VCs is not necessary in most cases. That is, we can replace VCs with an adaptive lightweight representation that, for almost all operations of the target program, requires constant space and supports constant-time operations. Experimental results show that the resulting race detection algorithm is over twice as fast as prior precise race detectors, with no loss of precision.},
+    journal = {Commun. ACM},
+    month = nov,
+    pages = {93–101},
+    numpages = {9}
 }
 
 %    @BOOK{Pravidla,
