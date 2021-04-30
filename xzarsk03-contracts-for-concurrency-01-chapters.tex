@@ -595,9 +595,6 @@ that the event is properly detected and the event handler is called. To store
 the state of the analysis, RoadRunner provides support for associating data with
 memory locations, locks, or threads.
 
-\todo{tool composition}
-\todo{optional: debugging, comparing analyses}
-
 \subsection{The RoadRunner Programming Interface}
 
 Every analyzer in RoadRunner is based on the \texttt{Tool} class. Figure
@@ -1022,13 +1019,6 @@ program trace containing a contract violation is shown in Figure \ref{traces}.
     \end{center}
 \end{figure}
 
-\subsection{Vector Clocks}
-
-\cite{fasttrack}
-
-\todo{definition, usage, examples}
-{\color{blue}\lipsum[1-3]}
-
 \subsection{On-the-fly Contract Validation}
 
 To check contract validations, it is not required to keep the entire program
@@ -1048,8 +1038,9 @@ instances may be removed only with respect to a given spoiler, not in general
 \cite{contracts}.
 
 To further reduce the required information about the trace, \emph{vector clocks}
-are used. For each target and spoiler instance in the trace window, only vector
-clocks of their beginning and end need to be kept.
+are used. Vector clocks are described in the next section. For each target and
+spoiler instance in the trace window, only vector clocks of their beginning and
+end need to be kept.
 
 The method for on-the-fly contract validation does the following. At method
 entry events, target and spoiler sequences are detected. At method exit events,
@@ -1058,6 +1049,83 @@ instance ends, spoiler instances from the trace window are checked if they
 violate the target. When a spoiler instance ends, target instances from the
 trace window are checked if they are violated by the spoiler. At method exit,
 target and spoiler instances are also discarded when no longer needed.
+
+\subsection{Vector Clocks}
+
+The on-the-fly dynamic analysis of contracts uses vector clocks and the
+\emph{happens-before} relation the same way it is used in the FastTrack
+algorithm \cite{fasttrack}. A \emph{vector clock} $VC: \mathbb{T} \rightarrow
+\mathbb{N}$ consists of clock values for each thread $t \in \mathbb{T}$. Vector
+clocks are partially-ordered with $\sqsubseteq$, can be joined with $\sqcup$,
+and contain a minimal element $\perp_V$. The $t$-component of a vector clock is
+incremented using the $inc_t$ function.
+\begin{align*}
+    V_1 \sqsubseteq V_2 \quad &\text{iff} \quad \forall t. \, V_1(t) \varleq
+    V_2(t) \\
+    V_1 \sqcup V_2 &= \lambda t. \, max(V_1(t), V_2(t)) \\
+    \perp_V &= \lambda t. \, 0 \\
+    inc_t(V) &= \lambda u. \, \text{if} \, u=t \, \text{then} \, V(u)+1 \,
+    \text{else} \, V(u)
+\end{align*}
+
+\emph{Example}. Consider threads $t_1$, $t_2$, $t_3$, and two vector clocks:
+$V_1 = \langle 1,0,2 \rangle$, $V_2 = \langle 1,0,5 \rangle$. Then $V_1
+\sqsubseteq V_2$ is true, $V_1 \sqcup V_2 = \langle 1,0,5 \rangle$, and
+$inc_{t_2}(V_1) = \langle 1,1,2 \rangle$.
+
+During the analysis, three kinds of clocks are kept. For each thread $t \in
+\mathbb{T}$, a vector clock $\mathbb{C}_t$ stores information about the last
+synchronization with other threads. For each lock $l \in \mathbb{L}$, a vector
+clock $\mathbb{L}_l$ holds information about the last thread that released the
+lock. For each event $e \in \tau$, a vector clock $VC_e$ is kept
+\cite{contracts}.
+
+The \emph{happens-before} relation is defined using vector clocks. For an event
+$e_t$ from a thread $t$ and an event $e_u$ from a thread $u$, $e_t \prec_{hb}
+e_u$ when $VC_{e_t}(t) \varleq VC_{e_u}(t)$.
+
+The clocks are updated on the following actions:
+\begin{itemize}
+    \item Fork -- when a thread $t$ creates a new thread $u$:
+        \begin{align*}
+            \mathbb{C}_u &\leftarrow \mathbb{C}_u \sqcup \mathbb{C}_t \\
+            \mathbb{C}_t &\leftarrow inc_t(\mathbb{C}_t)
+        \end{align*}
+        The new thread will get all \emph{happens-before} relations from the
+        parent thread. Then the parent thread is updated so that events coming
+        after the fork will not \emph{happen-before} events in the new thread.
+    \item Join -- when a thread $t$ waits for a thread $u$ to finish.
+        \begin{align*}
+            \mathbb{C}_t &\leftarrow \mathbb{C}_t \sqcup \mathbb{C}_u \\
+            \mathbb{C}_u &\leftarrow inc_u(\mathbb{C}_u)
+        \end{align*}
+        The thread that waits for the joining thread will get all
+        \emph{happens-before} relations from the joining thread. Then the
+        joining thread is updated so that events coming after the join will not
+        \emph{happen-before} events in the waiting thread.
+    \item Release -- when a thread $t$ releases a lock $l$.
+        \begin{align*}
+            \mathbb{L}_l &\leftarrow \mathbb{C}_t \\
+            \mathbb{C}_t &\leftarrow inc_t(\mathbb{C}_t)
+        \end{align*}
+        The releasing thread will be synchronized with the thread that will
+        acquire the lock in the future. The thread does not know with which
+        thread so the thread's vector clock is stored in the lock. Then the
+        thread is updated so that events coming after the release will not be
+        synchronized with the thread that acquires the lock in the future.
+    \item Acquire -- when a thread $t$ acquires a lock $l$.
+        \begin{align*}
+            \mathbb{C}_t &\leftarrow \mathbb{C}_t \sqcup \mathbb{L}_l
+        \end{align*}
+        The acquiring thread will get \emph{happens-before} relations from the
+        lock which holds the vector clock from last release operation.
+    \item Event clocks are set when an event enters the window trace. For an
+        event $e \in \tau$ executed by a thread $t \in \mathbb{T}$:
+        \begin{align*}
+            VC_e \leftarrow \mathbb{C}_t
+        \end{align*}
+\end{itemize}
+
 
 \section{Previous Work}
 
