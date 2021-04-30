@@ -1956,19 +1956,23 @@ The first part of this thesis provided the necessary background in
 multi-threaded programming in Java, dynamic analysis, and instrumentation in the
 RoadRunner framework. Contracts for parallelism were then introduced, together
 with an on-the-fly method for contract analysis. A dynamic analyzer for tracking
-parametric contracts was proposed, including changes to the RoadRunner framework
-itself. The analyzer was implemented and its functionality was verified by an
-extensive test suite.
+parametric contracts was proposed. Several restriction was put on the analyzer
+in the design phase in order to mitigate problems in previous prototype
+implementations. The analyzer consists of the following parts: a parser for
+contract definitions, a modified instrumentation of methods, and the core
+analyzer that tracks target and spoiler instances and detects contract
+violations. All parts of the analyzer were implemented and their functionality
+was verified by an extensive test suite.
 
-The analyzer implementation provides a good basis for contract validation of
-programs written in Java. The changes to RoadRunner can be used by various other
-analyzers.
+The analyzer implementation provides a solid basis for contract validation of
+programs written in Java. The changes in method instrumentation are not tied to
+the contract validation and can be used by various other analyzers that may
+benefit from obtaining method arguments and return values.
 
-In the future, the synchronization of the analyzer can be improved for faster
-analysis. Better performance may be achieved by further restricting the range of
-allowed targets and spoiler definitions.
-
-\todo{noise injection}
-
-\todo{}
-{\color{blue}\lipsum[1-3]}
+In the future, various parts of the analyzer may be tuned for better
+performance. The functional implementation allows for easy parallelization of
+checking for contract violations. The instrumentation can be further reduced to
+obtain only program actions relevant to the contract validation. Instance
+invalidation can be introduced by clarifying the conditions in context of
+parametric contracts. The analyzer can be combined with noise injection
+techniques for detecting more contract violations.
