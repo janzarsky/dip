@@ -1566,14 +1566,13 @@ does not.
 
 \emph{Example.} Consider target \texttt{a(X) b(X)} and a program trace
 \texttt{a(1) b(1) a(2) b(2) a(1)}. After \texttt{a(1)}, the analyzer adds a new
-instance $i_1$ to the window with \texttt{X=1}. After \texttt{b(1)}, $i_1$ is
-advanced, accepted, and reset. No new instance is started because there is no
-target starting with method \texttt{b}. After \texttt{a(2)}, $i_1$ cannot be
-advanced, because the parameters do not match. New instance $i_2$ with
-\texttt{X=2} is added to the trace window. After \texttt{b(2)}, $i_2$ is
-advanced, accepted, and reset.  When \texttt{a(1)} is encountered again, $i_1$
-is advanced but no new instance is added because $i_1$ would match the newly
-created instance.
+instance $i_1$ to the window with $X=1$. After \texttt{b(1)}, $i_1$ is advanced,
+accepted, and reset. No new instance is started because there is no target
+starting with method \texttt{b}. After \texttt{a(2)}, $i_1$ cannot be advanced,
+because the parameters do not match. New instance $i_2$ with $X=2$ is added to
+the trace window. After \texttt{b(2)}, $i_2$ is advanced, accepted, and reset.
+When \texttt{a(1)} is encountered again, $i_1$ is advanced but no new instance
+is added because $i_1$ would match the newly created instance.
 
 \subsection{Detection of Contract Violations}
 \label{violations}
@@ -1600,9 +1599,27 @@ decided based on the vector clocks of the beginnings and ends of the two
 instances. Vector clocks are only updated when threads synchronize themselves.
 So the analyzer will mark the two instances as interleaving when there was not
 a synchronization between the threads that would prevent them to interleave each
-other in another run of the program under analysis.
+other in another run of the program under analysis. Figure
+\ref{detectionExample} shows an example of a contract violation detected in a
+program.
 
-\todo{example}
+\begin{figure}[hbt]
+    \begin{center}
+        \label{detectionExample}
+        \input{figures/detection.tex}
+        \caption{An example of a contract violation in a program. Consider a
+        target \texttt{a(X) b(X)} and a spoiler \texttt{c(\_)}. In thread $t$, a
+        target instance $r_1$ with $X=1$ is detected, it begins and ends at
+        $\langle 1,0 \rangle$. There is no spoiler instance accepted at this
+        moment, so there is no contract violation. Then a thread $u$ is created
+        and a spoiler instance $s_1$ is accepted, it begins and ends at $\langle
+        1,1 \rangle$. The spoiler instance does not interleave the $r_1$ because
+        $\langle 1,0 \rangle \sqsubseteq \langle 1,1 \rangle$.  Then another
+        target instance $r_2$ is detected in $t$ with $X=2$, it begins and ends
+        at $\langle 2,0 \rangle$. The instance interleaves with spoiler instance
+        $s_1$ because $\langle 1,1 \rangle \nsqsubseteq \langle 2,0 \rangle$.}
+    \end{center}
+\end{figure}
 
 \section{A Contract Analyzer Tool}
 \label{contractTool}

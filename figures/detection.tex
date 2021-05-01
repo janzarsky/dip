@@ -1,0 +1,32 @@
+\begin{tikzpicture}
+    \draw [->, thick] (4.5,1) node[above] {$t$} -- (4.5,-5.25);
+    \draw (3,0) node[right] {\texttt{a(1)}};
+    \coordinate (a1) at (4.5,0);
+    \fill (a1) circle (0.08);
+    \draw (3,-0.75) node[right] {\texttt{b(1)}};
+    \coordinate (a2) at (4.5,-0.75);
+    \fill (a2) circle (0.08);
+    \coordinate (a3) at (4.5,-1.5);
+    \fill (a3) circle (0.08);
+    \draw (3,-3.75) node[right] {\texttt{a(2)}};
+    \coordinate (a4) at (4.5,-3.75);
+    \fill (a4) circle (0.08);
+    \draw (3,-4.5) node[right] {\texttt{b(2)}};
+    \coordinate (a5) at (4.5,-4.5);
+    \fill (a5) circle (0.08);
+
+    \draw (4.75,0.5) node[right] {$\langle 1,0 \rangle$};
+    \draw (4.75,-2) node[right] {$\langle 2,0 \rangle$};
+
+    \draw [->, thick] (9.5,-1.5) node[above] {$u$} -- (9.5,-5.25);
+    \coordinate (b1) at (9.5,-2.25);
+    \fill (b1) circle (0.08);
+    \draw (10,-3) node[right] {\texttt{c(42)}};
+    \coordinate (b2) at (9.5,-3);
+    \fill (b2) circle (0.08);
+
+    \draw (8.25,-1.75) node[right] {$\langle 0,1 \rangle$};
+    \draw (8.25,-2.75) node[right] {$\langle 1,1 \rangle$};
+
+    \draw[->, thick] (a3) to node[above] {\texttt{fork}} (b1);
+\end{tikzpicture}
