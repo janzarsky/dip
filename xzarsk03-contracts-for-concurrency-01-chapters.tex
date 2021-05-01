@@ -262,7 +262,6 @@ calling thread until some other thread enters the same monitor and calls either
 
 Multi-threaded programs may use the \texttt{volatile} type modifier. It tells
 the compiler that the variable may be modified outside of the current thread.
-\todo{elaborate}
 
 \section{Java Memory Model}
 
@@ -1015,7 +1014,13 @@ program trace containing a contract violation is shown in Figure \ref{traces}.
     \begin{center}
         \label{traces}
         \input{figures/traces.tex}
-        \caption{\todo{}}
+        \caption{An example of a program trace containing a contract violation.
+        Consider a target \texttt{a(X) b(\_)} and a spoiler \texttt{c(X)}. In
+        thread $t$, a target instance $r$ is detected with $X=1$. In thread $u$,
+        a spoiler instance $s$ is detected with $X=1$. The parameters match in
+        both instances. The instances are not synchronized, so $start(s)
+        \nprec_{hb} start(r) \wedge end(r) \nprec_{hb} end(s)$ holds, which
+        means that there is a contract violation.}
     \end{center}
 \end{figure}
 
