@@ -11,4 +11,138 @@
 \chapter{Class Diagram of the Contract Analyzer}
 \label{diagram}
 
-\todo{include the diagram}
+The following page contains a UML diagram of the contract analyzer described in
+Chapter~\ref{chThree}. In the diagram, the following classes are omitted for
+clarity:
+\begin{itemize}
+    \item the \texttt{ContractTool} class which connects
+    \texttt{ContractAnalyzer} to RoadRunner,
+    \item the contract lexer and parser,
+    \item basic classes and interfaces used for holding simple data, such as
+    \texttt{Args}, \texttt{Signature}, \texttt{MetaVars},
+    \texttt{ImmutableVectorClock}, and \texttt{ContractParams}.
+\end{itemize}
+
+The \texttt{ContractAnalyzer} class is a generic class with two type parameters:
+\texttt{T} is a type representing a thread, \texttt{L} represents a lock. During
+the analysis, RoadRunner types are used: \texttt{T} is \texttt{ShadowThread},
+\texttt{L} is \texttt{ShadowLock}. Collections and containers used in the
+diagram are parts of the Vavr library.
+
+\pagebreak
+
+\begin{tikzpicture}[every node/.style={scale=0.8}]
+% \draw[help lines,step=5mm,gray!20] (-1,-16) grid (14,1);
+\umlclass[anchor=north west, template={T,L}]{ContractAnalyzer}{
+    -- Contract \\
+    -- Decoration<T, Window> \\
+    -- Decoration<T, ImmutableVectorClock> \\
+    -- Decoration<L, ImmutableVectorClock> \\
+    -- getTid: Function<T, Integer> \\
+    -- threads: List<T>
+}{
+    + exit(T, Signature, Args) \\
+    + create(T) \\
+    + acquire(T, L) \\
+    + release(T, L) \\
+    + fork(T, T) \\
+    + join(T, T)
+}
+\umlclass[x=0, y=-6, anchor=north west, type=interface]
+{InstanceCollection}{
+}{
+    + getByState(State): Traversable<Instance> \\
+    + advance(Function<Instance, Option<\\
+    \quad \quad Either<ViolationException, Instance>{}>{}>): \\
+    \quad \quad Either<ViolationException, InstanceCollection>
+}
+\umlclass[x=15.25, y=-4, anchor=north east]{Window}{
+    -- tid: int \\
+    -- targets: InstanceCollection \\
+    -- spoilers: InstanceCollection
+}{
+    + Window(tid:int, Contract) \\
+    + exit(Signature, Args, Seq<Window>, \\
+    \quad \quad ImmutableVectorClock): \\
+    \quad \quad Either<ViolationException, Window>
+}
+\umlclass[x=15.25,y=0,anchor=north east]{Contract}{
+    -- targets: Map<State, State> \\
+    -- signatures: Set<Signature>
+}{
+    + Contract(Map<State, State>) \\
+    + contains(Signature): boolean \\
+    + getTargets(): Map<State, State> \\
+    + merge(Contract): Try<Contract>
+}
+\umlclass[x=0.75, y=-9.5, anchor=north west]
+{MultimapInstanceCollection}{
+    -- instances: Multimap<State, Instance>
+}{
+    + MultimapInstanceCollection( \\
+    \quad \quad states: Map<State, State>)
+}
+\umlclass[x=15.25, y=-8, anchor=north east]{Instance}{
+    -- fa: FiniteAutomaton \\
+    -- conflicting: State \\
+    -- lastBegin: Option<ImmutableVectorClock> \\
+    -- lastEnd: Option<ImmutableVectorClock> \\
+    -- begin: Option<ImmutableVectorClock>
+}{
+    + Instance(FiniteAutomaton, State) \\
+    + advance(Signature, Args, ImmutableVectorClock, \\
+    \quad \quad onAccepted: Function2<Instance, State, \\
+    \quad \quad Option<ViolationException>{}>): \\
+    \quad \quad Option<Either<ViolationException, Instance>{}> \\
+    + isViolatedBySpoiler(spoiler: Instance, tid: int, \\
+    \quad \quad targetTid: int, vc: ImmutableVectorClock) \\
+    + violatesTarget(target: Instance, tid: int, \\
+    \quad \quad targetTid: int, vc: ImmutableVectorClock) \\
+    + matches(Instance): boolean \\
+    + isRunning(): boolean \\
+    + hasParams(): boolean
+}
+\umlclass[x=0, y=-14, anchor=north west]{FiniteAutomaton}{
+    -- start: State \\
+    -- current: State \\
+    -- params: Option<ContractParams>
+}{
+    + FiniteAutomaton(State) \\
+    + advance(Signature, Args): \\
+    \quad \quad Option<FiniteAutomaton> \\
+    + reset(): FiniteAutomaton \\
+    + paramsMatch(FiniteAutomaton): boolean \\
+    + isAccepted(): boolean \\
+    + isRunning(): boolean \\
+    + hasParams(): boolean
+}
+\umlclass[x=15.25, y=-16, anchor=north east]{State}{
+    -- transitions: Map<Signature, \\
+    \quad \quad Tuple2<State, MetaVars>{}>
+}{
+    \umlstatic{+ last(): State} \\
+    \umlstatic{+ of(transitions: Map<Signature, Tuple2<State,} \\
+    \quad \quad \umlstatic{MetaVars>{}>): Try<State>} \\
+    + getNextState(Signature, Args): Option<Tuple2<\\
+    \quad \quad State, ContractParams>{}> \\
+    + getSignatures(): Set<Signature> \\
+    + concatenate(State): State \\
+    + alternate(State): Try<State>
+}
+\umlaggreg[mult2=1, anchor1=28, anchor2=172]{ContractAnalyzer}{Contract}
+\umlaggreg[mult2=*, anchor1=-29, anchor2=155]
+{ContractAnalyzer}{Window}
+\umlcompo[arg2=targets, mult2=1, anchor1=-168, anchor2=17]
+{Window}{InstanceCollection}
+\umlcompo[arg2=spoilers, mult2=1, anchor1=-155, anchor2=5]
+{Window}{InstanceCollection}
+\umlaggreg[mult2=*, anchor1=-17, anchor2=141]{InstanceCollection}{Instance}
+\umlimpl{MultimapInstanceCollection}{InstanceCollection}
+\umlcompo[mult2=1, anchor1=-140, anchor2=33]{Instance}{FiniteAutomaton}
+\umluniassoc[arg2=conflicting, mult2=1]{Instance}{State}
+\umluniassoc[arg2=start, mult2=1, anchor1=0, anchor2=151]
+{FiniteAutomaton}{State}
+\umluniassoc[arg2=current, mult2=1, anchor1=-15, anchor2=163]
+{FiniteAutomaton}{State}
+\umluniassoc[mult2=*, loopsize=1.5cm, angle1=-155, angle2=-140]{State}{State}
+\end{tikzpicture}
