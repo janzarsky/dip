@@ -37,15 +37,15 @@ spoilers must be implemented using the RoadRunner interface. This master's
 thesis deals with the design of the analyzer, its implementation, and the
 evaluation of the analyzer.
 
-The thesis is structured as follows. Chapter \ref{chTwo} describes specifics of
+The thesis is structured as follows. Chapter~\ref{chTwo} describes specifics of
 multi-threaded programming in Java, Java memory model, and an overview of
 software errors related to concurrency. Approaches to the dynamic analysis of
 Java programs and instrumentation techniques are described. Two important
 frameworks are presented, the ASM framework for byte code instrumentation, and
-the RoadRunner framework for writing dynamic analyzers. Chapter \ref{chThree}
+the RoadRunner framework for writing dynamic analyzers. Chapter~\ref{chThree}
 introduces contracts for concurrency, their modified versions, and a method for
-dynamic detection of contract violations. In Chapter \ref{chFour}, a dynamic
-analyzer for contracts is designed. Chapter \ref{chFive} provides implementation
+dynamic detection of contract violations. In Chapter~\ref{chFour}, a dynamic
+analyzer for contracts is designed. Chapter~\ref{chFive} provides implementation
 details and testing approaches.
 
 
@@ -181,8 +181,8 @@ To start a thread, the \texttt{start} method must be called (which will in
 turn call the \texttt{run} method). The thread will terminate upon returning
 from the \texttt{run} method. The \texttt{join} method is used in other
 threads to wait for a thread to terminate \cite{javaTheCompleteReference}.
-Figure \ref{threadExtend} shows a thread creation example by extending the
-\texttt{Thread} class, Figure \ref{threadRunnable} shows the same example
+Figure~\ref{threadExtend} shows a thread creation example by extending the
+\texttt{Thread} class, Figure~\ref{threadRunnable} shows the same example
 achieved by implementing the \texttt{Runnable} interface.
 
 \begin{figure}[hbt]
@@ -228,7 +228,7 @@ be owned by only one thread at a given time. To enter the monitor, one must use
 either synchronized methods or synchronized statements.  \emph{Synchronized
 statements} are code blocks with an explicitly specified object whose monitor is
 entered before executing the block. \emph{Synchronized methods} enter the
-monitor of the instance they are called upon. Figure \ref{synchronized} shows
+monitor of the instance they are called upon. Figure~\ref{synchronized} shows
 examples of synchronized blocks and synchronized methods.
 
 \begin{figure}[hbt]
@@ -295,7 +295,7 @@ is for example adding two local variables and it is not important to the model.
 Nonvolatile reading or writing of a shared variable is an inter-thread action.
 \emph{Synchronization actions} are inter-thread actions that include volatile
 reading or writing of variables, locking and unlocking of monitors, and starting
-and stopping of a thread. Figure \ref{threadActions} shows examples of different
+and stopping of a thread. Figure~\ref{threadActions} shows examples of different
 kinds of actions.
 
 \begin{figure}[hbt]
@@ -342,7 +342,7 @@ programs.
 
 A \emph{data race} occurs, when there are two accesses to the same variable, at
 least one of which is write, and these accesses are not ordered by
-\emph{happens-before}. This situation is illustrated in Figure \ref{hb2}.
+\emph{happens-before}. This situation is illustrated in Figure~\ref{hb2}.
 
 \begin{figure}[hbt]
     \label{hb1}
@@ -388,7 +388,7 @@ Programs written in Java are compiled into Java bytecode which is executed by
 the Java Virtual Machine. Every class gets compiled into a Java class file
 containing the following sections \cite{asmguide}:
 \begin{itemize}
-    \item Section with information about the class itself, such as the name of
+    \item A section with information about the class itself, such as the name of
     the class, the super class, implemented interfaces, and class annotations.
     \item One section per field, containing the field name, type, modifiers, and
     annotations.
@@ -493,7 +493,7 @@ used in slightly different circumstances. Exceptions are thrown using the
 \texttt{athrow} instruction. Entering a monitor is achieved by
 \texttt{monitorenter} and \texttt{monitorexit} instructions, which are used by
 synchronized statements in Java. An example of a method represented by bytecode
-is shown in Figure \ref{bytecodeExample}.
+is shown in Figure~\ref{bytecodeExample}.
 
 \begin{figure}[hbt]
     \label{bytecodeExample}
@@ -572,9 +572,9 @@ effectively copying the class.
     \caption{Typical architecture for class transformation.}
 \end{figure}
 
-The typical class transformation uses the following architecture (see Figure
-\ref{asmArchitecture}): a \texttt{ClassReader} instance reads the class, then
-one or more \texttt{ClassVisitor} instances modify the class, and then a
+The typical class transformation uses the following architecture (see
+Figure~\ref{asmArchitecture}): a \texttt{ClassReader} instance reads the class,
+then one or more \texttt{ClassVisitor} instances modify the class, and then a
 \texttt{ClassWriter} instance writes the modified class back to a file.
 
 \section{Dynamic Analysis using RoadRunner}
@@ -596,9 +596,9 @@ memory locations, locks, or threads.
 
 \subsection{The RoadRunner Programming Interface}
 
-Every analyzer in RoadRunner is based on the \texttt{Tool} class. Figure
-\ref{toolclass} contains the most important methods of \texttt{Tool}. During the
-analysis, every time an action is detected, the appropriate method in
+Every analyzer in RoadRunner is based on the \texttt{Tool} class.
+Figure~\ref{toolclass} contains the most important methods of \texttt{Tool}.
+During the analysis, every time an action is detected, the appropriate method in
 \texttt{Tool} is called, along with an \texttt{Event} object that contains
 information about the event.
 
@@ -726,7 +726,7 @@ public void foo();
   15: aload_2
   16: invokespecial #53 // Method __$rr_put_bar:(IILrr/state/ShadowThread;)V
   19: return\end{lstlisting}
-    \caption{Code from Figure \ref{rrInstBefore} instrumented by RoadRunner. For
+    \caption{Code from Figure~\ref{rrInstBefore} instrumented by RoadRunner. For
     the \texttt{bar} field, two access methods are added and a new field of type
     \texttt{ShadowVar}. In the \texttt{foo} method, the \texttt{bar} field is
     accessed using methods \texttt{\_\_\$rr\_get\_bar} and
@@ -742,7 +742,7 @@ method generates enter and exit events. In order to detect abnormal method exits
 that are caused by an exception being thrown, the call to the original method is
 wrapped in a try block. When an exception is caught, the exit event is generated
 and the exception is re-thrown. An example of a method instrumented by
-RoadRunner is shown in Figure \ref{rrInstMethod}.
+RoadRunner is shown in Figure~\ref{rrInstMethod}.
 
 \begin{figure}[hbt]
     \label{rrInstMethod}
@@ -888,7 +888,7 @@ basic contract is called a \emph{target} and is assigned a set of so-called
 \emph{spoilers}. A spoiler is a set of method sequences that may violate its
 target.
 
-Consider clause $\varrho_1$ from the example in Section \ref{basicContracts}. If
+Consider clause $\varrho_1$ from the example in Section~\ref{basicContracts}. If
 the element that was put into the map is concurrently removed or updated before
 the \texttt{get} call, a contract violation should be detected.  However,
 calling \texttt{contains} or \texttt{get} on the element will not affect the
@@ -1008,7 +1008,7 @@ happens-before relation can be deduced, and all contracts can be easily checked
 for violations. The trace, however, can get large and make this approach
 unpractical. For this reason, several optimizations are introduced in
 \cite{contracts}, which are presented in the next section. An example of a
-program trace containing a contract violation is shown in Figure \ref{traces}.
+program trace containing a contract violation is shown in Figure~\ref{traces}.
 
 \begin{figure}[hbt]
     \begin{center}
@@ -1158,14 +1158,14 @@ program under analysis and a contract definition. The analyzer is then able to
 detect contract violations in the program and report them. The RoadRunner
 framework was modified to support obtaining method arguments and return values.
 
-Section \ref{overview} provides an architectural overview of the analyzer
-itself. Section \ref{constraining} describes several restrictions that were
-placed on the analyzer in the design phase. In Section \ref{instrChanges},
-necessary changes to RoadRunner itself are presented. Section \ref{contracts}
+Section~\ref{overview} provides an architectural overview of the analyzer
+itself. Section~\ref{constraining} describes several restrictions that were
+placed on the analyzer in the design phase. In Section~\ref{instrChanges},
+necessary changes to RoadRunner itself are presented. Section~\ref{contracts}
 describes how a contract is defined and processed before the analysis is
-started. The core function of the analyzer is described in Section
-\ref{contractAnalyzer}. Section \ref{contractTool} describes how the analyzer
-interacts with RoadRunner.
+started. The core function of the analyzer is described in
+Section~\ref{contractAnalyzer}. Section~\ref{contractTool} describes how the
+analyzer interacts with RoadRunner.
 
 \section{Overview of the Contract Analyzer}
 \label{overview}
@@ -1177,16 +1177,16 @@ for contract violations. It manages data stored with threads and locks, such as
 trace windows and vector clocks. The \texttt{ContractAnalyzer} class can be
 instantiated without any dependencies from the RoadRunner project, which is
 useful for testing purposes. A detailed description of \texttt{ContractAnalyzer}
-can be found in Section \ref{contractAnalyzer}.
+can be found in Section~\ref{contractAnalyzer}.
 
 The \texttt{ContractTool} class is a subclass of RoadRunner's \texttt{Tool}
 class. During the initialization of \texttt{ContractTool}, the contract
 definition file is parsed and \texttt{ContractAnalyzer} is created. In
 \texttt{ContractTool}, relevant methods are overridden to receive events from
 RoadRunner, such as lock acquire and release or method exit. These events are
-then processed and sent to \texttt{ContractAnalyzer}. Section \ref{contractTool}
-provides a detailed description of \texttt{ContractTool} and Section
-\ref{contracts} describes the parsing and representation of contracts.
+then processed and sent to \texttt{ContractAnalyzer}. Section~\ref{contractTool}
+provides a detailed description of \texttt{ContractTool} and
+Section~\ref{contracts} describes the parsing and representation of contracts.
 
 For each thread, a \texttt{Window} instance is created by
 \texttt{ContractAnalyzer}. It stores information about target and spoiler
@@ -1228,7 +1228,7 @@ example, the target from the previous example is invalid because the value of
 
 \subsection{Invalidating Instances}
 
-A target or spoiler instance, as defined in Chapter \ref{chThree}, requires that
+A target or spoiler instance, as defined in Chapter~\ref{chThree}, requires that
 no method belonging to the alphabet of a given target or spoiler may be called
 between the events that form the instance. In practice, it means that a running
 instance must be discarded when a method belonging to the target or spoiler is
@@ -1249,7 +1249,7 @@ the instance's target, three kinds of situations can happen:
         advanced but it also should not be discarded. The method call most
         likely belongs to another instance.
     \item The method does not match the target definition. According to the
-        definition in Chapter \ref{chThree}, the instance should be discarded.
+        definition in Chapter~\ref{chThree}, the instance should be discarded.
         But the analyzer does not know if the method call is in any way related
         to the instance.
 \end{enumerate}
@@ -1291,7 +1291,7 @@ discard running instances.
 \subsection{Kleene Star in Contract Definition}
 
 The analyzer never invalidates a running instance. This fact allows for
-optimization in contract definitions. As defined in Chapter \ref{chThree}, a
+optimization in contract definitions. As defined in Chapter~\ref{chThree}, a
 target or a spoiler is a regular expression over methods. The analyzer should
 therefore recognize contracts defined using all three basic operations:
 concatenation (\texttt{ab}), alternation (\texttt{a|b}), and Kleene star
@@ -1387,7 +1387,7 @@ it is represented in the analyzer.
 The analyzer takes a contract definition as a parameter. At the top level, the
 definition contains pairs of targets and spoilers. Each target and spoiler is
 represented by a regular expression over methods. The on-the-fly dynamic
-analysis described in Chapter \ref{chThree} expects several spoilers to be
+analysis described in Chapter~\ref{chThree} expects several spoilers to be
 assigned to a single target. In practice, the spoilers can be merged into a
 single regular expression so that each target has exactly one spoiler. Each
 method is parametrized, including arguments, return value, and the object it is
@@ -1423,7 +1423,7 @@ Test.a()V X() ( Test.b()V X() | Test.c()V X() )
 
 A contract clause is defined as two regular expressions over methods, separated
 by an arrow and a semicolon at the end. A contract is then a list of clauses. An
-example of a full contract is shown in Figure \ref{contract}. The full grammar
+example of a full contract is shown in Figure~\ref{contract}. The full grammar
 for contracts is shown in Appendix \ref{appGrammar}.
 
 \begin{figure}[hbt]
@@ -1436,7 +1436,7 @@ Map.contains(I)Z M(K)
   ( Map.put(ID)V M(K,_) | Map.get(I)D M.(K) | Map.remove(I)D M(K) )
   <- Map.put(ID)V M(K,_) | Map.remove(I)D M(K) ;
 \end{lstlisting}
-    \caption{Contract from Chapter \ref{chThree} written for a Map with
+    \caption{Contract from Chapter~\ref{chThree} written for a Map with
     \texttt{int} keys and \texttt{double} values. The first target matches an
     inserting element to the map at a given key and then retrieving it. The
     target can be invalidated by calling either \texttt{put} or \texttt{get}
@@ -1461,7 +1461,7 @@ spoiler instances. A target with a single method will be represented by two
 states: one starting state with a transition to an accepting state. The
 transition will contain the method signature and meta-variables. During parsing
 of more complex targets and spoilers, these one-method state structures are
-combined. See Figure \ref{states} for an example. During the analysis,
+combined. See Figure~\ref{states} for an example. During the analysis,
 \texttt{State} instances will be used for checking whether a given method
 invocation can advance a given target or spoiler.
 
@@ -1513,11 +1513,11 @@ look for contract violations.
 
 The \texttt{ContractAnalyzer} class is created and called by the
 \texttt{ContractTool} class which directly uses the RoadRunner API. The
-\texttt{ContractTool} class is described in Section \ref{contractTool}.
+\texttt{ContractTool} class is described in Section~\ref{contractTool}.
 
 The interface of the analyzer is made up of synchronized methods to ensure
 proper synchronization. This approach is not the same as the event serialization
-mentioned in Chapter \ref{chTwo}. All events that are not calling analyzer's
+mentioned in Chapter~\ref{chTwo}. All events that are not calling analyzer's
 methods will still be concurrent.
 
 \subsection{Tracking of Target and Spoiler Instances}
@@ -1537,13 +1537,13 @@ instance remembers the vector clock of its beginning.
 
 When an instance is advanced using the last method in the target or spoiler
 definition, it reaches an accepting state. At this point, the analyzer checks
-for contract violations (see Section \ref{violations}). Then the instance is
+for contract violations (see Section~\ref{violations}). Then the instance is
 reset. That means that the instance again waits for the first method signature
 in a given target or spoiler. The value of parameters will however stay
 unchanged. The vector clocks of the beginning and the end of the instance are
 saved. So when an instance is running for the second time, it has access to the
-vector clocks of a previously encountered instance. See Figure
-\ref{instanceLifeCycle} for illustration of an instance life cycle.
+vector clocks of a previously encountered instance. See
+Figure~\ref{instanceLifeCycle} for illustration of an instance life cycle.
 
 \begin{figure}[hbt]
     \begin{center}
@@ -1611,9 +1611,9 @@ decided based on the vector clocks of the beginnings and ends of the two
 instances. Vector clocks are only updated when threads synchronize themselves.
 So the analyzer will mark the two instances as interleaving when there was not
 a synchronization between the threads that would prevent them to interleave each
-other in another run of the program under analysis. Figure
-\ref{detectionExample} shows an example of a contract violation detected in a
-program.
+other in another run of the program under analysis.
+Figure~\ref{detectionExample} shows an example of a contract violation detected
+in a program.
 
 \begin{figure}[hbt]
     \begin{center}
@@ -1636,7 +1636,7 @@ program.
 \section{A Contract Analyzer Tool}
 \label{contractTool}
 
-The \texttt{ContractAnalyzer} class described in Section \ref{contractAnalyzer}
+The \texttt{ContractAnalyzer} class described in Section~\ref{contractAnalyzer}
 is not meant to be called directly by RoadRunner because it contains only
 methods specific to the validation of contracts. The \texttt{ContractTool} class
 was created as a layer between RoadRunner and \texttt{ContractAnalyzer}. Its
@@ -1645,7 +1645,7 @@ instance, and forward relevant events from RoadRunner to
 \texttt{ContractAnalyzer}.
 
 The \texttt{ContractTool} class is a subclass of the \texttt{Tool} class (see
-Section \ref{roadRunnerUsage}). The following methods are overridden:
+Section~\ref{roadRunnerUsage}). The following methods are overridden:
 \begin{itemize}
     \item \texttt{init}, which is called before the analysis, after
         command-line options are processed;
@@ -1687,14 +1687,15 @@ events provided by RoadRunner and forward it to \texttt{ContractAnalyzer}.
 \chapter{Implementation and Testing}
 \label{chFive}
 
-The analyzer described in Chapter \ref{chFour} was successfully implemented.
+The analyzer described in Chapter~\ref{chFour} was successfully implemented.
 This chapter provides implementation details and clarifies decisions made during
-the implementation. Section \ref{approaches} describes approaches and principles
+the implementation. Section~\ref{approaches} describes approaches and principles
 that shaped the implementation. Before the implementation took place, several
-RoadRunner dependencies were upgraded, see Section \ref{asmAndJava}. In Section
-\ref{cfParsing}, the contract file parser is described. Changes to the
-instrumentation performed by RoadRunner are described in detail in Section
-\ref{instrImpl}. Finally, Section \ref{testing} describes testing approaches.
+RoadRunner dependencies were upgraded, see Section~\ref{asmAndJava}. In
+Section~\ref{cfParsing}, the contract file parser is described. Changes to the
+instrumentation performed by RoadRunner are described in detail in
+Section~\ref{instrImpl}. Finally, Section~\ref{testing} describes testing
+approaches.
 
 \section{General Approaches}
 \label{approaches}
@@ -1737,7 +1738,7 @@ be \texttt{final} to avoid overriding of methods. All fields of a class
 should be \texttt{private} and \texttt{final}. All fields should reference only
 immutable objects or, if not possible, the fields should not be modified in the
 class. All methods that would normally modify the object should return updated
-object instead. See Figure \ref{immutable} for an example.
+object instead. See Figure~\ref{immutable} for an example.
 
 \begin{figure}[hbt]
     \label{immutable}
@@ -1809,7 +1810,7 @@ RoadRunner itself was modified to be built for Java 11.
 \section{Contract File Parsing}
 \label{cfParsing}
 One of the inputs to the analyzer is a contract definition. The syntax of the
-definition is described in Chapter \ref{chFour}. Due to its length, it is passed
+definition is described in Chapter~\ref{chFour}. Due to its length, it is passed
 to the analyzer in a text file. The file name is specified using a command-line
 option. RoadRunner allows tools to easily add new command-line options. The
 options are then automatically parsed and made available for the tool to use.
