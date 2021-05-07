@@ -6,7 +6,45 @@
 \chapter{Contract Definition Grammar}
 \label{appGrammar}
 
-\todo{include the grammar}
+The configuration files with contract definitions must follow the grammar
+presented below. The grammar is described in the BNF syntax.
+
+\begin{lstlisting}
+<contract> ::= <clause> | <contract> <clause>
+
+<clause> ::= <method_expr> "<-" <method_expr> ";"
+
+<method_expr> ::= <method>
+                | "(" <method_expr> ")"
+                | <method_expr> "|" <method_expr>
+                | <method_expr> "(" <method_expr> ")"
+                | <method_expr> <method>
+
+<method> ::= <class> <name> <descriptor> <metavars>
+
+<metavars> ::= <metavar> "=" <metavar> "(" <metavars_list> ")"
+    | <metavar> "=" <metavar> "()" 
+    | <metavar> "=("  <metavars_list> ")"
+    | <metavar> "(" <metavars_list> ")"
+    | "(" <metavars_list> ")"
+    | <metavar> "()" 
+    | "()"
+
+<metavars_list> ::= <metavar> | <metavars_list> "," <metavar>
+
+<metavar> ::= <letter> | "_"
+\end{lstlisting}
+
+The terminals have the following definitions:
+\begin{itemize}
+    \item \texttt{<class>} is a class name in the internal representation of
+        the JVM specification, for example: \texttt{java/lang/Object};
+    \item \texttt{<name>} is the method name, as defined by the JVM
+        specification, for example: \texttt{equals};
+    \item \texttt{<descriptor>} is the method descriptor, as defined by JVM
+        specification, for example: \texttt{(Ljava/lang/Object;)Z};
+    \item \texttt{<letter>} is a single letter, such as \texttt{X}.
+\end{itemize}
 
 \chapter{Class Diagram of the Contract Analyzer}
 \label{diagram}
