@@ -89,26 +89,26 @@ the presence of defects in software, not for proving their absence
 An important property of test cases is their \emph{repeatability}, meaning that
 a certain test case will always yield the same result. When testing
 multi-threaded programs, this property does not hold because of the
-non-determinism introduced by the thread scheduler. Threads are interleaved
+nondeterminism introduced by the thread scheduler. Threads are interleaved
 differently on each execution which means that errors may or may not appear.
 This makes discovering defects in multi-threaded programs difficult.
 
 \paragraph{Dynamic Analysis}
 \emph{Dynamic analysis} works with information gathered during an execution of a
 program. The information may be analyzed during program execution
-(\emph{on-the-fly}) or at the end (\emph{post-mortem}). Even though the analysis
-works with information from a single execution, it can in some cases find errors
-that were not observed during the execution but may demonstrate themselves in
-similar executions \cite{letko}. The dynamic analysis also suffers from
-nondeterministic scheduling. The program under analysis may also behave
-differently due to being observed by the analyzer.
+(\emph{on-the-fly} analysis) or at the end (\emph{post-mortem} analysis). Even
+though the analysis works with information from a single execution, it can in
+some cases find errors that were not observed during the execution but may
+demonstrate themselves in similar executions \cite{letko}. The dynamic analysis
+also suffers from nondeterministic scheduling. The program under analysis may
+also behave differently due to being observed by the analyzer.
 
 The analyzer proposed in this thesis performs on-the-fly dynamic analysis of
 contracts for concurrency and detects contract violations that occurred not only
 in the given run but also those that may have occurred in similar runs.
 
 \paragraph{Static Analysis}
-\emph{Static analysis} is performed at compile-time and it does not require the
+\emph{Static analysis} is performed at compile time and it does not require the
 program to be running. The analysis is theoretically able to cover all possible
 executions of a program. In practice, it is limited by the fact that the number
 of thread interleavings in multi-threaded programs grows exponentially
@@ -292,7 +292,7 @@ order, and happens-before order.
 The actions can be either intra- or inter-thread. An \emph{inter-thread} action
 can be detected or influenced by another thread. An \emph{intra-thread} action
 is for example adding two local variables and it is not important to the model.
-Non-volatile reading or writing of a shared variable is an inter-thread action.
+Nonvolatile reading or writing of a shared variable is an inter-thread action.
 \emph{Synchronization actions} are inter-thread actions that include volatile
 reading or writing of variables, locking and unlocking of monitors, and starting
 and stopping of a thread. Figure \ref{threadActions} shows examples of different
@@ -630,11 +630,11 @@ public abstract class Tool {
 
 The following events are detected by the RoadRunner framework:
 \begin{itemize}
-    \item Method entry and exit.
-    \item Memory accesses -- reads and writes to fields and variables.
-    \item Lock acquires and releases.
-    \item Synchronization signals -- wait and notify.
-    \item Thread forking and joining.
+    \item method entry and exit,
+    \item memory accesses (reads and writes to fields and variables),
+    \item lock acquires and releases,
+    \item synchronization signals (wait and notify),
+    \item thread forking and joining.
 \end{itemize}
 
 There are several subclasses of the \texttt{Event} class with specific
@@ -1061,7 +1061,7 @@ The on-the-fly dynamic analysis of contracts uses vector clocks and the
 \emph{happens-before} relation the same way it is used in the FastTrack
 algorithm \cite{fasttrack}. A \emph{vector clock} $VC: \mathbb{T} \rightarrow
 \mathbb{N}$ consists of clock values for each thread $t \in \mathbb{T}$. Vector
-clocks are partially-ordered with $\sqsubseteq$, can be joined with $\sqcup$,
+clocks are partially ordered with $\sqsubseteq$, can be joined with $\sqcup$,
 and contain a minimal element $\perp_V$. The $t$-component of a vector clock is
 incremented using the $inc_t$ function.
 \begin{align*}
@@ -1091,7 +1091,7 @@ e_u$ when $VC_{e_t}(t) \varleq VC_{e_u}(t)$.
 
 The clocks are updated on the following actions:
 \begin{itemize}
-    \item Fork -- when a thread $t$ creates a new thread $u$:
+    \item Fork --- when a thread $t$ creates a new thread $u$:
         \begin{align*}
             \mathbb{C}_u &\leftarrow \mathbb{C}_u \sqcup \mathbb{C}_t \\
             \mathbb{C}_t &\leftarrow inc_t(\mathbb{C}_t)
@@ -1099,7 +1099,7 @@ The clocks are updated on the following actions:
         The new thread will get all \emph{happens-before} relations from the
         parent thread. Then the parent thread is updated so that events coming
         after the fork will not \emph{happen-before} events in the new thread.
-    \item Join -- when a thread $t$ waits for a thread $u$ to finish.
+    \item Join --- when a thread $t$ waits for a thread $u$ to finish.
         \begin{align*}
             \mathbb{C}_t &\leftarrow \mathbb{C}_t \sqcup \mathbb{C}_u \\
             \mathbb{C}_u &\leftarrow inc_u(\mathbb{C}_u)
@@ -1108,7 +1108,7 @@ The clocks are updated on the following actions:
         \emph{happens-before} relations from the joining thread. Then the
         joining thread is updated so that events coming after the join will not
         \emph{happen-before} events in the waiting thread.
-    \item Release -- when a thread $t$ releases a lock $l$.
+    \item Release --- when a thread $t$ releases a lock $l$.
         \begin{align*}
             \mathbb{L}_l &\leftarrow \mathbb{C}_t \\
             \mathbb{C}_t &\leftarrow inc_t(\mathbb{C}_t)
@@ -1118,7 +1118,7 @@ The clocks are updated on the following actions:
         thread so the thread's vector clock is stored in the lock. Then the
         thread is updated so that events coming after the release will not be
         synchronized with the thread that acquires the lock in the future.
-    \item Acquire -- when a thread $t$ acquires a lock $l$.
+    \item Acquire --- when a thread $t$ acquires a lock $l$.
         \begin{align*}
             \mathbb{C}_t &\leftarrow \mathbb{C}_t \sqcup \mathbb{L}_l
         \end{align*}
@@ -1308,7 +1308,7 @@ the analyzer.
 
 The method described in \cite{contracts} is based on program traces where
 every method represents a single event in the trace. However, the RoadRunner
-framework produces two events for every method -- method entry and method exit.
+framework produces two events for every method: method entry and method exit.
 For parametric contracts, we need to obtain values of parameters and also the
 return value, which is available only on method exit. For convenience, the
 analyzer should use only the method exit event. This means that the analyzer may
@@ -1335,11 +1335,11 @@ can be assigned values.
 The \texttt{enter} and \texttt{exit} of RoadRunner's \texttt{Tool} class methods
 both take a \texttt{MethodEvent} parameter containing the following information:
 \begin{itemize}
-    \item Target -- \texttt{null} for static methods, the value of \texttt{this}
+    \item Target --- \texttt{null} for static methods, the value of \texttt{this}
         for instance methods.
-    \item A \texttt{MethodInfo} object -- static information about the method
+    \item A \texttt{MethodInfo} object --- static information about the method
         definition (name, descriptor, whether it is synchronized or static).
-    \item Call site location -- where was the method invoked.
+    \item Call site location --- where was the method invoked.
 \end{itemize}
 
 The \texttt{MethodEvent} class was extended for storing method arguments and the
@@ -1837,9 +1837,9 @@ The current implementation of the parser introduces a limitation to the range of
 allowed regular expressions. When the alternation operation is used (denoted by
 \texttt{|}), the expressions cannot start with the same method. For example, the
 regular expression \texttt{(ab|ac)} is not allowed. The resulting finite
-automaton would be non-deterministic. The current implementation does not
-perform any conversion, all expressions must be converted by the user. In the
-previous example, the expression would need to be converted to \texttt{a(b|c)}.
+automaton would be nondeterministic. The current implementation does not perform
+any conversion, all expressions must be converted by the user. In the previous
+example, the expression would need to be converted to \texttt{a(b|c)}.
 
 \section{Changes in Instrumentation}
 \label{instrImpl}
@@ -1873,7 +1873,7 @@ corresponding class depending on the primitive type. For example, \texttt{int}
 values are passed to the \texttt{java.lang.Integer.valueOf()} function. After
 processing all arguments, the array is stored in a local variable.
 
-The original method is then called in a try-catch block. On normal exit, the
+The original method is then called in a try--catch block. On normal exit, the
 return value is converted to an object, the same way parameters are converted.
 Then a method exit event is generated, containing both the array of arguments
 and the return value. If an exception is caught, the return value is set to
@@ -1923,14 +1923,14 @@ public int foo(int, java.lang.String);
                 // (Lrr/state/ShadowThread;[Ljava/lang/Object;Ljava/lang/Object;)V
 60: athrow
 61: ireturn\end{lstlisting}
-    \caption{Method instrumented to obtain arguments and the return value. On
-    lines 5 to 11, the enter event is generated. On lines 14 to 18, an array for
-    arguments is created and stored in a local variable. On lines 19 to 25, the
+    \caption{A method instrumented to obtain arguments and the return value. On
+    lines 5--11, the enter event is generated. On lines 14--18, an array for
+    arguments is created and stored in a local variable. On lines 19--25, the
     first argument is wrapped in an object and stored in the array on index 0.
-    On lines 26 to 29, the second argument is stored directly in the array on
-    index 1. On lines 30 to 33, the original method is called. On lines 36 to
-    40, the return value is wrapped and stored in a local variable. Lines 42 to
-    50 generate the exit event. Lines 53 to 60 contain a catch block in case an
+    On lines 26--29, the second argument is stored directly in the array on
+    index 1. On lines 30--33, the original method is called. On lines 36--40,
+    the return value is wrapped and stored in a local variable. Lines 42--50
+    generate the exit event. Lines 53--60 contain a catch block in case an
     exception is thrown in the original function.}
 \end{figure}
 
