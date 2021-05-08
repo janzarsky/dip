@@ -72,10 +72,10 @@ implementation of the contract analyzer.
 \label{approachesToSwVerification}
 
 The goal of software verification is to make sure that the software meets all
-requirements. There are several approaches to software verification, each of
-them having its own advantages and disadvantages. This section provides a
-summary of testing, dynamic and static analysis, abstract interpretation,
-theorem proving, and model checking.
+requirements~\cite{fundamentals}. There are several approaches to software
+verification, each of them having its own advantages and disadvantages. This
+section provides a summary of testing, dynamic and static analysis, abstract
+interpretation, theorem proving, and model checking.
 
 \paragraph{Testing}
 \emph{Testing} consists of running the software under different conditions and
@@ -126,9 +126,9 @@ heuristic exploration of the state space. The drawback of this technique is that
 the state space of the program model can be huge.
 
 \paragraph{Theorem Proving}
-\emph{Theorem proving} is a semi-automated approach to proving that a certain
+\emph{Theorem proving} is a semi-automated approach to proving that certain
 facts are satisfied in the system. It is based on assumptions and general
-theorems about the system and uses mathematical reasoning.
+theorems about the system and uses mathematical reasoning \cite{fundamentals}.
 
 
 \section{Safety Errors in Multi-threaded Programs}
@@ -136,7 +136,7 @@ theorems about the system and uses mathematical reasoning.
 Contracts for concurrency specify rules on using a set of methods in a
 concurrent setting. They aim at discovering errors specific to a concurrent
 environment. When compared to single-threaded programs, multi-threaded programs
-may encounter a whole new class of errors related to sharing memory between
+may encounter a whole new class of errors related to memory sharing between
 threads. Errors presented in this section are classified as \emph{safety errors}
 in \cite{letko} as these are usually checked in various dynamic analyses.
 
@@ -170,12 +170,13 @@ threads are waiting for a signal, and the signal is never delivered.
 Java provides built-in support for multi-threaded programming. This section
 describes a typical thread life cycle, synchronization of threads, and
 inter-thread communication, as these are important in dynamic analysis using
-contracts.
+contracts for concurrency.
 
-A thread in Java is represented by a \texttt{Thread} object. There are two ways
-to create a thread: by extending the \texttt{Thread} class, or by implementing
-the \texttt{Runnable} interface. Both approaches produce a \texttt{Thread}
-instance that executes the \texttt{run} method in a new thread when started.
+A thread in Java is represented by a \texttt{Thread} instance. There are two
+ways to create a thread: by extending the \texttt{Thread} class, or by
+implementing the \texttt{Runnable} interface. Both approaches produce a
+\texttt{Thread} instance that executes the \texttt{run} method in a new thread
+when started.
 
 To start a thread, the \texttt{start} method must be called (which will in
 turn call the \texttt{run} method). The thread will terminate upon returning
@@ -201,7 +202,8 @@ class MyThread extends Thread {
   }
 }
 \end{lstlisting}
-    \caption{Creating a thread by extending the \texttt{Thread} class.}
+    \caption{A simple program that creates a thread by extending the
+    \texttt{Thread} class.}
 \end{figure}
 
 \begin{figure}[hbt]
@@ -219,7 +221,8 @@ class MyRunnable implements Runnable {
   }
 }
 \end{lstlisting}
-    \caption{Creating a thread by implementing the \texttt{Runnable} interface.}
+    \caption{A simple program that creates a thread by implementing the
+    \texttt{Runnable} interface.}
 \end{figure}
 
 When accessing a shared resource from multiple threads, proper synchronization
@@ -228,8 +231,9 @@ be owned by only one thread at a given time. To enter the monitor, one must use
 either synchronized methods or synchronized statements.  \emph{Synchronized
 statements} are code blocks with an explicitly specified object whose monitor is
 entered before executing the block. \emph{Synchronized methods} enter the
-monitor of the instance they are called upon. Figure~\ref{synchronized} shows
-examples of synchronized blocks and synchronized methods.
+monitor of the instance they are called upon~\cite{javaTheCompleteReference}.
+Figure~\ref{synchronized} shows examples of synchronized blocks and synchronized
+methods.
 
 \begin{figure}[hbt]
     \label{synchronized}
@@ -258,7 +262,7 @@ Communication between threads is achieved using the following methods:
 \texttt{wait}, \texttt{notify}, and \texttt{notifyAll}. All methods must be
 called within a synchronized context. Calling \texttt{wait} will suspend the
 calling thread until some other thread enters the same monitor and calls either
-\texttt{notify} or \texttt{notifyAll}.
+\texttt{notify} or \texttt{notifyAll}~\cite{javaTheCompleteReference}.
 
 Multi-threaded programs may use the \texttt{volatile} type modifier. It tells
 the compiler that the variable may be modified outside of the current thread.
@@ -281,13 +285,13 @@ execution traces that are valid according to the model \cite{jmmspec}.
 
 In a single-threaded program, it is only required that the program produces the
 same result as if it was run serially. The compiler is free to reorder
-instructions when it does not affect the result of the computation.
+instructions when it does not affect the result of the computation. In
+multi-threaded programs, the reordering of instructions has to be limited when
+the threads interact with each other.
 
-In multi-threaded programs, the reordering of instructions has to be limited
-when the threads interact with each other. In the model, only certain program
-\emph{actions} are considered. There are several orders defined over the actions
-which are used by the dynamic contract analysis: program order, synchronization
-order, and happens-before order.
+In the model, only certain program \emph{actions} are considered. There are
+several orders defined over the actions which are used by the dynamic contract
+analysis: program order, synchronization order, and happens-before order.
 
 The actions can be either intra- or inter-thread. An \emph{inter-thread} action
 can be detected or influenced by another thread. An \emph{intra-thread} action
@@ -295,8 +299,8 @@ is for example adding two local variables and it is not important to the model.
 Nonvolatile reading or writing of a shared variable is an inter-thread action.
 \emph{Synchronization actions} are inter-thread actions that include volatile
 reading or writing of variables, locking and unlocking of monitors, and starting
-and stopping of a thread. Figure~\ref{threadActions} shows examples of different
-kinds of actions.
+and stopping of a thread~\cite{jmmspec}. Figure~\ref{threadActions} shows
+examples of different kinds of actions.
 
 \begin{figure}[hbt]
     \label{threadActions}
@@ -314,8 +318,8 @@ class MySharedData {
   }
 }
 \end{lstlisting}
-    \caption{Different program actions classified from the Java Memory Model
-    point of view. Entering and leaving \texttt{MyMethod} produces
+    \caption{Various program actions classified from the Java memory model point
+    of view. Entering and leaving \texttt{MyMethod} produces
     \emph{synchronization actions}. Accessing \texttt{mySharedVar} is considered
     as an \emph{inter-thread} action, but not as a synchronization action
     because \texttt{mySharedVar} is not declared as \texttt{volatile}.}
@@ -342,7 +346,8 @@ programs.
 
 A \emph{data race} occurs, when there are two accesses to the same variable, at
 least one of which is write, and these accesses are not ordered by
-\emph{happens-before}. This situation is illustrated in Figure~\ref{hb2}.
+\emph{happens-before}~\cite{jmmspec}. This situation is illustrated in
+Figure~\ref{hb2}.
 
 \begin{figure}[hbt]
     \label{hb1}
@@ -532,7 +537,7 @@ The ASM framework allows generating and modifying Java classes directly in
 bytecode. It can be used both statically (for example during compilation) or
 dynamically (to create classes at runtime). The ASM framework provides an
 interface for loading and storing the bytecode using higher-level abstractions,
-such as constants, identifiers, methods, fields, etc. \cite{asmguide}.
+such as constants, identifiers, methods, fields, and others~\cite{asmguide}.
 
 There are two interfaces available: the \emph{core API} with an
 \emph{event-based} representation of classes, and the \emph{tree API} with an
@@ -564,18 +569,18 @@ reader. The reader will then call appropriate visit methods on the visitor as it
 is parsing the class. To demonstrate this, one can create a \texttt{ClassReader}
 and connect it to a \texttt{ClassWriter} (which is a subclass of
 \texttt{ClassVisitor}). The reader will call visit methods on the writer,
-effectively copying the class.
+effectively copying the class. The typical class transformation is shown in
+Figure~\ref{asmArchitecture}.
+
 
 \begin{figure}[hbt]
     \label{asmArchitecture}
     \input{figures/asm.tex}
-    \caption{Typical architecture for class transformation.}
+    \caption{The typical architecture for a class transformation using the ASM
+    framework. A \texttt{ClassReader} instance reads the class, then one or more
+    \texttt{ClassVisitor} instances modify the class, and then a
+    \texttt{ClassWriter} instance writes the modified class back to a file.}
 \end{figure}
-
-The typical class transformation uses the following architecture (see
-Figure~\ref{asmArchitecture}): a \texttt{ClassReader} instance reads the class,
-then one or more \texttt{ClassVisitor} instances modify the class, and then a
-\texttt{ClassWriter} instance writes the modified class back to a file.
 
 \section{Dynamic Analysis using RoadRunner}
 \label{roadRunnerUsage}
@@ -652,7 +657,7 @@ Multiple tools can be chained together. Each event handler method forwards the
 \texttt{Event} instance to the next tool in the chain by default. If the event
 is not forwarded, the tool becomes a filter over the event stream. This can be
 used to filter out events that are not interesting to a particular analysis and
-then performing the analysis in the next tool.
+then performing the analysis in the next tool~\cite{RoadRunner}.
 
 \subsection{RoadRunner Synchronization Models}
 
@@ -861,7 +866,7 @@ argument. This dependency can be expressed using \emph{meta-variables} placed as
 the parameters or return values of methods. Parameters that should not be taken
 into account are marked with free meta-variable (denoted with an underscore).
 
-\emph{Example.} The example from section \ref{basicContracts} can be extended
+\emph{Example.} The example from Section \ref{basicContracts} can be extended
 with parameters:
 \begin{align*}
     (\varrho_1) &\ \texttt{put(X,\_) \_ = get(X)}\\
@@ -937,7 +942,8 @@ match target arguments.
 
 In \cite{contracts}, a dynamic contract validation method is proposed for
 contracts with spoilers. Parametric contracts are not included in the method.
-This section provides an overview of the method.
+This section provides an overview of the method. The analyzer designed in
+Chapter~\ref{chFour} uses this method and extends it with parameters.
 
 \subsection{Multi-threaded Program Traces}
 
@@ -955,7 +961,7 @@ set of spoilers, $\mathbb{C} \subseteq \mathbb{R} \times \mathbb{S}$ a set of
 contracts, and $\mathbb{L}$ a set of locks. The set of all events that can be
 generated by a thread $t \in \mathbb{T}$ is then denoted as $\mathbb{E}_t$. Let
 $\mathbb{E} = \bigcup_{t \in \mathbb{T}} \mathbb{E}_t$. A \emph{trace} is then a
-sequence $\tau = e_1 \hdots e_n \in \mathbb{E}^+$.
+sequence $\tau = e_1 \hdots e_n \in \mathbb{E}^+$~\cite{contracts}.
 
 % TODO: basically copied
 
@@ -977,7 +983,7 @@ is no target instance.
 A \emph{spoiler instance} $s$ of a spoiler $\sigma \in \mathbb{S}$ is defined
 similarly. We let $start(r) = e_{i_1}$ and $end(r) = e_{i_k}$ denote the first
 and last events of a target, respectively. Likewise, $start(s)$ and $end(s)$
-denote the first and last events of a spoiler, respectively.
+denote the first and last events of a spoiler, respectively~\cite{contracts}.
 
 \subsection{Contract Violation}
 
