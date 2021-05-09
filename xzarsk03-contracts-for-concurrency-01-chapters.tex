@@ -19,26 +19,21 @@ thread interleavings breach the contract. To verify that a program satisfies the
 restrictions given by contracts for concurrency, one may use either static or
 dynamic analysis, both offering different advantages.
 
-The goal of this project is to design a dynamic analyzer that will be able to
-detect contract violations in Java programs. To observe the behavior of the
-program under analysis, the program must be modified to report all actions of
-interest to the analyzer. That is usually done at the byte code level, and it
-requires a lot of skill not to affect the behavior of the program under
-analysis. Fortunately, the \emph{RoadRunner} framework takes care of the
-instrumenting and provides a simple interface for observing actions taken by the
-program under analysis. The contract analyzer will be built upon the RoadRunner
-interface.
+The goal of this thesis is to design a dynamic analyzer that detects contract
+violations in programs written in the Java programming language. The analyzer
+is built using the \emph{RoadRunner} framework that instruments programs under
+analysis and reports actions taken by the program via a simple interface.
 
-To successfully perform the analysis, the following must be done. A grammar for
-contract definitions and a parser must be created. The instrumentation performed
-by RoadRunner needs to be extended to extract additional information about the
+To perform the analysis, the following must be done. A grammar for contract
+definitions and a parser must be created. The instrumentation performed by
+RoadRunner needs to be extended to extract additional information about the
 program under analysis. Then finally, an analyzer for parametric contracts with
 spoilers must be implemented using the RoadRunner interface. This master's
-thesis deals with the design of the analyzer, its implementation, and the
-evaluation of the analyzer.
+thesis deals with the design of the analyzer, its implementation, and
+verification of its functionality.
 
-The thesis is structured as follows. Chapter~\ref{chTwo} describes specifics of
-multi-threaded programming in Java, Java memory model, and an overview of
+The thesis is structured as follows. Chapter~\ref{chTwo} describes the specifics
+of multi-threaded programming in Java, the Java memory model, and an overview of
 software errors related to concurrency. Approaches to the dynamic analysis of
 Java programs and instrumentation techniques are described. Two important
 frameworks are presented, the ASM framework for byte code instrumentation, and
@@ -788,7 +783,7 @@ public int foo(int);
 
 Monitor entries and exits are handled differently for synchronized statements
 and synchronized methods. Synchronized statements in Java are represented by
-\texttt{monitorenter} and \texttt{monitorexit} instructions. RoadRunner extends 
+\texttt{monitorenter} and \texttt{monitorexit} instructions. RoadRunner extends
 all occurrences of these instructions with calls to methods that generate
 acquire and release events. Synchronized methods in Java do not need
 \texttt{monitorenter} and \texttt{monitorexit} instructions, the locking is
@@ -1059,7 +1054,8 @@ it is detected whether a target or a spoiler instance has ended. When a target
 instance ends, spoiler instances from the trace window are checked if they
 violate the target. When a spoiler instance ends, target instances from the
 trace window are checked if they are violated by the spoiler. At method exit,
-target and spoiler instances are also discarded when no longer needed.
+target and spoiler instances are also discarded when no longer
+needed~\cite{contracts}.
 
 \subsection{Vector Clocks}
 
@@ -1986,7 +1982,7 @@ tool. Then it verifies if a contract violation has been found.
 
 \chapter{Conclusion}
 
-The goal of this term project was to design a dynamic analyzer for validating
+The goal of this thesis was to design a dynamic analyzer for validating
 parametric contracts with spoilers. The analyzer was fully implemented as an
 extension to the RoadRunner framework.
 
@@ -1994,13 +1990,14 @@ The first part of this thesis provided the necessary background in
 multi-threaded programming in Java, dynamic analysis, and instrumentation in the
 RoadRunner framework. Contracts for parallelism were then introduced, together
 with an on-the-fly method for contract analysis. A dynamic analyzer for tracking
-parametric contracts was proposed. Several restriction was put on the analyzer
-in the design phase in order to mitigate problems in previous prototype
-implementations. The analyzer consists of the following parts: a parser for
-contract definitions, a modified instrumentation of methods, and the core
-analyzer that tracks target and spoiler instances and detects contract
-violations. All parts of the analyzer were implemented and their functionality
-was verified by an extensive test suite.
+parametric contracts was proposed. Several restrictions were put on the analyzer
+in the design phase to mitigate problems in previous prototype implementations.
+The analyzer consists of the following parts: a parser for contract definitions,
+modified instrumentation of methods, and the core analyzer that tracks target
+and spoiler instances and detects contract violations. All parts of the analyzer
+were implemented and their functionality was verified by an extensive test
+suite. The analyzer was able to detect all contract violations present in the
+testing programs.
 
 The analyzer implementation provides a solid basis for contract validation of
 programs written in Java. The changes in method instrumentation are not tied to
@@ -2011,6 +2008,6 @@ In the future, various parts of the analyzer may be tuned for better
 performance. The functional implementation allows for easy parallelization of
 checking for contract violations. The instrumentation can be further reduced to
 obtain only program actions relevant to the contract validation. Instance
-invalidation can be introduced by clarifying the conditions in context of
+invalidation can be introduced by clarifying the conditions in the context of
 parametric contracts. The analyzer can be combined with noise injection
 techniques for detecting more contract violations.
