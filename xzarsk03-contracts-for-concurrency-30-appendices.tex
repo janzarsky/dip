@@ -1,7 +1,38 @@
 \chapter{Manual}
 \label{manual}
 
-\todo{installation and running}
+The analyzer requires a Java Virtual Machine version 11 and
+Ant\footnote{available at \url{http://ant.apache.org/}}. For
+convenience, the analyzer should be compiled and run on Linux as there are
+several Bash scripts used in the process. All commands, such as \texttt{ant} or
+\texttt{javac}, that are run during the compilation should belong to the same
+JVM installation.
+
+On Fedora 34, Java 11 is used by default. Ant can be installed by running
+\texttt{dnf install ant} as root. On Ubuntu 21.04, Java 11 must be installed by
+running \texttt{apt install openjdk-11-jdk}. Ant must be installed locally from
+the project's website.
+
+To compile the project, run \texttt{ant} in the RoadRunner directory. The
+project should compile and print \texttt{BUILD SUCCESSFUL} at the end. The unit
+tests can be run at this step with \texttt{ant test}. The tests should all pass.
+
+Before running RoadRunner, edit the \texttt{msetup} file. On line 36, edit the
+path to the JVM installation. On Fedora 34, \texttt{/usr/lib/jvm/java-11} should
+be used. On Ubuntu 21.04, \texttt{/usr/lib/jvm/java-11-openjdk-amd64} should be
+used. Then run \texttt{source msetup}. The environment variables should be
+properly exported.
+
+To verify the compilation, run \texttt{rrrun -help}. To instrument and run a
+testing program, first compile the program: \texttt{javac test/Test.java} and
+then run RoadRunner: \texttt{rrrun test.Test}.
+
+To launch the contract analyzer on a simple program, run the following commands:
+\begin{lstlisting}
+$ javac test/ContractTest.java
+$ rrrun -tools=CT -contractFile=test/ContractTest.contract test.ContractTest
+\end{lstlisting}
+The analyzer should find a contract violation.
 
 \chapter{Contract Definition Grammar}
 \label{appGrammar}
