@@ -177,13 +177,12 @@ To start a thread, the \texttt{start} method must be called (which will in
 turn call the \texttt{run} method). The thread will terminate upon returning
 from the \texttt{run} method. The \texttt{join} method is used in other
 threads to wait for a thread to terminate \cite{javaTheCompleteReference}.
-Figure~\ref{threadExtend} shows a thread creation example by extending the
-\texttt{Thread} class, Figure~\ref{threadRunnable} shows the same example
+Listing~\ref{threadExtend} shows a thread creation example by extending the
+\texttt{Thread} class, Listing~\ref{threadRunnable} shows the same example
 achieved by implementing the \texttt{Runnable} interface.
 
-\begin{figure}[hbt]
-    \label{threadExtend}
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={A simple program that creates a
+thread by extending the \texttt{Thread} class.}, float=hb, label=threadExtend]
 class MyThread extends Thread {
   @Override
   public void run() {
@@ -197,13 +196,10 @@ class MyThread extends Thread {
   }
 }
 \end{lstlisting}
-    \caption{A simple program that creates a thread by extending the
-    \texttt{Thread} class.}
-\end{figure}
 
-\begin{figure}[hbt]
-    \label{threadRunnable}
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, label=threadRunnable, float=ht, caption={A
+simple program that creates a thread by implementing the \texttt{Runnable}
+interface.}]
 class MyRunnable implements Runnable {
   public void run() {
     System.out.println("This is executed in a new thread.");
@@ -216,9 +212,6 @@ class MyRunnable implements Runnable {
   }
 }
 \end{lstlisting}
-    \caption{A simple program that creates a thread by implementing the
-    \texttt{Runnable} interface.}
-\end{figure}
 
 When accessing a shared resource from multiple threads, proper synchronization
 is usually required. In Java, every object gets an implicit monitor, which can
@@ -227,12 +220,15 @@ either synchronized methods or synchronized statements.  \emph{Synchronized
 statements} are code blocks with an explicitly specified object whose monitor is
 entered before executing the block. \emph{Synchronized methods} enter the
 monitor of the instance they are called upon~\cite{javaTheCompleteReference}.
-Figure~\ref{synchronized} shows examples of synchronized blocks and synchronized
+Listing~\ref{synchronized} shows examples of synchronized blocks and synchronized
 methods.
 
-\begin{figure}[hbt]
-    \label{synchronized}
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, label=synchronized, float=h, caption={A
+program with synchronized methods and statements. The \texttt{inc1} method is
+\emph{synchronized}, on each call, the \texttt{Example} instance's monitor is
+entered. The \texttt{inc2} method is not synchronized but contains a
+\emph{synchronized block} with an explicitly specified monitor
+(\texttt{this}).}]
 class Example {
   private int a = 0;
 
@@ -247,11 +243,6 @@ class Example {
   }
 }
 \end{lstlisting}
-    \caption{The \texttt{inc1} method is \emph{synchronized}, on each call, the
-    \texttt{Example} instance's monitor is entered. The \texttt{inc2} method is
-    not synchronized but contains a \emph{synchronized block} with an explicitly
-    specified monitor (\texttt{this}).}
-\end{figure}
 
 Communication between threads is achieved using the following methods:
 \texttt{wait}, \texttt{notify}, and \texttt{notifyAll}. All methods must be
@@ -294,12 +285,15 @@ is for example adding two local variables and it is not important to the model.
 Nonvolatile reading or writing of a shared variable is an inter-thread action.
 \emph{Synchronization actions} are inter-thread actions that include volatile
 reading or writing of variables, locking and unlocking of monitors, and starting
-and stopping of a thread~\cite{jmmspec}. Figure~\ref{threadActions} shows
+and stopping of a thread~\cite{jmmspec}. Listing~\ref{threadActions} shows
 examples of different kinds of actions.
 
-\begin{figure}[hbt]
-    \label{threadActions}
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, label=threadActions, float=hb,
+caption={Various program actions classified from the Java memory model point of
+view. Entering and leaving \texttt{MyMethod} produces \emph{synchronization
+actions}. Accessing \texttt{mySharedVar} is considered as an \emph{inter-thread}
+action, but not as a synchronization action because \texttt{mySharedVar} is not
+declared as \texttt{volatile}.}]
 class MySharedData {
   int mySharedVar = 0;
 
@@ -313,12 +307,6 @@ class MySharedData {
   }
 }
 \end{lstlisting}
-    \caption{Various program actions classified from the Java memory model point
-    of view. Entering and leaving \texttt{MyMethod} produces
-    \emph{synchronization actions}. Accessing \texttt{mySharedVar} is considered
-    as an \emph{inter-thread} action, but not as a synchronization action
-    because \texttt{mySharedVar} is not declared as \texttt{volatile}.}
-\end{figure}
 
 
 \emph{Program order} is a total order over all inter-thread actions from a given
@@ -403,7 +391,7 @@ sections of the file. The whole structure is shown in Table \ref{classfile}.
 The Java class file format is described in detail in the Java Virtual Machine
 Specification \cite{jvmspec}.
 
-\begin{table}
+\begin{table}[h]
     \begin{center}
         \label{classfile}
         \begin{tabular}{|l|l|l|}
@@ -493,11 +481,17 @@ used in slightly different circumstances. Exceptions are thrown using the
 \texttt{athrow} instruction. Entering a monitor is achieved by
 \texttt{monitorenter} and \texttt{monitorexit} instructions, which are used by
 synchronized statements in Java. An example of a method represented by bytecode
-is shown in Figure~\ref{bytecodeExample}.
+is shown in Listing~\ref{bytecodeExample}.
 
-\begin{figure}[hbt]
-    \label{bytecodeExample}
-    \begin{lstlisting}
+\begin{lstlisting}[label=bytecodeExample, float, caption={An example of a method
+bytecode viewed using the \texttt{javap} command. The method takes three
+parameters: a file writer and two integers.  There are 5 local variables: the
+object the method was called on (index 0), method parameters (indices 1--3),
+and a local variable (index 5). On lines 0--3, the two integers are loaded on
+to the operand stack, added together, and the result is stored in a local
+variable. Lines 5--7 calls the \texttt{write} method on the file writer, lines
+11--12 calls the \texttt{close} method. Operands on lines 8 and 12 are
+indices to the constant pool section.}]
 public void foo(java.io.FileWriter, int, int)
   descriptor: (Ljava/io/FileWriter;II)V
   flags: (0x0001) ACC_PUBLIC
@@ -513,17 +507,7 @@ public void foo(java.io.FileWriter, int, int)
       11: aload_1
       12: invokevirtual #3    // Method java/io/FileWriter.close:()V
       15: return
-    \end{lstlisting}
-    \caption{An example of a method bytecode viewed using the \texttt{javap}
-    command. The method takes three parameters: a file writer and two integers.
-    There are 5 local variables: the object the method was called on (index 0),
-    method parameters (indices 1 to 3), and a local variable (index 5). On lines
-    0 to 3, the two integers are loaded on to the operand stack, added together,
-    and the result is stored in a local variable. Lines 5 to 7 calls the
-    \texttt{write} method on the file writer, lines 11 and 12 calls the
-    \texttt{close} method. Operands on lines 8 and 12 are indices to the
-    constant pool section.}
-\end{figure}
+\end{lstlisting}
 
 
 \subsection{The ASM framework}
@@ -597,14 +581,13 @@ memory locations, locks, or threads.
 \subsection{The RoadRunner Programming Interface}
 
 Every analyzer in RoadRunner is based on the \texttt{Tool} class.
-Figure~\ref{toolclass} contains the most important methods of \texttt{Tool}.
+Listing~\ref{toolclass} contains the most important methods of \texttt{Tool}.
 During the analysis, every time an action is detected, the appropriate method in
 \texttt{Tool} is called, along with an \texttt{Event} object that contains
 information about the event.
 
-\begin{figure}[hbt]
-    \label{toolclass}
-    \begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, label=toolclass, float, caption={The abstract
+class \texttt{Tool}. Only selected public methods are shown.}]
 public abstract class Tool {
   // event handlers for accessing a memory location
   public void access(AccessEvent fae) { }
@@ -623,10 +606,7 @@ public abstract class Tool {
   // shadow location initialization
   public ShadowVar makeShadowVar(AccessEvent ae) { }
 }
-    \end{lstlisting}
-    \caption{The abstract class \texttt{Tool}. Only selected public methods are
-    shown.}
-\end{figure}
+\end{lstlisting}
 
 The following events are detected by the RoadRunner framework:
 \begin{itemize}
@@ -677,13 +657,12 @@ events are generated. In the rest of the code, all \texttt{getfield} and
 \texttt{putfield} instructions are replaced with calls to the corresponding
 access methods. RoadRunner allows tools to store arbitrary data related to a
 field in \emph{shadow variables}. For each field, a new field of the
-\texttt{ShadowVar} type is created to store the data. Figures \ref{rrInstBefore}
-and \ref{rrInstField} shows a simple class before and after field
-instrumentation.
+\texttt{ShadowVar} type is created to store the data. Listings
+\ref{rrInstBefore} and \ref{rrInstField} shows a simple class before and after
+field instrumentation.
 
-\begin{figure}[hbt]
-    \label{rrInstBefore}
-    \begin{lstlisting}
+\begin{lstlisting}[label=rrInstBefore, float=h, caption={An example class
+bytecode viewed using the \texttt{javap} tool, simplified.}]
 private int bar;
 
 public void foo();
@@ -694,13 +673,14 @@ public void foo();
    7: iadd
    8: putfield      #2    // Field bar:I
   11: return\end{lstlisting}
-    \caption{An example class bytecode viewed using the \texttt{javap} tool,
-    simplified.}
-\end{figure}
 
-\begin{figure}[hbt]
-    \label{rrInstField}
-    \begin{lstlisting}
+\begin{lstlisting}[label=rrInstField, float, caption={Code from
+Listing~\ref{rrInstBefore} instrumented by RoadRunner. For the \texttt{bar}
+field, two access methods are added and a new field of type \texttt{ShadowVar}.
+In the \texttt{foo} method, the \texttt{bar} field is accessed using methods
+\texttt{\_\_\$rr\_get\_bar} and \texttt{\_\_\$rr\_put\_bar}. These methods take
+the current shadow thread as an argument which is obtained by calling
+\texttt{getCurrentShadowThread}.}]
 public int bar;
 
 public transient rr.state.ShadowVar __(*\$*)rr_bar;
@@ -726,13 +706,6 @@ public void foo();
   15: aload_2
   16: invokespecial #53 // Method __$rr_put_bar:(IILrr/state/ShadowThread;)V
   19: return\end{lstlisting}
-    \caption{Code from Figure~\ref{rrInstBefore} instrumented by RoadRunner. For
-    the \texttt{bar} field, two access methods are added and a new field of type
-    \texttt{ShadowVar}. In the \texttt{foo} method, the \texttt{bar} field is
-    accessed using methods \texttt{\_\_\$rr\_get\_bar} and
-    \texttt{\_\_\$rr\_put\_bar}. These methods take the current shadow thread as
-    an argument which is obtained by calling \texttt{getCurrentShadowThread}.}
-\end{figure}
 
 Method invocations are tracked by creating a wrapper method for each method. The
 original method is renamed, but otherwise left intact (the code may however be
@@ -742,11 +715,13 @@ method generates enter and exit events. In order to detect abnormal method exits
 that are caused by an exception being thrown, the call to the original method is
 wrapped in a try block. When an exception is caught, the exit event is generated
 and the exception is re-thrown. An example of a method instrumented by
-RoadRunner is shown in Figure~\ref{rrInstMethod}.
+RoadRunner is shown in Listing~\ref{rrInstMethod}.
 
-\begin{figure}[hbt]
-    \label{rrInstMethod}
-    \begin{lstlisting}
+\begin{lstlisting}[label=rrInstMethod, float, caption={Method \texttt{int
+foo(int a)} instrumented by RoadRunner. The original method was renamed to
+\texttt{\_\_\$rr\_foo\_\_\$rr\_\_Original\_} and a new method with the original
+name was created. This method generates enter and exit events and calls the
+original method.}]
 public int __(*\$*)rr_foo__(*\$*)rr__Original_(int);
    0: invokestatic  #20 // Method rr/state/ShadowThread
                         // .getCurrentShadowThread:()Lrr/state/ShadowThread;
@@ -775,11 +750,6 @@ public int foo(int);
                         // .exit:(Lrr/state/ShadowThread;)V
   28: athrow
   29: ireturn\end{lstlisting}
-    \caption{Method \texttt{int foo(int a)} instrumented by RoadRunner. The
-    original method was renamed to \texttt{\_\_\$rr\_foo\_\_\$rr\_\_Original\_}
-    and a new method with the original name was created. This method generates
-    enter and exit events and calls the original method.}
-\end{figure}
 
 Monitor entries and exits are handled differently for synchronized statements
 and synchronized methods. Synchronized statements in Java are represented by
@@ -1425,12 +1395,17 @@ Test.a()V X() ( Test.b()V X() | Test.c()V X() )
 
 A contract clause is defined as two regular expressions over methods, separated
 by an arrow and a semicolon at the end. A contract is then a list of clauses. An
-example of a full contract is shown in Figure~\ref{contract}. The full grammar
+example of a full contract is shown in Listing~\ref{contract}. The full grammar
 for contracts is shown in Appendix \ref{appGrammar}.
 
-\begin{figure}[hbt]
-    \label{contract}
-    \begin{lstlisting}
+\begin{lstlisting}[label=contract, float, caption={Contract from
+Chapter~\ref{chThree} written for a Map with \texttt{int} keys and
+\texttt{double} values. The first target matches an inserting element to the map
+at a given key and then retrieving it. The target can be invalidated by calling
+either \texttt{put} or \texttt{get} with the same key. The second target matches
+checking if a key is present in the map and then modifying the value at the
+given key. The target can be invalidated by replacing the value or by removing
+it.}]
 Map.put(ID)V M(K,_) Map.get(I)D M(K)
     <- Map.put(ID)V M(K,_) | Map.remove(I)D M(K) ;
 
@@ -1438,14 +1413,6 @@ Map.contains(I)Z M(K)
   ( Map.put(ID)V M(K,_) | Map.get(I)D M.(K) | Map.remove(I)D M(K) )
   <- Map.put(ID)V M(K,_) | Map.remove(I)D M(K) ;
 \end{lstlisting}
-    \caption{Contract from Chapter~\ref{chThree} written for a Map with
-    \texttt{int} keys and \texttt{double} values. The first target matches an
-    inserting element to the map at a given key and then retrieving it. The
-    target can be invalidated by calling either \texttt{put} or \texttt{get}
-    with the same key. The second target matches checking if a key is present in
-    the map and then modifying the value at the given key. The target can be
-    invalidated by replacing the value or by removing it.}
-\end{figure}
 
 \subsection{Contract Representation}
 All parts of a contract definition are parsed into a corresponding class
@@ -1740,11 +1707,14 @@ be \texttt{final} to avoid overriding of methods. All fields of a class
 should be \texttt{private} and \texttt{final}. All fields should reference only
 immutable objects or, if not possible, the fields should not be modified in the
 class. All methods that would normally modify the object should return updated
-object instead. See Figure~\ref{immutable} for an example.
+object instead. See Listing~\ref{immutable} for an example.
 
-\begin{figure}[hbt]
-    \label{immutable}
-    \begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, label=immutable, float=hbt,
+caption={Simplified implementation of an immutable finite automaton. The
+automaton consists of references to the starting state and the current state.
+The public constructor allows creating automatons that are in their starting
+states, ensuring consistency. The advance method does not update the current
+state but creates a new finite automaton with an updated current state.}]
 public final class FiniteAutomaton {
     private final State start;
     private final State current;
@@ -1767,13 +1737,6 @@ public final class FiniteAutomaton {
     public boolean isRunning() { return current != start; }
 }
 \end{lstlisting}
-    \caption{Simplified implementation of an immutable finite automaton. The
-    automaton consists of references to the starting state and the current
-    state. The public constructor allows creating automatons that are in their
-    starting states, ensuring consistency. The advance method does not update
-    the current state but creates a new finite automaton with an updated current
-    state.}
-\end{figure}
 
 To use immutable objects effectively, the Vavr collection
 library\footnote{available at \url{https://www.vavr.io/}} was used. It provides
@@ -1880,11 +1843,18 @@ The original method is then called in a try--catch block. On normal exit, the
 return value is converted to an object, the same way parameters are converted.
 Then a method exit event is generated, containing both the array of arguments
 and the return value. If an exception is caught, the return value is set to
-\texttt{null} and an exit event is generated containing the arguments.
+\texttt{null} and an exit event is generated containing the arguments. An
+example of a instrumented method is shown in Listing~/ref{paramInst}.
 
-\begin{figure}[hbt]
-    \label{paramInst}
-    \begin{lstlisting}
+\begin{lstlisting}[label=paramInst, float, caption={A method instrumented to
+obtain arguments and the return value. On lines 5--11, the enter event is
+generated. On lines 14--18, an array for arguments is created and stored in a
+local variable. On lines 19--25, the first argument is wrapped in an object and
+stored in the array on index 0.  On lines 26--29, the second argument is stored
+directly in the array on index 1. On lines 30--33, the original method is
+called. On lines 36--40, the return value is wrapped and stored in a local
+variable. Lines 42--50 generate the exit event. Lines 53--60 contain a catch
+block in case an exception is thrown in the original function.}]
 public int foo(int, java.lang.String);
  0: invokestatic  #20   // Method rr/state/ShadowThread
                         // .getCurrentShadowThread:()Lrr/state/ShadowThread;
@@ -1926,16 +1896,6 @@ public int foo(int, java.lang.String);
                 // (Lrr/state/ShadowThread;[Ljava/lang/Object;Ljava/lang/Object;)V
 60: athrow
 61: ireturn\end{lstlisting}
-    \caption{A method instrumented to obtain arguments and the return value. On
-    lines 5--11, the enter event is generated. On lines 14--18, an array for
-    arguments is created and stored in a local variable. On lines 19--25, the
-    first argument is wrapped in an object and stored in the array on index 0.
-    On lines 26--29, the second argument is stored directly in the array on
-    index 1. On lines 30--33, the original method is called. On lines 36--40,
-    the return value is wrapped and stored in a local variable. Lines 42--50
-    generate the exit event. Lines 53--60 contain a catch block in case an
-    exception is thrown in the original function.}
-\end{figure}
 
 \section{Testing}
 \label{testing}
