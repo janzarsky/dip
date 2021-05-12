@@ -15,9 +15,9 @@ basic form, it specifies which method sequences must be executed atomically.
 There are two extensions for contracts for concurrency. \emph{Parametric
 contracts} allow one to better identify methods that need to be executed
 atomically.  Contracts with \emph{spoilers} allow finer control over which
-thread interleavings breach the contract. To verify that a~program satisfies the
-restrictions given by contracts for concurrency, one may use either static or
-dynamic analysis, both offering different advantages.
+thread interleavings violate the contract. To verify that a~program satisfies
+the restrictions given by contracts for concurrency, one may use either static
+or dynamic analysis, both offering different advantages.
 
 The goal of this thesis is to design a~dynamic analyzer that detects contract
 violations in programs written in the Java programming language. The analyzer
@@ -78,8 +78,8 @@ checking the results of the computation (or observing other behavior of the
 software). To gain enough confidence that the software operates correctly in all
 conditions, a~suitable set of \emph{test cases} must be found, which is
 difficult, and sometimes impossible. Testing is best suited for confirming
-the presence of defects in software, not for proving their absence
-\cite{fundamentals}.
+the presence of defects in software, not for proving their
+absence~\cite{fundamentals}.
 
 An important property of test cases is their \emph{repeatability}, meaning that
 a~certain test case will always yield the same result. When testing
@@ -94,7 +94,7 @@ a~program. The information may be analyzed during program execution
 (\emph{on-the-fly} analysis) or at the end (\emph{post-mortem} analysis). Even
 though the analysis works with information from a~single execution, it can in
 some cases find errors that were not observed during the execution but may
-demonstrate themselves in similar executions \cite{letko}. The dynamic analysis
+demonstrate themselves in similar executions~\cite{letko}. The dynamic analysis
 also suffers from nondeterministic scheduling. The program under analysis may
 also behave differently due to being observed by the analyzer.
 
@@ -106,8 +106,8 @@ in the given run but also those that may have occurred in similar runs.
 \emph{Static analysis} is performed at compile time and it does not require the
 program to be running. The analysis is theoretically able to cover all possible
 executions of a~program. In practice, it is limited by the fact that the number
-of thread interleavings in multi-threaded programs grows exponentially
-\cite{letko}.
+of thread interleavings in multi-threaded programs grows
+exponentially~\cite{letko}.
 
 \paragraph{Abstract Interpretation}
 \emph{Abstract interpretation} takes the source code and symbolically executes
@@ -116,14 +116,14 @@ all the calculations. It suffers from similar problems as static analysis.
 
 \paragraph{Model Checking}
 \emph{Model checking} is a~technique for checking whether a~system satisfies
-certain correctness specification \cite{letko}. It is based on systematic or
+certain correctness specification~\cite{letko}. It is based on systematic or
 heuristic exploration of the state space. The drawback of this technique is that
 the state space of the program model can be huge.
 
 \paragraph{Theorem Proving}
 \emph{Theorem proving} is a~semi-automated approach to proving that certain
 facts are satisfied in the system. It is based on assumptions and general
-theorems about the system and uses mathematical reasoning \cite{fundamentals}.
+theorems about the system and uses mathematical reasoning~\cite{fundamentals}.
 
 
 \section{Safety Errors in Multi-threaded Programs}
@@ -133,7 +133,7 @@ a~concurrent setting. They aim at discovering errors specific to a~concurrent
 environment. When compared to single-threaded programs, multi-threaded programs
 may encounter a~whole new class of errors related to memory sharing between
 threads. Errors presented in this section are classified as \emph{safety errors}
-in \cite{letko} as these are usually checked in various dynamic analyses.
+in~\cite{letko} as these are usually checked in various dynamic analyses.
 
 \paragraph{Data Race}
 A \emph{data race} occurs when there are two unsynchronized accesses to a~shared
@@ -142,19 +142,19 @@ variable and at least one of them is a~write access.
 \paragraph{Atomicity Violation}
 When a~code block is required to be atomic, all program executions must be
 equivalent to an execution where the block is executed serially. Contract for
-concurrency primarily focus on atomicity violations \cite{contracts}.
+concurrency primarily focus on atomicity violations~\cite{contracts}.
 
 \paragraph{Order Violation}
 When certain operations are required to be executed
 in a~certain order, and the order is not met in a~given program execution, an
 \emph{order violation} occurs. Contracts for concurrency can also detect order
-violations \cite{contracts}.
+violations~\cite{contracts}.
 
 \paragraph{Deadlock}
-General definition of a~deadlock is presented in
-\cite{letko}. A program state contains a~set $S$ of deadlocked threads if, and
-only if each thread in $S$ is blocked and waiting for some event that could
-unblock it, but such an event could only be generated by a~thread from $S$.
+General definition of a~deadlock is presented in~\cite{letko}. A program state
+contains a~set $S$ of deadlocked threads if, and only if each thread in $S$ is
+blocked and waiting for some event that could unblock it, but such an event
+could only be generated by a~thread from $S$.
 
 \paragraph{Missed Signal}
 A \emph{missed signal} is present in a~program execution when one or more
@@ -176,7 +176,7 @@ when started.
 To start a~thread, the \texttt{start} method must be called (which will in
 turn call the \texttt{run} method). The thread will terminate upon returning
 from the \texttt{run} method. The \texttt{join} method is used in other
-threads to wait for a~thread to terminate \cite{javaTheCompleteReference}.
+threads to wait for a~thread to terminate~\cite{javaTheCompleteReference}.
 Listing~\ref{threadExtend} shows a~thread creation example by extending the
 \texttt{Thread} class, Listing~\ref{threadRunnable} shows the same example
 achieved by implementing the \texttt{Runnable} interface.
@@ -267,7 +267,7 @@ Java memory model takes a~program and an execution trace, and for each read
 operation decides if it is valid or not. The decision depends on the write
 operation that modified the data before the read operation. The compiler,
 runtime, and hardware must ensure that all executions of a~program produce
-execution traces that are valid according to the model \cite{jmmspec}.
+execution traces that are valid according to the model~\cite{jmmspec}.
 
 In a~single-threaded program, it is only required that the program produces the
 same result as if it was run serially. The compiler is free to reorder
@@ -323,9 +323,9 @@ the first action in the new thread.
 \emph{happens-before} another, the first action is visible to and ordered before
 the second action. If actions \emph{x} and \emph{y} belong to the same thread
 and \emph{x} comes before \emph{y} in program order, then \emph{x happens-before
-y}.  If \emph{x synchronizes-with y}, then \emph{x happens-before y}. Figures
-\ref{hb1} and \ref{hb2} illustrates the \emph{happens-before} relation in simple
-programs.
+y}.  If \emph{x synchronizes-with y}, then \emph{x happens-before y}.
+Figures~\ref{hb1} and \ref{hb2} illustrates the \emph{happens-before} relation
+in simple programs.
 
 A \emph{data race} occurs, when there are two accesses to the same variable, at
 least one of which is write, and these accesses are not ordered by
@@ -363,7 +363,7 @@ measure performance, log events, or perform dynamic analysis. The running
 program should not be aware that it is being instrumented and the result of the
 computation should remain the same. Instrumentation may add significant overhead
 to the program. For example, programs instrumented by the RoadRunner framework
-are roughly 10 times slower \cite{RoadRunner}.
+are roughly 10 times slower~\cite{RoadRunner}.
 
 In Java, the instrumentation is done by changing the bytecode. There are several
 general-purpose frameworks for modifying the Java bytecode. In this section, the
@@ -374,7 +374,7 @@ the basis of this master's thesis.
 
 Programs written in Java are compiled into Java bytecode which is executed by
 the Java Virtual Machine. Every class gets compiled into a~Java class file
-containing the following sections \cite{asmguide}:
+containing the following sections~\cite{asmguide}:
 \begin{itemize}
     \item A section with information about the class itself, such as the name of
     the class, the super class, implemented interfaces, and class annotations.
@@ -387,9 +387,9 @@ containing the following sections \cite{asmguide}:
 
 Java class files also contain a~\emph{constant pool} section that holds all
 numeric, type, and string constants which are then referenced from other
-sections of the file. The whole structure is shown in Table \ref{classfile}.
+sections of the file. The whole structure is shown in Table~\ref{classfile}.
 The Java class file format is described in detail in the Java Virtual Machine
-Specification \cite{jvmspec}.
+Specification~\cite{jvmspec}.
 
 \begin{table}[h]
     \begin{center}
@@ -414,7 +414,7 @@ Specification \cite{jvmspec}.
             & Code \\
             \hline
         \end{tabular}
-        \caption{Structure of the Java class file. Adapted from \cite{asmguide},
+        \caption{Structure of the Java class file. Adapted from~\cite{asmguide},
         simplified.}
     \end{center}
 \end{table}
@@ -525,7 +525,7 @@ When parsing a~class, the ASM parser will produce an event for each element of
 the class.  When writing a~class, the writer creates the class based on
 a~sequence of events. The tree API loads the whole class and creates a~tree of
 objects representing the class. The core API is faster and requires less memory,
-however, it is not practical for complex transformations \cite{asmguide}. The
+however, it is not practical for complex transformations~\cite{asmguide}. The
 RoadRunner framework uses the core API.
 
 The core API is based on the \texttt{ClassVisitor} abstract class. The class
@@ -533,8 +533,8 @@ contains methods for visiting different sections of a~class, for example,
 \texttt{visitAttribute}, \texttt{visitMethod}, or \texttt{visitField}. Complex
 sections, such as methods or fields, have their visitor classes. For example,
 the \texttt{MethodVisitor} class contains methods such as
-\texttt{visitLocalVariable}, \texttt{visitCode}, or \texttt{visitParameter}
-\cite{asmguide}.
+\texttt{visitLocalVariable}, \texttt{visitCode}, or
+\texttt{visitParameter}~\cite{asmguide}.
 
 To generate a~new class, one has to create a~\texttt{ClassWriter} instance,
 which is a~subclass of \texttt{ClassVisitor}. Then a~sequence of visit methods
@@ -570,7 +570,7 @@ that are useful for dynamic analysis, such as memory accesses, synchronizing on
 a~lock, forking or joining of threads, and so on. This event stream is then
 available to various analysis tools. Multiple tools can be chained together,
 each tool acting as a~filter over the events. This allows complex analyses to be
-built from simpler, modular tools \cite{RoadRunner}.
+built from simpler, modular tools~\cite{RoadRunner}.
 
 RoadRunner aims to simplify writing dynamic analysis tools. A RoadRunner
 analysis tool only needs to handle events of interest. RoadRunner will ensure
@@ -657,9 +657,9 @@ events are generated. In the rest of the code, all \texttt{getfield} and
 \texttt{putfield} instructions are replaced with calls to the corresponding
 access methods. RoadRunner allows tools to store arbitrary data related to
 a~field in \emph{shadow variables}. For each field, a~new field of the
-\texttt{ShadowVar} type is created to store the data. Listings
-\ref{rrInstBefore} and \ref{rrInstField} shows a~simple class before and after
-field instrumentation.
+\texttt{ShadowVar} type is created to store the data.
+Listings~\ref{rrInstBefore} and \ref{rrInstField} shows a~simple class before
+and after field instrumentation.
 
 \begin{lstlisting}[label=rrInstBefore, float=h, caption={An example class
 bytecode viewed using the \texttt{javap} tool, simplified.}]
@@ -776,9 +776,9 @@ requires one to follow a~protocol consisting of: (i) syntax, i.e. types of
 parameters and return values, (ii) semantics, i.e. the expected behavior for
 given input parameters, and (iii) access restrictions. Access restrictions
 include the domain of valid values, dependencies on other services, and
-atomicity violations \cite{contracts}.
+atomicity violations~\cite{contracts}.
 
-\emph{Contracts for concurrency} \cite{FITPUB10817},
+\emph{Contracts for concurrency}~\cite{FITPUB10817},
 \cite{DBLP:journals/corr/SousaDFL15}, are a~case of a~software protocol that
 expresses access restrictions in a~concurrent setting. In its basic form, they
 specify sequences of methods that must be executed atomically. The contracts can
@@ -794,7 +794,7 @@ this method.
 \section{Basic Contracts}
 \label{basicContracts}
 
-A \emph{contract} is formally defined in \cite{FITPUB10817} as follows. Let
+A \emph{contract} is formally defined in~\cite{FITPUB10817} as follows. Let
 $\Sigma_\mathbb{M}$ be a~set of all public method names (the API) of a~module or
 a~library. A \emph{contract} is a~set $\mathbb{R}$ of \emph{clauses}. Each
 clause $\varrho \in \mathbb{R}$ is a~regular expression over
@@ -819,7 +819,7 @@ map based on the result of the \texttt{contains} call, it should be atomic.
 \label{parametricContracts}
 
 In some situations, the definition of contracts may be too restrictive,
-producing false alarms. In \cite{contracts}, contracts are extended with
+producing false alarms. In~\cite{contracts}, contracts are extended with
 parameters to reflect the data flow between methods. Consider the following
 example:
 \begin{lstlisting}[language=java]
@@ -831,7 +831,7 @@ argument. This dependency can be expressed using \emph{meta-variables} placed as
 the parameters or return values of methods. Parameters that should not be taken
 into account are marked with free meta-variable (denoted with an underscore).
 
-\emph{Example.} The example from Section \ref{basicContracts} can be extended
+\emph{Example.} The example from Section~\ref{basicContracts} can be extended
 with parameters:
 \begin{align*}
     (\varrho_1) &\ \texttt{put(X,\_) \_ = get(X)}\\
@@ -840,7 +840,7 @@ with parameters:
 \end{align*}
 
 The basic definition of contracts contains one implicit parameter, the object
-that the method was called upon (\texttt{this} in Java) \cite{FITPUB10817}. To
+that the method was called upon (\texttt{this} in Java)~\cite{FITPUB10817}. To
 better illustrate this, the example can be rewritten as:
 \begin{align*}
     (\varrho_1) &\ \texttt{X.put(Y,\_) \_ = X.get(Y)}\\
@@ -852,7 +852,7 @@ better illustrate this, the example can be rewritten as:
 \section{Contracts with Spoilers}
 \label{contractsWithSpoilers}
 
-In \cite{contracts}, contracts are extended with contextual information to
+In~\cite{contracts}, contracts are extended with contextual information to
 distinguish which method sequences violate the contract. Each clause of the
 basic contract is called a~\emph{target} and is assigned a~set of so-called
 \emph{spoilers}. A spoiler is a~set of method sequences that may violate its
@@ -868,7 +868,7 @@ $\varrho_1$, denoted as \texttt{put get} $\leftsquigarrow$ \texttt{put|remove}.
 
 % TODO: this is basically copied - is it ok?
 
-Formally, as defined in \cite{contracts}, let $\mathbb{R}$ be the set of
+Formally, as defined in~\cite{contracts}, let $\mathbb{R}$ be the set of
 \emph{target} clauses where each target $\varrho \in \mathbb{R}$ is a~regular
 expression over $\Sigma_\mathbb{M}$. Let $\mathbb{S}$ be the set of
 \emph{spoilers} where each spoiler $\sigma \in \mathbb{S}$ is a~regular
@@ -880,7 +880,7 @@ Contract violation is observed when a~target sequence $\varrho \in \mathbb{R}$
 is fully interleaved by a~spoiler sequence $\sigma \in \mathbb{C}(\varrho)$ and
 the sequences are executed on the same object.
 
-\emph{Example.} The example from section \ref{basicContracts} can be extended
+\emph{Example.} The example from section~\ref{basicContracts} can be extended
 with spoilers:
 \begin{align*}
     (\varrho_1) &\ \texttt{put get} \leftsquigarrow \texttt{put|remove}\\
@@ -892,7 +892,7 @@ When combining parametric contracts with spoilers, the spoilers may also contain
 parameters. Then a~contract violation is detected only when spoiler arguments
 match target arguments.
 
-\emph{Example.} Examples from sections \ref{parametricContracts} and
+\emph{Example.} Examples from sections~\ref{parametricContracts} and
 \ref{contractsWithSpoilers} combined together:
 \begin{align*}
     (\varrho_1) &\ \texttt{X.put(Y,\_) \_ = X.get(Y)} \leftsquigarrow
@@ -905,7 +905,7 @@ match target arguments.
 
 \section{Dynamic Contract Validation}
 
-In \cite{contracts}, a~dynamic contract validation method is proposed for
+In~\cite{contracts}, a~dynamic contract validation method is proposed for
 contracts with spoilers. Parametric contracts are not included in the method.
 This section provides an overview of the method. The analyzer designed in
 Chapter~\ref{chFour} uses this method and extends it with parameters.
@@ -955,7 +955,7 @@ denote the first and last events of a~spoiler, respectively~\cite{contracts}.
 A contract is violated when there is a~target instance that is fully interleaved
 with a~spoiler instance from another thread. The interleaving is defined using
 a~\emph{happens-before} relation, which is in the context of contracts defined
-as follows \cite{contracts}. A \emph{happens-before relation} $\prec_{hb}$ over
+as follows~\cite{contracts}. A \emph{happens-before relation} $\prec_{hb}$ over
 a~trace $\tau = e_1 \ldots e_n \in \mathbb{E}^+$ is the smallest transitively
 closed relation on the set of events from $\tau$ such that $e_j \prec_{hb} e_k$
 holds when $j < k$ and one of the following holds:
@@ -977,8 +977,8 @@ and it may have ended before the target ended. When given a~complete program
 execution trace, all target and spoiler instances can be detected, the
 happens-before relation can be deduced, and all contracts can be easily checked
 for violations. The trace, however, can get large and make this approach
-unpractical. For this reason, several optimizations are introduced in
-\cite{contracts}, which are presented in the next section. An example of
+unpractical. For this reason, several optimizations are introduced
+in~\cite{contracts}, which are presented in the next section. An example of
 a~program trace containing a~contract violation is shown in Figure~\ref{traces}.
 
 \begin{figure}[hbt]
@@ -1005,13 +1005,13 @@ conditions. The goal is to keep the window as small as possible.
 Spoiler instances can be safely removed from the window whenever a~contract
 violation that would be detected with the spoiler can be detected without it. A
 spoiler instance can be removed from the window whenever a~newer instance of the
-same spoiler is detected \cite{contracts}.
+same spoiler is detected~\cite{contracts}.
 
 A target instance $r$ can be safely removed with respect to a~spoiler instance
 $s$ whenever a~contract violation that would be detected between $r$ and $s$,
 can be detected between $s$ and another target instance too. Note that target
-instances may be removed only with respect to a~given spoiler, not in general
-\cite{contracts}.
+instances may be removed only with respect to a~given spoiler, not in
+general~\cite{contracts}.
 
 To further reduce the required information about the trace, \emph{vector clocks}
 are used. Vector clocks are described in the next section. For each target and
@@ -1031,7 +1031,7 @@ needed~\cite{contracts}.
 
 The on-the-fly dynamic analysis of contracts uses vector clocks and the
 \emph{happens-before} relation the same way it is used in the FastTrack
-algorithm \cite{fasttrack}. A \emph{vector clock} $VC: \mathbb{T} \rightarrow
+algorithm~\cite{fasttrack}. A \emph{vector clock} $VC: \mathbb{T} \rightarrow
 \mathbb{N}$ consists of clock values for each thread $t \in \mathbb{T}$. Vector
 clocks are partially ordered with $\sqsubseteq$, can be joined with $\sqcup$,
 and contain a~minimal element $\perp_V$. The $t$-component of a~vector clock is
@@ -1054,8 +1054,8 @@ During the analysis, three kinds of clocks are kept. For each thread $t \in
 \mathbb{T}$, a~vector clock $\mathbb{C}_t$ stores information about the last
 synchronization with other threads. For each lock $l \in \mathbb{L}$, a~vector
 clock $\mathbb{L}_l$ holds information about the last thread that released the
-lock. For each event $e \in \tau$, a~vector clock $VC_e$ is kept
-\cite{contracts}.
+lock. For each event $e \in \tau$, a~vector clock $VC_e$ is
+kept~\cite{contracts}.
 
 The \emph{happens-before} relation is defined using vector clocks. For an event
 $e_t$ from a~thread $t$ and an event $e_u$ from a~thread $u$, $e_t \prec_{hb}
@@ -1123,7 +1123,7 @@ The clocks are updated on the following actions:
 
 This chapter describes the proposed dynamic analyzer for parametric contracts
 with spoilers. The analyzer follows the method for dynamic analysis of contracts
-described in \cite{contracts} and extends it to support parametric contracts.
+described in~\cite{contracts} and extends it to support parametric contracts.
 
 The analyzer is built as a~new tool for the RoadRunner framework. The input is
 a~program under analysis and a~contract definition. The analyzer is then able to
@@ -1170,7 +1170,7 @@ are checked.
 \label{constraining}
 
 The analyzer is designed with several restrictions based on the previous work,
-such as \cite{janousek} or \cite{FITPUB10817}, to improve its performance.
+such as~\cite{janousek} or~\cite{FITPUB10817}, to improve its performance.
 First, a~restriction is placed on the parameters in contract definitions to
 reduce the number of instances in a~trace window. Then the conditions for
 removing instances from the trace window are discussed and a~related contract
@@ -1179,7 +1179,7 @@ should be handled.
 
 \subsection{Avoiding Cloning of Target and Spoiler Instances}
 
-The method for analyzing contracts described in \cite{janousek} produces an
+The method for analyzing contracts described in~\cite{janousek} produces an
 enormous number of instances being tracked at the same time. A lot of instances
 are created because of the necessity to clone target and spoiler instances
 before they are advanced. Consider the following target: \texttt{a(X) b(Y)
@@ -1278,7 +1278,7 @@ the analyzer.
 
 \subsection{Nested Method Calls}
 
-The method described in \cite{contracts} is based on program traces where
+The method described in~\cite{contracts} is based on program traces where
 every method represents a~single event in the trace. However, the RoadRunner
 framework produces two events for every method: method entry and method exit.
 For parametric contracts, we need to obtain values of parameters and also the
@@ -1396,7 +1396,7 @@ Test.a()V X() ( Test.b()V X() | Test.c()V X() )
 A contract clause is defined as two regular expressions over methods, separated
 by an arrow and a~semicolon at the end. A contract is then a~list of clauses. An
 example of a~full contract is shown in Listing~\ref{contract}. The full grammar
-for contracts is shown in Appendix \ref{appGrammar}.
+for contracts is shown in Appendix~\ref{appGrammar}.
 
 \begin{lstlisting}[label=contract, float, caption={Contract from
 Chapter~\ref{chThree} written for a~Map with \texttt{int} keys and
@@ -1810,11 +1810,11 @@ example, the expression would need to be converted to \texttt{a(b|c)}.
 \section{Changes in Instrumentation}
 \label{instrImpl}
 RoadRunner was modified to obtain method arguments and return values during the
-analysis. The implementation is based on changes described in \cite{janousek},
+analysis. The implementation is based on changes described in~\cite{janousek},
 the final version however fixes several major issues. The initial implementation
 adds new fields to the \texttt{MethodEvent} class which holds information about
-a~method invocation. These changes were taken without modifications from
-\cite{janousek}.
+a~method invocation. These changes were taken without modifications
+from~\cite{janousek}.
 
 The main instrumentation logic is contained in the
 \texttt{SyncAndMethodThunkInserter} class from the
@@ -1822,7 +1822,7 @@ The main instrumentation logic is contained in the
 method. The method creates a~new method that will generate enter and exit events
 and call the original method. In the beginning, the values of method parameters
 need to be stored, at the end, the return value must be stored. The initial
-implementation described in \cite{janousek} contained several issues. Static
+implementation described in~\cite{janousek} contained several issues. Static
 methods could not be instrumented because of incorrect indexing of local
 variables. Methods with parameters of type \texttt{double} or \texttt{long}
 could not be instrumented, because the implementation was not taking into
@@ -1907,7 +1907,7 @@ instrumentation of method arguments and returns values was tested using a~custom
 RoadRunner tool. The integration of all parts was tested using Bash scripts that
 prepare contract files, programs under analysis, and launch RoadRunner. This
 section describes approaches used for testing different parts of the analyzer.
-See Appendix \ref{manual} for instructions for running the tests.
+See Appendix~\ref{manual} for instructions for running the tests.
 
 The analyzer was implemented so that there is almost no need to work with
 RoadRunner's internal structures when testing the analyzer. The
