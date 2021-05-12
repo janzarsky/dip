@@ -4,25 +4,26 @@
 
 When developing software, one commonly relies on software libraries written by
 other developers. To avoid introducing defects into the software, one has to
-follow rules laid by the library developer. This includes the syntax of the
-library and semantics of operations provided by the library. In a~concurrent
-environment, a~new set of problems related to the proper synchronization of
-threads is introduced.
+follow rules stated by the library developer. This includes the syntax and
+semantics of operations provided by the library. In a~concurrent environment,
+a~new set of problems related to the proper synchronization of threads is
+introduced.
 
 \emph{Contracts for concurrency} enable library developers to define
 restrictions on the usage of the library in a~concurrent environment. In its
 basic form, it specifies which method sequences must be executed atomically.
 There are two extensions for contracts for concurrency. \emph{Parametric
-contracts} allow one to better identify methods that need to be executed
-atomically.  Contracts with \emph{spoilers} allow finer control over which
-thread interleavings violate the contract. To verify that a~program satisfies
-the restrictions given by contracts for concurrency, one may use either static
-or dynamic analysis, both offering different advantages.
+contracts} allow to better identify methods that need to be executed atomically.
+Contracts with \emph{spoilers} allow finer control over which thread
+interleavings violate the contract. To verify that a~program satisfies the
+restrictions given by contracts for concurrency, one may use either static or
+dynamic analysis, both providing different advantages.
 
-The goal of this thesis is to design a~dynamic analyzer that detects contract
-violations in programs written in the Java programming language. The analyzer
-is built using the \emph{RoadRunner} framework that instruments programs under
-analysis and reports actions taken by the program via a~simple interface.
+The main goal of this thesis is to design a~dynamic analyzer that detects
+contract violations in programs written in the Java programming language. The
+analyzer is built using the \emph{RoadRunner} framework that instruments
+programs under analysis and reports actions taken by the program via a~simple
+interface.
 
 To perform the analysis, the following must be done. A grammar for contract
 definitions and a~parser must be created. The instrumentation performed by
@@ -1948,7 +1949,7 @@ extension to the RoadRunner framework.
 
 The first part of this thesis provided the necessary background in
 multi-threaded programming in Java, dynamic analysis, and instrumentation in the
-RoadRunner framework. Contracts for parallelism were then introduced, together
+RoadRunner framework. Contracts for parallelism were then introduced together
 with an on-the-fly method for contract analysis. A dynamic analyzer for tracking
 parametric contracts was proposed. Several restrictions were put on the analyzer
 in the design phase to mitigate problems in previous prototype implementations.
@@ -1965,9 +1966,9 @@ the contract validation and can be used by various other analyzers that may
 benefit from obtaining method arguments and return values.
 
 In the future, various parts of the analyzer may be tuned for better
-performance. The functional implementation allows for easy parallelization of
-checking for contract violations. The instrumentation can be further reduced to
+performance. The functional implementation allows easy parallelization of
+checking contract violations. The instrumentation can be further reduced to
 obtain only program actions relevant to the contract validation. Instance
 invalidation can be introduced by clarifying the conditions in the context of
-parametric contracts. The analyzer can be combined with noise injection
+parametric contracts. The analyzer can be also combined with noise injection
 techniques for detecting more contract violations.
