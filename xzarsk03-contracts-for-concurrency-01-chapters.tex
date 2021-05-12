@@ -5,27 +5,27 @@
 When developing software, one commonly relies on software libraries written by
 other developers. To avoid introducing defects into the software, one has to
 follow rules laid by the library developer. This includes the syntax of the
-library and semantics of operations provided by the library. In a concurrent
-environment, a new set of problems related to the proper synchronization of
+library and semantics of operations provided by the library. In a~concurrent
+environment, a~new set of problems related to the proper synchronization of
 threads is introduced.
 
 \emph{Contracts for concurrency} enable library developers to define
-restrictions on the usage of the library in a concurrent environment. In its
+restrictions on the usage of the library in a~concurrent environment. In its
 basic form, it specifies which method sequences must be executed atomically.
 There are two extensions for contracts for concurrency. \emph{Parametric
 contracts} allow one to better identify methods that need to be executed
 atomically.  Contracts with \emph{spoilers} allow finer control over which
-thread interleavings breach the contract. To verify that a program satisfies the
+thread interleavings breach the contract. To verify that a~program satisfies the
 restrictions given by contracts for concurrency, one may use either static or
 dynamic analysis, both offering different advantages.
 
-The goal of this thesis is to design a dynamic analyzer that detects contract
+The goal of this thesis is to design a~dynamic analyzer that detects contract
 violations in programs written in the Java programming language. The analyzer
 is built using the \emph{RoadRunner} framework that instruments programs under
-analysis and reports actions taken by the program via a simple interface.
+analysis and reports actions taken by the program via a~simple interface.
 
 To perform the analysis, the following must be done. A grammar for contract
-definitions and a parser must be created. The instrumentation performed by
+definitions and a~parser must be created. The instrumentation performed by
 RoadRunner needs to be extended to extract additional information about the
 program under analysis. Then finally, an analyzer for parametric contracts with
 spoilers must be implemented using the RoadRunner interface. This master's
@@ -38,8 +38,8 @@ software errors related to concurrency. Approaches to the dynamic analysis of
 Java programs and instrumentation techniques are described. Two important
 frameworks are presented, the ASM framework for byte code instrumentation, and
 the RoadRunner framework for writing dynamic analyzers. Chapter~\ref{chThree}
-introduces contracts for concurrency, their modified versions, and a method for
-dynamic detection of contract violations. In Chapter~\ref{chFour}, a dynamic
+introduces contracts for concurrency, their modified versions, and a~method for
+dynamic detection of contract violations. In Chapter~\ref{chFour}, a~dynamic
 analyzer for contracts is designed. Chapter~\ref{chFive} provides implementation
 details and testing approaches.
 
@@ -48,7 +48,7 @@ details and testing approaches.
 \chapter{Dynamic Analysis of Multi-threaded Programs in Java}
 \label{chTwo}
 
-This chapter focuses on a dynamic analysis that detects errors related to
+This chapter focuses on a~dynamic analysis that detects errors related to
 improper synchronization between threads in multi-threaded Java programs. In the
 first section, dynamic analysis is compared with other approaches to software
 verification. Then the most common types of errors found in multi-threaded
@@ -69,30 +69,30 @@ implementation of the contract analyzer.
 The goal of software verification is to make sure that the software meets all
 requirements~\cite{fundamentals}. There are several approaches to software
 verification, each of them having its own advantages and disadvantages. This
-section provides a summary of testing, dynamic and static analysis, abstract
+section provides a~summary of testing, dynamic and static analysis, abstract
 interpretation, theorem proving, and model checking.
 
 \paragraph{Testing}
 \emph{Testing} consists of running the software under different conditions and
 checking the results of the computation (or observing other behavior of the
 software). To gain enough confidence that the software operates correctly in all
-conditions, a suitable set of \emph{test cases} must be found, which is
+conditions, a~suitable set of \emph{test cases} must be found, which is
 difficult, and sometimes impossible. Testing is best suited for confirming
 the presence of defects in software, not for proving their absence
 \cite{fundamentals}.
 
 An important property of test cases is their \emph{repeatability}, meaning that
-a certain test case will always yield the same result. When testing
+a~certain test case will always yield the same result. When testing
 multi-threaded programs, this property does not hold because of the
 nondeterminism introduced by the thread scheduler. Threads are interleaved
 differently on each execution which means that errors may or may not appear.
 This makes discovering defects in multi-threaded programs difficult.
 
 \paragraph{Dynamic Analysis}
-\emph{Dynamic analysis} works with information gathered during an execution of a
-program. The information may be analyzed during program execution
+\emph{Dynamic analysis} works with information gathered during an execution of
+a~program. The information may be analyzed during program execution
 (\emph{on-the-fly} analysis) or at the end (\emph{post-mortem} analysis). Even
-though the analysis works with information from a single execution, it can in
+though the analysis works with information from a~single execution, it can in
 some cases find errors that were not observed during the execution but may
 demonstrate themselves in similar executions \cite{letko}. The dynamic analysis
 also suffers from nondeterministic scheduling. The program under analysis may
@@ -105,7 +105,7 @@ in the given run but also those that may have occurred in similar runs.
 \paragraph{Static Analysis}
 \emph{Static analysis} is performed at compile time and it does not require the
 program to be running. The analysis is theoretically able to cover all possible
-executions of a program. In practice, it is limited by the fact that the number
+executions of a~program. In practice, it is limited by the fact that the number
 of thread interleavings in multi-threaded programs grows exponentially
 \cite{letko}.
 
@@ -115,74 +115,74 @@ it line by line, approximating the semantics of the program without performing
 all the calculations. It suffers from similar problems as static analysis.
 
 \paragraph{Model Checking}
-\emph{Model checking} is a technique for checking whether a system satisfies
+\emph{Model checking} is a~technique for checking whether a~system satisfies
 certain correctness specification \cite{letko}. It is based on systematic or
 heuristic exploration of the state space. The drawback of this technique is that
 the state space of the program model can be huge.
 
 \paragraph{Theorem Proving}
-\emph{Theorem proving} is a semi-automated approach to proving that certain
+\emph{Theorem proving} is a~semi-automated approach to proving that certain
 facts are satisfied in the system. It is based on assumptions and general
 theorems about the system and uses mathematical reasoning \cite{fundamentals}.
 
 
 \section{Safety Errors in Multi-threaded Programs}
 
-Contracts for concurrency specify rules on using a set of methods in a
-concurrent setting. They aim at discovering errors specific to a concurrent
+Contracts for concurrency specify rules on using a~set of methods in
+a~concurrent setting. They aim at discovering errors specific to a~concurrent
 environment. When compared to single-threaded programs, multi-threaded programs
-may encounter a whole new class of errors related to memory sharing between
+may encounter a~whole new class of errors related to memory sharing between
 threads. Errors presented in this section are classified as \emph{safety errors}
 in \cite{letko} as these are usually checked in various dynamic analyses.
 
 \paragraph{Data Race}
-A \emph{data race} occurs when there are two unsynchronized accesses to a shared
-variable and at least one of them is a write access.
+A \emph{data race} occurs when there are two unsynchronized accesses to a~shared
+variable and at least one of them is a~write access.
 
 \paragraph{Atomicity Violation}
-When a code block is required to be atomic, all program executions must be
+When a~code block is required to be atomic, all program executions must be
 equivalent to an execution where the block is executed serially. Contract for
 concurrency primarily focus on atomicity violations \cite{contracts}.
 
 \paragraph{Order Violation}
 When certain operations are required to be executed
-in a certain order, and the order is not met in a given program execution, an
+in a~certain order, and the order is not met in a~given program execution, an
 \emph{order violation} occurs. Contracts for concurrency can also detect order
 violations \cite{contracts}.
 
 \paragraph{Deadlock}
-General definition of a deadlock is presented in
-\cite{letko}. A program state contains a set $S$ of deadlocked threads if, and
+General definition of a~deadlock is presented in
+\cite{letko}. A program state contains a~set $S$ of deadlocked threads if, and
 only if each thread in $S$ is blocked and waiting for some event that could
-unblock it, but such an event could only be generated by a thread from $S$.
+unblock it, but such an event could only be generated by a~thread from $S$.
 
 \paragraph{Missed Signal}
-A \emph{missed signal} is present in a program execution when one or more
-threads are waiting for a signal, and the signal is never delivered.
+A \emph{missed signal} is present in a~program execution when one or more
+threads are waiting for a~signal, and the signal is never delivered.
 
 \section{Multi-threaded Programming in Java}
 
 Java provides built-in support for multi-threaded programming. This section
-describes a typical thread life cycle, synchronization of threads, and
+describes a~typical thread life cycle, synchronization of threads, and
 inter-thread communication, as these are important in dynamic analysis using
 contracts for concurrency.
 
-A thread in Java is represented by a \texttt{Thread} instance. There are two
-ways to create a thread: by extending the \texttt{Thread} class, or by
-implementing the \texttt{Runnable} interface. Both approaches produce a
-\texttt{Thread} instance that executes the \texttt{run} method in a new thread
+A thread in Java is represented by a~\texttt{Thread} instance. There are two
+ways to create a~thread: by extending the \texttt{Thread} class, or by
+implementing the \texttt{Runnable} interface. Both approaches produce
+a~\texttt{Thread} instance that executes the \texttt{run} method in a~new thread
 when started.
 
-To start a thread, the \texttt{start} method must be called (which will in
+To start a~thread, the \texttt{start} method must be called (which will in
 turn call the \texttt{run} method). The thread will terminate upon returning
 from the \texttt{run} method. The \texttt{join} method is used in other
-threads to wait for a thread to terminate \cite{javaTheCompleteReference}.
-Listing~\ref{threadExtend} shows a thread creation example by extending the
+threads to wait for a~thread to terminate \cite{javaTheCompleteReference}.
+Listing~\ref{threadExtend} shows a~thread creation example by extending the
 \texttt{Thread} class, Listing~\ref{threadRunnable} shows the same example
 achieved by implementing the \texttt{Runnable} interface.
 
-\begin{lstlisting}[language=java, caption={A simple program that creates a
-thread by extending the \texttt{Thread} class.}, float=hb, label=threadExtend]
+\begin{lstlisting}[language=java, caption={A simple program that creates
+a~thread by extending the \texttt{Thread} class.}, float=hb, label=threadExtend]
 class MyThread extends Thread {
   @Override
   public void run() {
@@ -198,7 +198,7 @@ class MyThread extends Thread {
 \end{lstlisting}
 
 \begin{lstlisting}[language=java, label=threadRunnable, float=ht, caption={A
-simple program that creates a thread by implementing the \texttt{Runnable}
+simple program that creates a~thread by implementing the \texttt{Runnable}
 interface.}]
 class MyRunnable implements Runnable {
   public void run() {
@@ -213,9 +213,9 @@ class MyRunnable implements Runnable {
 }
 \end{lstlisting}
 
-When accessing a shared resource from multiple threads, proper synchronization
+When accessing a~shared resource from multiple threads, proper synchronization
 is usually required. In Java, every object gets an implicit monitor, which can
-be owned by only one thread at a given time. To enter the monitor, one must use
+be owned by only one thread at a~given time. To enter the monitor, one must use
 either synchronized methods or synchronized statements.  \emph{Synchronized
 statements} are code blocks with an explicitly specified object whose monitor is
 entered before executing the block. \emph{Synchronized methods} enter the
@@ -226,8 +226,8 @@ methods.
 \begin{lstlisting}[language=java, label=synchronized, float=h, caption={A
 program with synchronized methods and statements. The \texttt{inc1} method is
 \emph{synchronized}, on each call, the \texttt{Example} instance's monitor is
-entered. The \texttt{inc2} method is not synchronized but contains a
-\emph{synchronized block} with an explicitly specified monitor
+entered. The \texttt{inc2} method is not synchronized but contains
+a~\emph{synchronized block} with an explicitly specified monitor
 (\texttt{this}).}]
 class Example {
   private int a = 0;
@@ -246,7 +246,7 @@ class Example {
 
 Communication between threads is achieved using the following methods:
 \texttt{wait}, \texttt{notify}, and \texttt{notifyAll}. All methods must be
-called within a synchronized context. Calling \texttt{wait} will suspend the
+called within a~synchronized context. Calling \texttt{wait} will suspend the
 calling thread until some other thread enters the same monitor and calls either
 \texttt{notify} or \texttt{notifyAll}~\cite{javaTheCompleteReference}.
 
@@ -263,13 +263,13 @@ using shared memory. The model defines several relations that are used by the
 dynamic analysis of contracts for concurrency, most notably the
 \emph{happens-before} relation and the \emph{synchronizes-with} relation.
 
-Java memory model takes a program and an execution trace, and for each read
+Java memory model takes a~program and an execution trace, and for each read
 operation decides if it is valid or not. The decision depends on the write
 operation that modified the data before the read operation. The compiler,
-runtime, and hardware must ensure that all executions of a program produce
+runtime, and hardware must ensure that all executions of a~program produce
 execution traces that are valid according to the model \cite{jmmspec}.
 
-In a single-threaded program, it is only required that the program produces the
+In a~single-threaded program, it is only required that the program produces the
 same result as if it was run serially. The compiler is free to reorder
 instructions when it does not affect the result of the computation. In
 multi-threaded programs, the reordering of instructions has to be limited when
@@ -282,17 +282,17 @@ analysis: program order, synchronization order, and happens-before order.
 The actions can be either intra- or inter-thread. An \emph{inter-thread} action
 can be detected or influenced by another thread. An \emph{intra-thread} action
 is for example adding two local variables and it is not important to the model.
-Nonvolatile reading or writing of a shared variable is an inter-thread action.
+Nonvolatile reading or writing of a~shared variable is an inter-thread action.
 \emph{Synchronization actions} are inter-thread actions that include volatile
 reading or writing of variables, locking and unlocking of monitors, and starting
-and stopping of a thread~\cite{jmmspec}. Listing~\ref{threadActions} shows
+and stopping of a~thread~\cite{jmmspec}. Listing~\ref{threadActions} shows
 examples of different kinds of actions.
 
 \begin{lstlisting}[language=java, label=threadActions, float=hb,
 caption={Various program actions classified from the Java memory model point of
 view. Entering and leaving \texttt{MyMethod} produces \emph{synchronization
 actions}. Accessing \texttt{mySharedVar} is considered as an \emph{inter-thread}
-action, but not as a synchronization action because \texttt{mySharedVar} is not
+action, but not as a~synchronization action because \texttt{mySharedVar} is not
 declared as \texttt{volatile}.}]
 class MySharedData {
   int mySharedVar = 0;
@@ -309,17 +309,17 @@ class MySharedData {
 \end{lstlisting}
 
 
-\emph{Program order} is a total order over all inter-thread actions from a given
+\emph{Program order} is a~total order over all inter-thread actions from a~given
 thread. It reflects the order in which these actions would be executed if
 run by the intra-thread semantics.
 
-\emph{Synchronization order} is a total order over all synchronization actions
+\emph{Synchronization order} is a~total order over all synchronization actions
 of an execution. Within each thread, the synchronization order is consistent
 with the program order. The \emph{synchronized-with} relation is defined on
-certain actions. For example: starting a thread is \emph{synchronized-with}
+certain actions. For example: starting a~thread is \emph{synchronized-with}
 the first action in the new thread.
 
-\emph{Happens-before order} is a partial order. If an action
+\emph{Happens-before order} is a~partial order. If an action
 \emph{happens-before} another, the first action is visible to and ordered before
 the second action. If actions \emph{x} and \emph{y} belong to the same thread
 and \emph{x} comes before \emph{y} in program order, then \emph{x happens-before
@@ -335,11 +335,11 @@ Figure~\ref{hb2}.
 \begin{figure}[hbt]
     \label{hb1}
     \input{figures/hbexample.tex}
-    \caption{\emph{Happens-before} relations in a correctly synchronized program
-    consisting of threads $t_1$ and $t_2$. Each arrow represents a
-    \emph{happens-before} relation. The red arrows represent the program order,
-    the blue arrow represents the \emph{synchronizes-with} relation. Grey arrows
-    complete the transitive closure. The conflicting accesses to variable
+    \caption{\emph{Happens-before} relations in a~correctly synchronized program
+    consisting of threads $t_1$ and $t_2$. Each arrow represents
+    a~\emph{happens-before} relation. The red arrows represent the program
+    order, the blue arrow represents the \emph{synchronizes-with} relation. Grey
+    arrows complete the transitive closure. The conflicting accesses to variable
     \texttt{a} are not data races, because they are ordered by
     \emph{happens-before} (the black arrow).}
 \end{figure}
@@ -348,9 +348,9 @@ Figure~\ref{hb2}.
     \label{hb2}
     \input{figures/hbexample2.tex}
     \caption{\emph{Happens-before} relations in an incorrectly synchronized
-    program (each solid arrow represents a \emph{happens-before} relation).
+    program (each solid arrow represents a~\emph{happens-before} relation).
     There is no \emph{happens-before} relation between conflicting accesses
-    \texttt{a=42} and \texttt{print(a)} (the dashed line), creating a data
+    \texttt{a=42} and \texttt{print(a)} (the dashed line), creating a~data
     race.}
 \end{figure}
 
@@ -373,7 +373,7 @@ the basis of this master's thesis.
 \subsection{Java Bytecode Overview}
 
 Programs written in Java are compiled into Java bytecode which is executed by
-the Java Virtual Machine. Every class gets compiled into a Java class file
+the Java Virtual Machine. Every class gets compiled into a~Java class file
 containing the following sections \cite{asmguide}:
 \begin{itemize}
     \item A section with information about the class itself, such as the name of
@@ -385,7 +385,7 @@ containing the following sections \cite{asmguide}:
     of the method.
 \end{itemize}
 
-Java class files also contain a \emph{constant pool} section that holds all
+Java class files also contain a~\emph{constant pool} section that holds all
 numeric, type, and string constants which are then referenced from other
 sections of the file. The whole structure is shown in Table \ref{classfile}.
 The Java class file format is described in detail in the Java Virtual Machine
@@ -423,9 +423,9 @@ The Java Virtual Machine operates on two kinds of types: \emph{primitive types}
 and \emph{reference types}. Examples of primitive types are \texttt{int},
 \texttt{long}, \texttt{boolean}, or \texttt{double}. There are three kinds of
 reference types: class types, array types, and interface types. The array type
-consists of a component type which can also be an array type. For example,
+consists of a~component type which can also be an array type. For example,
 \texttt{int[]} represents an array type with component type of \texttt{int}. All
-reference types may hold a special null reference, which is also the default
+reference types may hold a~special null reference, which is also the default
 value of reference types.
 
 Compiled classes do not contain any \texttt{package} or \texttt{import}
@@ -433,29 +433,29 @@ statements, so all type names must be fully qualified. Internally, class files
 use slashes instead of dots in type names, so for example
 \texttt{java.lang.Object} becomes \texttt{java/lang/Object}. In most places,
 Java types are represented with \emph{type descriptors}. Each primitive type is
-assigned a single character: \texttt{I} for \texttt{int}, \texttt{D} for
+assigned a~single character: \texttt{I} for \texttt{int}, \texttt{D} for
 \texttt{Double}, and so on. Classes and interfaces are written with prefix
 \texttt{L} and semicolon at the end, so \texttt{String} becomes
-\texttt{Ljava/lang/String;}. Arrays are represented using a
-\texttt{\leftbracket} and the element type, so an array of integers is
+\texttt{Ljava/lang/String;}. Arrays are represented using
+a~\texttt{\leftbracket} and the element type, so an array of integers is
 \texttt{\leftbracket I}, an array of strings is \texttt{\leftbracket
 Ljava/lang/String;}. Similarly, \emph{method descriptors} are used to represent
-the return type of a method and types of all method parameters. For example, a
-method declared as \texttt{double m(int i, String s)} would be represented as
+the return type of a~method and types of all method parameters. For example,
+a~method declared as \texttt{double m(int i, String s)} would be represented as
 \texttt{(ILjava/lang/String;)D}. In method descriptors, \texttt{V} is used when
 the method returns \texttt{void}.
 
-When executing, on each method invocation, the Java Virtual Machine creates a
-new \emph{frame}. Each frame contains its own local variables and an operand
+When executing, on each method invocation, the Java Virtual Machine creates
+a~new \emph{frame}. Each frame contains its own local variables and an operand
 stack. When the method invocation is completed, the frame is destroyed.
 
-Local variables are addressed by indexing. Each variable can hold a single value
-of a primitive or reference type with the exception of \texttt{long} and
-\texttt{double} which require a pair of variables. At index 0, there is a
-reference to the object the method was invoked on (the value of \texttt{this} in
-Java). Class methods (marked as \texttt{static} in Java) do not use this index.
-Starting at index 1 (or 0 in case of class methods), method parameters are
-stored. After the parameters, local variables may be stored.
+Local variables are addressed by indexing. Each variable can hold a~single value
+of a~primitive or reference type with the exception of \texttt{long} and
+\texttt{double} which require a~pair of variables. At index 0, there is
+a~reference to the object the method was invoked on (the value of \texttt{this}
+in Java). Class methods (marked as \texttt{static} in Java) do not use this
+index.  Starting at index 1 (or 0 in case of class methods), method parameters
+are stored. After the parameters, local variables may be stored.
 
 Each frame contains an \emph{operand stack}, which is initially empty. Various
 instructions are used to load values onto the stack, either from local variables
@@ -478,17 +478,17 @@ and \texttt{anewarray} are used. Methods are invoked using these five
 instructions: \texttt{invokevirtual}, \texttt{invokeinterface},
 \texttt{invokespecial}, \texttt{invokestatic}, and \texttt{invokedynamic}, each
 used in slightly different circumstances. Exceptions are thrown using the
-\texttt{athrow} instruction. Entering a monitor is achieved by
+\texttt{athrow} instruction. Entering a~monitor is achieved by
 \texttt{monitorenter} and \texttt{monitorexit} instructions, which are used by
-synchronized statements in Java. An example of a method represented by bytecode
+synchronized statements in Java. An example of a~method represented by bytecode
 is shown in Listing~\ref{bytecodeExample}.
 
-\begin{lstlisting}[label=bytecodeExample, float, caption={An example of a method
+\begin{lstlisting}[label=bytecodeExample, float, caption={An example of a~method
 bytecode viewed using the \texttt{javap} command. The method takes three
-parameters: a file writer and two integers.  There are 5 local variables: the
+parameters: a~file writer and two integers.  There are 5 local variables: the
 object the method was called on (index 0), method parameters (indices 1--3),
-and a local variable (index 5). On lines 0--3, the two integers are loaded on
-to the operand stack, added together, and the result is stored in a local
+and a~local variable (index 5). On lines 0--3, the two integers are loaded on
+to the operand stack, added together, and the result is stored in a~local
 variable. Lines 5--7 calls the \texttt{write} method on the file writer, lines
 11--12 calls the \texttt{close} method. Operands on lines 8 and 12 are
 indices to the constant pool section.}]
@@ -521,32 +521,32 @@ such as constants, identifiers, methods, fields, and others~\cite{asmguide}.
 There are two interfaces available: the \emph{core API} with an
 \emph{event-based} representation of classes, and the \emph{tree API} with an
 \emph{object-based} representation. The core API processes classes sequentially.
-When parsing a class, the ASM parser will produce an event for each element of
-the class.  When writing a class, the writer creates the class based on a
-sequence of events. The tree API loads the whole class and creates a tree of
+When parsing a~class, the ASM parser will produce an event for each element of
+the class.  When writing a~class, the writer creates the class based on
+a~sequence of events. The tree API loads the whole class and creates a~tree of
 objects representing the class. The core API is faster and requires less memory,
 however, it is not practical for complex transformations \cite{asmguide}. The
 RoadRunner framework uses the core API.
 
 The core API is based on the \texttt{ClassVisitor} abstract class. The class
-contains methods for visiting different sections of a class, for example,
+contains methods for visiting different sections of a~class, for example,
 \texttt{visitAttribute}, \texttt{visitMethod}, or \texttt{visitField}. Complex
 sections, such as methods or fields, have their visitor classes. For example,
 the \texttt{MethodVisitor} class contains methods such as
 \texttt{visitLocalVariable}, \texttt{visitCode}, or \texttt{visitParameter}
 \cite{asmguide}.
 
-To generate a new class, one has to create a \texttt{ClassWriter} instance,
-which is a subclass of \texttt{ClassVisitor}. Then a sequence of visit methods
+To generate a~new class, one has to create a~\texttt{ClassWriter} instance,
+which is a~subclass of \texttt{ClassVisitor}. Then a~sequence of visit methods
 must be called, such as \texttt{visitField} or \texttt{visitMethod}. The
 \texttt{ClassWriter} instance will generate appropriate bytecode on each call.
 
-To read and parse a class, one has to create a \texttt{ClassReader} instance.
-The reader will produce a sequence of events for each section of the class. To
-consume those events, a \texttt{ClassVisitor} instance must be given to the
+To read and parse a~class, one has to create a~\texttt{ClassReader} instance.
+The reader will produce a~sequence of events for each section of the class. To
+consume those events, a~\texttt{ClassVisitor} instance must be given to the
 reader. The reader will then call appropriate visit methods on the visitor as it
-is parsing the class. To demonstrate this, one can create a \texttt{ClassReader}
-and connect it to a \texttt{ClassWriter} (which is a subclass of
+is parsing the class. To demonstrate this, one can create a~\texttt{ClassReader}
+and connect it to a~\texttt{ClassWriter} (which is a~subclass of
 \texttt{ClassVisitor}). The reader will call visit methods on the writer,
 effectively copying the class. The typical class transformation is shown in
 Figure~\ref{asmArchitecture}.
@@ -555,21 +555,21 @@ Figure~\ref{asmArchitecture}.
 \begin{figure}[hbt]
     \label{asmArchitecture}
     \input{figures/asm.tex}
-    \caption{The typical architecture for a class transformation using the ASM
+    \caption{The typical architecture for a~class transformation using the ASM
     framework. A \texttt{ClassReader} instance reads the class, then one or more
-    \texttt{ClassVisitor} instances modify the class, and then a
-    \texttt{ClassWriter} instance writes the modified class back to a file.}
+    \texttt{ClassVisitor} instances modify the class, and then
+    a~\texttt{ClassWriter} instance writes the modified class back to a~file.}
 \end{figure}
 
 \section{Dynamic Analysis using RoadRunner}
 \label{roadRunnerUsage}
 
 The RoadRunner framework is used for the dynamic analysis of concurrent programs
-written in Java. RoadRunner instruments programs to obtain a stream of events
+written in Java. RoadRunner instruments programs to obtain a~stream of events
 that are useful for dynamic analysis, such as memory accesses, synchronizing on
-a lock, forking or joining of threads, and so on. This event stream is then
+a~lock, forking or joining of threads, and so on. This event stream is then
 available to various analysis tools. Multiple tools can be chained together,
-each tool acting as a filter over the events. This allows complex analyses to be
+each tool acting as a~filter over the events. This allows complex analyses to be
 built from simpler, modular tools \cite{RoadRunner}.
 
 RoadRunner aims to simplify writing dynamic analysis tools. A RoadRunner
@@ -621,17 +621,17 @@ There are several subclasses of the \texttt{Event} class with specific
 information about events.
 
 RoadRunner allows associating data with objects from the program under analysis.
-For each thread, a \texttt{ShadowThread} object is created which contains a
-reference to the underlying thread. Similarly, for each lock, a
-\texttt{ShadowLock} object is created. Both extend the \texttt{Decoratable}
+For each thread, a~\texttt{ShadowThread} object is created which contains
+a~reference to the underlying thread. Similarly, for each lock,
+a~\texttt{ShadowLock} object is created. Both extend the \texttt{Decoratable}
 class that allows storing of arbitrary information. For associating data with
-memory locations, a \emph{shadow location} is created when the location is first
+memory locations, a~\emph{shadow location} is created when the location is first
 accessed.
 
 Multiple tools can be chained together. Each event handler method forwards the
 \texttt{Event} instance to the next tool in the chain by default. If the event
-is not forwarded, the tool becomes a filter over the event stream. This can be
-used to filter out events that are not interesting to a particular analysis and
+is not forwarded, the tool becomes a~filter over the event stream. This can be
+used to filter out events that are not interesting to a~particular analysis and
 then performing the analysis in the next tool~\cite{RoadRunner}.
 
 \subsection{RoadRunner Synchronization Models}
@@ -641,12 +641,12 @@ events are also handled by the same thread that generated them which means that
 several event handlers may be running concurrently. Tools written for RoadRunner
 must provide internal synchronization to ensure that no concurrency-related
 errors occur in the tool itself. RoadRunner contains an option to serialize all
-events. In this mode, there is only one event handler running at a time.
+events. In this mode, there is only one event handler running at a~time.
 
 \subsection{Instrumentation Performed by RoadRunner}
 
-RoadRunner uses a modified version of the ASM framework to instrument the
-program under analysis. Before a class is loaded, it is instrumented. The
+RoadRunner uses a~modified version of the ASM framework to instrument the
+program under analysis. Before a~class is loaded, it is instrumented. The
 instrumented code will then produce events that will be sent to the tool chain
 for an analysis. Three important kinds of actions are instrumented: field
 accesses, method invocations, and monitor entries and exits.
@@ -655,10 +655,10 @@ Field accesses are instrumented by adding two new methods for each field: one
 for reading and one for writing to the field. In these methods, write and read
 events are generated. In the rest of the code, all \texttt{getfield} and
 \texttt{putfield} instructions are replaced with calls to the corresponding
-access methods. RoadRunner allows tools to store arbitrary data related to a
-field in \emph{shadow variables}. For each field, a new field of the
+access methods. RoadRunner allows tools to store arbitrary data related to
+a~field in \emph{shadow variables}. For each field, a~new field of the
 \texttt{ShadowVar} type is created to store the data. Listings
-\ref{rrInstBefore} and \ref{rrInstField} shows a simple class before and after
+\ref{rrInstBefore} and \ref{rrInstField} shows a~simple class before and after
 field instrumentation.
 
 \begin{lstlisting}[label=rrInstBefore, float=h, caption={An example class
@@ -676,7 +676,7 @@ public void foo();
 
 \begin{lstlisting}[label=rrInstField, float, caption={Code from
 Listing~\ref{rrInstBefore} instrumented by RoadRunner. For the \texttt{bar}
-field, two access methods are added and a new field of type \texttt{ShadowVar}.
+field, two access methods are added and a~new field of type \texttt{ShadowVar}.
 In the \texttt{foo} method, the \texttt{bar} field is accessed using methods
 \texttt{\_\_\$rr\_get\_bar} and \texttt{\_\_\$rr\_put\_bar}. These methods take
 the current shadow thread as an argument which is obtained by calling
@@ -707,19 +707,19 @@ public void foo();
   16: invokespecial #53 // Method __$rr_put_bar:(IILrr/state/ShadowThread;)V
   19: return\end{lstlisting}
 
-Method invocations are tracked by creating a wrapper method for each method. The
+Method invocations are tracked by creating a~wrapper method for each method. The
 original method is renamed, but otherwise left intact (the code may however be
 further instrumented to obtain other information, such as field accesses). Then
-a wrapper method with the same name as the original one is created. The wrapper
+a~wrapper method with the same name as the original one is created. The wrapper
 method generates enter and exit events. In order to detect abnormal method exits
 that are caused by an exception being thrown, the call to the original method is
-wrapped in a try block. When an exception is caught, the exit event is generated
-and the exception is re-thrown. An example of a method instrumented by
+wrapped in a~try block. When an exception is caught, the exit event is generated
+and the exception is re-thrown. An example of a~method instrumented by
 RoadRunner is shown in Listing~\ref{rrInstMethod}.
 
 \begin{lstlisting}[label=rrInstMethod, float, caption={Method \texttt{int
 foo(int a)} instrumented by RoadRunner. The original method was renamed to
-\texttt{\_\_\$rr\_foo\_\_\$rr\_\_Original\_} and a new method with the original
+\texttt{\_\_\$rr\_foo\_\_\$rr\_\_Original\_} and a~new method with the original
 name was created. This method generates enter and exit events and calls the
 original method.}]
 public int __(*\$*)rr_foo__(*\$*)rr__Original_(int);
@@ -759,9 +759,9 @@ acquire and release events. Synchronized methods in Java do not need
 \texttt{monitorenter} and \texttt{monitorexit} instructions, the locking is
 performed implicitly by the Java Virtual Machine. In RoadRunner, synchronized
 methods are replaced with synchronized statements that are then instrumented as
-described above. For each synchronized method, a wrapper method is created. The
+described above. For each synchronized method, a~wrapper method is created. The
 original method's synchronized flag is cleared. The wrapper method, which is
-also not synchronized, contains a synchronized statement with call to the
+also not synchronized, contains a~synchronized statement with call to the
 original method. Synchronized methods are in the end wrapped twice, the first
 wrapper generates synchronization events and the second one generates method
 invocation events.
@@ -771,23 +771,23 @@ invocation events.
 
 When developing software, one frequently uses modules created by someone else
 via its programming interface. For example, in object-oriented programming, the
-interface consists of public methods of a given class. Accessing the interface
-requires one to follow a protocol consisting of: (i) syntax, i.e. types of
+interface consists of public methods of a~given class. Accessing the interface
+requires one to follow a~protocol consisting of: (i) syntax, i.e. types of
 parameters and return values, (ii) semantics, i.e. the expected behavior for
 given input parameters, and (iii) access restrictions. Access restrictions
 include the domain of valid values, dependencies on other services, and
 atomicity violations \cite{contracts}.
 
 \emph{Contracts for concurrency} \cite{FITPUB10817},
-\cite{DBLP:journals/corr/SousaDFL15}, are a case of a software protocol that
-expresses access restrictions in a concurrent setting. In its basic form, they
+\cite{DBLP:journals/corr/SousaDFL15}, are a~case of a~software protocol that
+expresses access restrictions in a~concurrent setting. In its basic form, they
 specify sequences of methods that must be executed atomically. The contracts can
 be extended with parameters to reflect the data flow between the methods (so
 that only methods manipulating the same data must be executed atomically).
 Another extension adds so-called \emph{spoilers} (so that given sequence must be
 executed atomically only with respect to only certain sequences). Both
 extensions can be combined. This chapter defines basic contracts, as well as
-both extensions to them. Then a method for dynamic validation of contracts for
+both extensions to them. Then a~method for dynamic validation of contracts for
 concurrency is presented. The analyzer, implemented in this thesis, is based on
 this method.
 
@@ -795,16 +795,16 @@ this method.
 \label{basicContracts}
 
 A \emph{contract} is formally defined in \cite{FITPUB10817} as follows. Let
-$\Sigma_\mathbb{M}$ be a set of all public method names (the API) of a module or
-a library. A \emph{contract} is a set $\mathbb{R}$ of \emph{clauses}. Each
-clause $\varrho \in \mathbb{R}$ is a regular expression over
-$\Sigma_\mathbb{M}$. A contract violation occurs when any of the sequences in a
-contract is interleaved with an execution of a method from $\Sigma_\mathbb{M}$
+$\Sigma_\mathbb{M}$ be a~set of all public method names (the API) of a~module or
+a~library. A \emph{contract} is a~set $\mathbb{R}$ of \emph{clauses}. Each
+clause $\varrho \in \mathbb{R}$ is a~regular expression over
+$\Sigma_\mathbb{M}$. A contract violation occurs when any of the sequences in
+a~contract is interleaved with an execution of a~method from $\Sigma_\mathbb{M}$
 over the same object.
 
-\emph{Example.} Consider a map implementation with the following operations:
+\emph{Example.} Consider a~map implementation with the following operations:
 \texttt{put(key, value)}, \texttt{get(key)}, \texttt{remove(key)}, and
-\texttt{contains(key)}. Then a contract for this class may contain the following
+\texttt{contains(key)}. Then a~contract for this class may contain the following
 clauses:
 \begin{align*}
     (\varrho_1) &\ \texttt{put get}\\
@@ -854,30 +854,30 @@ better illustrate this, the example can be rewritten as:
 
 In \cite{contracts}, contracts are extended with contextual information to
 distinguish which method sequences violate the contract. Each clause of the
-basic contract is called a \emph{target} and is assigned a set of so-called
-\emph{spoilers}. A spoiler is a set of method sequences that may violate its
+basic contract is called a~\emph{target} and is assigned a~set of so-called
+\emph{spoilers}. A spoiler is a~set of method sequences that may violate its
 target.
 
 Consider clause $\varrho_1$ from the example in Section~\ref{basicContracts}. If
 the element that was put into the map is concurrently removed or updated before
-the \texttt{get} call, a contract violation should be detected.  However,
+the \texttt{get} call, a~contract violation should be detected.  However,
 calling \texttt{contains} or \texttt{get} on the element will not affect the
-computation and should not be marked as a contract violation. In this example,
-methods \texttt{put} and \texttt{remove} are spoilers for a target
+computation and should not be marked as a~contract violation. In this example,
+methods \texttt{put} and \texttt{remove} are spoilers for a~target
 $\varrho_1$, denoted as \texttt{put get} $\leftsquigarrow$ \texttt{put|remove}.
 
 % TODO: this is basically copied - is it ok?
 
 Formally, as defined in \cite{contracts}, let $\mathbb{R}$ be the set of
-\emph{target} clauses where each target $\varrho \in \mathbb{R}$ is a regular
+\emph{target} clauses where each target $\varrho \in \mathbb{R}$ is a~regular
 expression over $\Sigma_\mathbb{M}$. Let $\mathbb{S}$ be the set of
-\emph{spoilers} where each spoiler $\sigma \in \mathbb{S}$ is a regular
-expression over $\Sigma_\mathbb{M}$. A \emph{contract} is a relation $\mathbb{C}
+\emph{spoilers} where each spoiler $\sigma \in \mathbb{S}$ is a~regular
+expression over $\Sigma_\mathbb{M}$. A \emph{contract} is a~relation $\mathbb{C}
 \subseteq \mathbb{R} \times \mathbb{S}$ defining for each target, which spoilers
 may cause atomicity violation.
 
-Contract violation is observed when a target sequence $\varrho \in \mathbb{R}$
-is fully interleaved by a spoiler sequence $\sigma \in \mathbb{C}(\varrho)$ and
+Contract violation is observed when a~target sequence $\varrho \in \mathbb{R}$
+is fully interleaved by a~spoiler sequence $\sigma \in \mathbb{C}(\varrho)$ and
 the sequences are executed on the same object.
 
 \emph{Example.} The example from section \ref{basicContracts} can be extended
@@ -889,7 +889,7 @@ with spoilers:
 \end{align*}
 
 When combining parametric contracts with spoilers, the spoilers may also contain
-parameters. Then a contract violation is detected only when spoiler arguments
+parameters. Then a~contract violation is detected only when spoiler arguments
 match target arguments.
 
 \emph{Example.} Examples from sections \ref{parametricContracts} and
@@ -905,7 +905,7 @@ match target arguments.
 
 \section{Dynamic Contract Validation}
 
-In \cite{contracts}, a dynamic contract validation method is proposed for
+In \cite{contracts}, a~dynamic contract validation method is proposed for
 contracts with spoilers. Parametric contracts are not included in the method.
 This section provides an overview of the method. The analyzer designed in
 Chapter~\ref{chFour} uses this method and extends it with parameters.
@@ -916,23 +916,23 @@ In the context of the dynamic on-the-fly contract validation, multi-threaded
 \emph{program trace} consists of events of the following types:
 \begin{itemize}
     \item thread forking or joining another thread,
-    \item thread entering or exiting a method,
-    \item thread acquiring or releasing a lock.
+    \item thread entering or exiting a~method,
+    \item thread acquiring or releasing a~lock.
 \end{itemize}
 
-All events in a trace are indexed by their position in the trace. Let
-$\mathbb{T}$ be a set of threads, $\mathbb{R}$ a set of targets, $\mathbb{S}$ a
-set of spoilers, $\mathbb{C} \subseteq \mathbb{R} \times \mathbb{S}$ a set of
-contracts, and $\mathbb{L}$ a set of locks. The set of all events that can be
-generated by a thread $t \in \mathbb{T}$ is then denoted as $\mathbb{E}_t$. Let
-$\mathbb{E} = \bigcup_{t \in \mathbb{T}} \mathbb{E}_t$. A \emph{trace} is then a
-sequence $\tau = e_1 \hdots e_n \in \mathbb{E}^+$~\cite{contracts}.
+All events in a~trace are indexed by their position in the trace. Let
+$\mathbb{T}$ be a~set of threads, $\mathbb{R}$ a~set of targets, $\mathbb{S}$
+a~set of spoilers, $\mathbb{C} \subseteq \mathbb{R} \times \mathbb{S}$ a~set of
+contracts, and $\mathbb{L}$ a~set of locks. The set of all events that can be
+generated by a~thread $t \in \mathbb{T}$ is then denoted as $\mathbb{E}_t$. Let
+$\mathbb{E} = \bigcup_{t \in \mathbb{T}} \mathbb{E}_t$. A \emph{trace} is then
+a~sequence $\tau = e_1 \hdots e_n \in \mathbb{E}^+$~\cite{contracts}.
 
 % TODO: basically copied
 
-Given a trace $\tau = e_1 \hdots e_n \in \mathbb{E}^+$, we call its subsequence
-$r = e_{i_1} e_{i_2} \hdots e_{i_k}$, $1 < k \leq n$, an \emph{instance} of a
-target $\varrho \in \mathbb{R}$ if, and only if:
+Given a~trace $\tau = e_1 \hdots e_n \in \mathbb{E}^+$, we call its subsequence
+$r = e_{i_1} e_{i_2} \hdots e_{i_k}$, $1 < k \leq n$, an \emph{instance} of
+a~target $\varrho \in \mathbb{R}$ if, and only if:
 \begin{enumerate}
     \item $r$ consists of well-paired method enter and exit events,
     \item all enter events of $r$ match the regular expression of $\varrho$,
@@ -941,57 +941,57 @@ target $\varrho \in \mathbb{R}$ if, and only if:
         $e_{i_k}$.
 \end{enumerate}
 
-\emph{Example.} Given target $\varrho = abc$, and a trace $\tau_1 = adbdc$,
-there is a target instance $r = e_1 e_3 e_4$. In trace $\tau_2 = acbdc$, there
+\emph{Example.} Given target $\varrho = abc$, and a~trace $\tau_1 = adbdc$,
+there is a~target instance $r = e_1 e_3 e_4$. In trace $\tau_2 = acbdc$, there
 is no target instance.
 
-A \emph{spoiler instance} $s$ of a spoiler $\sigma \in \mathbb{S}$ is defined
+A \emph{spoiler instance} $s$ of a~spoiler $\sigma \in \mathbb{S}$ is defined
 similarly. We let $start(r) = e_{i_1}$ and $end(r) = e_{i_k}$ denote the first
-and last events of a target, respectively. Likewise, $start(s)$ and $end(s)$
-denote the first and last events of a spoiler, respectively~\cite{contracts}.
+and last events of a~target, respectively. Likewise, $start(s)$ and $end(s)$
+denote the first and last events of a~spoiler, respectively~\cite{contracts}.
 
 \subsection{Contract Violation}
 
-A contract is violated when there is a target instance that is fully interleaved
-with a spoiler instance from another thread. The interleaving is defined using a
-\emph{happens-before} relation, which is in the context of contracts defined as
-follows \cite{contracts}. A \emph{happens-before relation} $\prec_{hb}$ over a
-trace $\tau = e_1 \ldots e_n \in \mathbb{E}^+$ is the smallest transitively
+A contract is violated when there is a~target instance that is fully interleaved
+with a~spoiler instance from another thread. The interleaving is defined using
+a~\emph{happens-before} relation, which is in the context of contracts defined
+as follows \cite{contracts}. A \emph{happens-before relation} $\prec_{hb}$ over
+a~trace $\tau = e_1 \ldots e_n \in \mathbb{E}^+$ is the smallest transitively
 closed relation on the set of events from $\tau$ such that $e_j \prec_{hb} e_k$
 holds when $j < k$ and one of the following holds:
 \begin{enumerate}
     \item both $e_j$ and $e_k$ are executed by the same thread,
     \item both $e_j$ and $e_k$ acquire or release the same lock,
-    \item one of $e_j$ and $e_k$ is a fork or a join performed by thread $t$,
+    \item one of $e_j$ and $e_k$ is a~fork or a~join performed by thread $t$,
         and the other is executed by thread $u$.
 \end{enumerate}
 
-A contract $(\varrho,\sigma) \in \mathbb{C}$ is \emph{violated} in a trace
-$\tau$ if, and only if there is a target instance $r$ in the trace and a spoiler
+A contract $(\varrho,\sigma) \in \mathbb{C}$ is \emph{violated} in a~trace
+$\tau$ if, and only if there is a~target instance $r$ in the trace and a~spoiler
 instance $s$ in the trace such that:
 \begin{align*}
     start(s) \nprec_{hb} start(r) \wedge end(r) \nprec_{hb} end(s)
 \end{align*}
 The violation occurs when the spoiler may have started after the target started
-and it may have ended before the target ended. When given a complete program
+and it may have ended before the target ended. When given a~complete program
 execution trace, all target and spoiler instances can be detected, the
 happens-before relation can be deduced, and all contracts can be easily checked
 for violations. The trace, however, can get large and make this approach
 unpractical. For this reason, several optimizations are introduced in
-\cite{contracts}, which are presented in the next section. An example of a
-program trace containing a contract violation is shown in Figure~\ref{traces}.
+\cite{contracts}, which are presented in the next section. An example of
+a~program trace containing a~contract violation is shown in Figure~\ref{traces}.
 
 \begin{figure}[hbt]
     \begin{center}
         \label{traces}
         \input{figures/traces.tex}
-        \caption{An example of a program trace containing a contract violation.
-        Consider a target \texttt{a(X) b(\_)} and a spoiler \texttt{c(X)}. In
-        thread $t$, a target instance $r$ is detected with $X=1$. In thread $u$,
-        a spoiler instance $s$ is detected with $X=1$. The parameters match in
+        \caption{An example of a~program trace containing a~contract violation.
+        Consider a~target \texttt{a(X) b(\_)} and a~spoiler \texttt{c(X)}. In
+        thread $t$, a~target instance $r$ is detected with $X=1$. In thread $u$,
+        a~spoiler instance $s$ is detected with $X=1$. The parameters match in
         both instances. The instances are not synchronized, so $start(s)
         \nprec_{hb} start(r) \wedge end(r) \nprec_{hb} end(s)$ holds, which
-        means that there is a contract violation.}
+        means that there is a~contract violation.}
     \end{center}
 \end{figure}
 
@@ -1002,15 +1002,15 @@ execution trace. A \emph{trace window} is kept instead. Events are moved to the
 trace window as soon as they become available and are removed under certain
 conditions. The goal is to keep the window as small as possible.
 
-Spoiler instances can be safely removed from the window whenever a contract
+Spoiler instances can be safely removed from the window whenever a~contract
 violation that would be detected with the spoiler can be detected without it. A
-spoiler instance can be removed from the window whenever a newer instance of the
+spoiler instance can be removed from the window whenever a~newer instance of the
 same spoiler is detected \cite{contracts}.
 
-A target instance $r$ can be safely removed with respect to a spoiler instance
-$s$ whenever a contract violation that would be detected between $r$ and $s$,
+A target instance $r$ can be safely removed with respect to a~spoiler instance
+$s$ whenever a~contract violation that would be detected between $r$ and $s$,
 can be detected between $s$ and another target instance too. Note that target
-instances may be removed only with respect to a given spoiler, not in general
+instances may be removed only with respect to a~given spoiler, not in general
 \cite{contracts}.
 
 To further reduce the required information about the trace, \emph{vector clocks}
@@ -1020,9 +1020,9 @@ end need to be kept.
 
 The method for on-the-fly contract validation does the following. At method
 entry events, target and spoiler sequences are detected. At method exit events,
-it is detected whether a target or a spoiler instance has ended. When a target
+it is detected whether a~target or a~spoiler instance has ended. When a~target
 instance ends, spoiler instances from the trace window are checked if they
-violate the target. When a spoiler instance ends, target instances from the
+violate the target. When a~spoiler instance ends, target instances from the
 trace window are checked if they are violated by the spoiler. At method exit,
 target and spoiler instances are also discarded when no longer
 needed~\cite{contracts}.
@@ -1034,7 +1034,7 @@ The on-the-fly dynamic analysis of contracts uses vector clocks and the
 algorithm \cite{fasttrack}. A \emph{vector clock} $VC: \mathbb{T} \rightarrow
 \mathbb{N}$ consists of clock values for each thread $t \in \mathbb{T}$. Vector
 clocks are partially ordered with $\sqsubseteq$, can be joined with $\sqcup$,
-and contain a minimal element $\perp_V$. The $t$-component of a vector clock is
+and contain a~minimal element $\perp_V$. The $t$-component of a~vector clock is
 incremented using the $inc_t$ function.
 \begin{align*}
     V_1 \sqsubseteq V_2 \quad &\text{iff} \quad \forall t. \, V_1(t) \varleq
@@ -1051,19 +1051,19 @@ $V_1 = \langle 1,0,2 \rangle$, $V_2 = \langle 1,0,5 \rangle$. Then $V_1
 $inc_{t_2}(V_1) = \langle 1,1,2 \rangle$.
 
 During the analysis, three kinds of clocks are kept. For each thread $t \in
-\mathbb{T}$, a vector clock $\mathbb{C}_t$ stores information about the last
-synchronization with other threads. For each lock $l \in \mathbb{L}$, a vector
+\mathbb{T}$, a~vector clock $\mathbb{C}_t$ stores information about the last
+synchronization with other threads. For each lock $l \in \mathbb{L}$, a~vector
 clock $\mathbb{L}_l$ holds information about the last thread that released the
-lock. For each event $e \in \tau$, a vector clock $VC_e$ is kept
+lock. For each event $e \in \tau$, a~vector clock $VC_e$ is kept
 \cite{contracts}.
 
 The \emph{happens-before} relation is defined using vector clocks. For an event
-$e_t$ from a thread $t$ and an event $e_u$ from a thread $u$, $e_t \prec_{hb}
+$e_t$ from a~thread $t$ and an event $e_u$ from a~thread $u$, $e_t \prec_{hb}
 e_u$ when $VC_{e_t}(t) \varleq VC_{e_u}(t)$.
 
 The clocks are updated on the following actions:
 \begin{itemize}
-    \item Fork --- when a thread $t$ creates a new thread $u$:
+    \item Fork --- when a~thread $t$ creates a~new thread $u$:
         \begin{align*}
             \mathbb{C}_u &\leftarrow \mathbb{C}_u \sqcup \mathbb{C}_t \\
             \mathbb{C}_t &\leftarrow inc_t(\mathbb{C}_t)
@@ -1071,7 +1071,7 @@ The clocks are updated on the following actions:
         The new thread will get all \emph{happens-before} relations from the
         parent thread. Then the parent thread is updated so that events coming
         after the fork will not \emph{happen-before} events in the new thread.
-    \item Join --- when a thread $t$ waits for a thread $u$ to finish.
+    \item Join --- when a~thread $t$ waits for a~thread $u$ to finish.
         \begin{align*}
             \mathbb{C}_t &\leftarrow \mathbb{C}_t \sqcup \mathbb{C}_u \\
             \mathbb{C}_u &\leftarrow inc_u(\mathbb{C}_u)
@@ -1080,7 +1080,7 @@ The clocks are updated on the following actions:
         \emph{happens-before} relations from the joining thread. Then the
         joining thread is updated so that events coming after the join will not
         \emph{happen-before} events in the waiting thread.
-    \item Release --- when a thread $t$ releases a lock $l$.
+    \item Release --- when a~thread $t$ releases a~lock $l$.
         \begin{align*}
             \mathbb{L}_l &\leftarrow \mathbb{C}_t \\
             \mathbb{C}_t &\leftarrow inc_t(\mathbb{C}_t)
@@ -1090,14 +1090,14 @@ The clocks are updated on the following actions:
         thread so the thread's vector clock is stored in the lock. Then the
         thread is updated so that events coming after the release will not be
         synchronized with the thread that acquires the lock in the future.
-    \item Acquire --- when a thread $t$ acquires a lock $l$.
+    \item Acquire --- when a~thread $t$ acquires a~lock $l$.
         \begin{align*}
             \mathbb{C}_t &\leftarrow \mathbb{C}_t \sqcup \mathbb{L}_l
         \end{align*}
         The acquiring thread will get \emph{happens-before} relations from the
         lock which holds the vector clock from last release operation.
     \item Event clocks are set when an event enters the window trace. For an
-        event $e \in \tau$ executed by a thread $t \in \mathbb{T}$:
+        event $e \in \tau$ executed by a~thread $t \in \mathbb{T}$:
         \begin{align*}
             VC_e \leftarrow \mathbb{C}_t
         \end{align*}
@@ -1118,15 +1118,15 @@ The clocks are updated on the following actions:
 
 
 
-\chapter{Design of a Dynamic Analyzer for Parametric Contracts with Spoilers}
+\chapter{Design of a~Dynamic Analyzer for Parametric Contracts with Spoilers}
 \label{chFour}
 
 This chapter describes the proposed dynamic analyzer for parametric contracts
 with spoilers. The analyzer follows the method for dynamic analysis of contracts
 described in \cite{contracts} and extends it to support parametric contracts.
 
-The analyzer is built as a new tool for the RoadRunner framework. The input is a
-program under analysis and a contract definition. The analyzer is then able to
+The analyzer is built as a~new tool for the RoadRunner framework. The input is
+a~program under analysis and a~contract definition. The analyzer is then able to
 detect contract violations in the program and report them. The RoadRunner
 framework was modified to support obtaining method arguments and return values.
 
@@ -1134,7 +1134,7 @@ Section~\ref{overview} provides an architectural overview of the analyzer
 itself. Section~\ref{constraining} describes several restrictions that were
 placed on the analyzer in the design phase. In Section~\ref{instrChanges},
 necessary changes to RoadRunner itself are presented. Section~\ref{contracts}
-describes how a contract is defined and processed before the analysis is
+describes how a~contract is defined and processed before the analysis is
 started. The core function of the analyzer is described in
 Section~\ref{contractAnalyzer}. Section~\ref{contractTool} describes how the
 analyzer interacts with RoadRunner.
@@ -1142,7 +1142,7 @@ analyzer interacts with RoadRunner.
 \section{Overview of the Contract Analyzer}
 \label{overview}
 
-This section provides a high-level overview of the contract analyzer. The
+This section provides a~high-level overview of the contract analyzer. The
 \texttt{ContractAnalyzer} class is the core of the analyzer. It receives events
 from the program under analysis, detects target and spoiler instances, and looks
 for contract violations. It manages data stored with threads and locks, such as
@@ -1151,18 +1151,18 @@ instantiated without any dependencies from the RoadRunner project, which is
 useful for testing purposes. A detailed description of \texttt{ContractAnalyzer}
 can be found in Section~\ref{contractAnalyzer}.
 
-The \texttt{ContractTool} class is a subclass of RoadRunner's \texttt{Tool}
+The \texttt{ContractTool} class is a~subclass of RoadRunner's \texttt{Tool}
 class. During the initialization of \texttt{ContractTool}, the contract
 definition file is parsed and \texttt{ContractAnalyzer} is created. In
 \texttt{ContractTool}, relevant methods are overridden to receive events from
 RoadRunner, such as lock acquire and release or method exit. These events are
 then processed and sent to \texttt{ContractAnalyzer}. Section~\ref{contractTool}
-provides a detailed description of \texttt{ContractTool} and
+provides a~detailed description of \texttt{ContractTool} and
 Section~\ref{contracts} describes the parsing and representation of contracts.
 
-For each thread, a \texttt{Window} instance is created by
+For each thread, a~\texttt{Window} instance is created by
 \texttt{ContractAnalyzer}. It stores information about target and spoiler
-instances in a trace window. On method exit, existing instances are advanced,
+instances in a~trace window. On method exit, existing instances are advanced,
 new instances are started, and for all finished instances, contract violations
 are checked.
 
@@ -1171,9 +1171,9 @@ are checked.
 
 The analyzer is designed with several restrictions based on the previous work,
 such as \cite{janousek} or \cite{FITPUB10817}, to improve its performance.
-First, a restriction is placed on the parameters in contract definitions to
-reduce the number of instances in a trace window. Then the conditions for
-removing instances from the trace window are discussed and a related contract
+First, a~restriction is placed on the parameters in contract definitions to
+reduce the number of instances in a~trace window. Then the conditions for
+removing instances from the trace window are discussed and a~related contract
 restriction is introduced. Finally, it is described how nested method calls
 should be handled.
 
@@ -1184,33 +1184,33 @@ enormous number of instances being tracked at the same time. A lot of instances
 are created because of the necessity to clone target and spoiler instances
 before they are advanced. Consider the following target: \texttt{a(X) b(Y)
 c(X,Y)} and the following program trace: \texttt{a(1) b(2) b(3) c(1,3)}.  When
-\texttt{a(1)} enters the trace window, a new instance is created and the value
+\texttt{a(1)} enters the trace window, a~new instance is created and the value
 of \texttt{X} is set to 1. But when processing \texttt{b(2)}, the analyzer
 cannot reliably decide whether the method call belongs to the instance or not
 (there might be \texttt{c(1,2)} later in the trace). The only option is to keep
-the instance and create a duplicate which is then advanced (while setting
+the instance and create a~duplicate which is then advanced (while setting
 \texttt{Y} to 2).
 
 To prevent duplication of instances, the following restriction was put on the
 contract definition. All target and spoiler parameters must be assigned in the
-first call of a given target or spoiler. This ensures that there is no ambiguity
-in deciding whether a given method call advances an instance or not. For
+first call of a~given target or spoiler. This ensures that there is no ambiguity
+in deciding whether a~given method call advances an instance or not. For
 example, the target from the previous example is invalid because the value of
 \texttt{Y} remains unknown after the first method call.
 
 \subsection{Invalidating Instances}
 
 A target or spoiler instance, as defined in Chapter~\ref{chThree}, requires that
-no method belonging to the alphabet of a given target or spoiler may be called
-between the events that form the instance. In practice, it means that a running
-instance must be discarded when a method belonging to the target or spoiler is
-called. For example, consider a target \texttt{abc} and the following program
-trace: \texttt{aa}. After the first \texttt{a}, a new instance is created. After
+no method belonging to the alphabet of a~given target or spoiler may be called
+between the events that form the instance. In practice, it means that a~running
+instance must be discarded when a~method belonging to the target or spoiler is
+called. For example, consider a~target \texttt{abc} and the following program
+trace: \texttt{aa}. After the first \texttt{a}, a~new instance is created. After
 accepting the second \texttt{a}, the instance must be discarded.
 
 When tracking parametric contracts, instances cannot be easily discarded.
-Consider a running instance of a target (or a spoiler), all of its parameters
-are assigned a value. When a method is called that belongs to the alphabet of
+Consider a~running instance of a~target (or a~spoiler), all of its parameters
+are assigned a~value. When a~method is called that belongs to the alphabet of
 the instance's target, three kinds of situations can happen:
 \begin{enumerate}
     \item The method matches the target definition and method arguments match
@@ -1226,15 +1226,15 @@ the instance's target, three kinds of situations can happen:
         to the instance.
 \end{enumerate}
 
-The second situation can be illustrated in the following example. Consider a
-target \texttt{a(X) b(X)} and a program trace \texttt{a(1) b(2) b(1)}. After
+The second situation can be illustrated in the following example. Consider
+a~target \texttt{a(X) b(X)} and a~program trace \texttt{a(1) b(2) b(1)}. After
 \texttt{a(1)}, an instance is created with \texttt{X} set to 1. When
-\texttt{b(2)} is called, the value of \texttt{X} conflicts with the value
-stored in the instance. However, the instance should not be discarded as we can
-see that a matching call exists later in the trace.
+\texttt{b(2)} is called, the value of \texttt{X} conflicts with the value stored
+in the instance. However, the instance should not be discarded as we can see
+that a~matching call exists later in the trace.
 
-An example of the third situation. Consider target \texttt{a(X) b(X)} and a
-program trace \texttt{a(1) a(2) b(1) b(2)}. Intuitively, there should be two
+An example of the third situation. Consider target \texttt{a(X) b(X)} and
+a~program trace \texttt{a(1) a(2) b(1) b(2)}. Intuitively, there should be two
 instances detected, one with \texttt{X} set to 1, and one with \texttt{X} set to
 2. After \texttt{a(1)}, the first instance with \texttt{X=1} is created. When
 \texttt{a(2)} is accepted, the instance cannot be discarded even though it
@@ -1243,15 +1243,15 @@ belongs to the alphabet of the target.
 The problems described above mean that the analyzer will never discard an
 already running instance, the only option is to advance it. Another option is to
 modify the behavior in the third situation so that the analyzer will try to
-guess whether a method call belongs to the current instance or not. With simple
+guess whether a~method call belongs to the current instance or not. With simple
 contracts, the decision can be easy. Consider the target from the previous
-paragraph: \texttt{a(X) b(X)}. In this case, every time a method \texttt{b()} is
+paragraph: \texttt{a(X) b(X)}. In this case, every time a~method \texttt{b()} is
 called, the analyzer can decide whether it belongs to the currently tracked
 instance or not based on the value of \texttt{X}. The decision is less clear
-when a target contains the same method multiple times with different parameters.
-For example, consider target \texttt{a(X,Y) b(X) b(Y)} and a program trace
+when a~target contains the same method multiple times with different parameters.
+For example, consider target \texttt{a(X,Y) b(X) b(Y)} and a~program trace
 containing two interleaved instances with different parameters: \texttt{a(1,2)
-a(2,3) b(2) b(1) b(2) b(3)}. After \texttt{a(1,2)}, a new instance is created
+a(2,3) b(2) b(1) b(2) b(3)}. After \texttt{a(1,2)}, a~new instance is created
 with \texttt{X=1} and \texttt{Y=2}. After \texttt{a(2,3)}, another instance is
 created with \texttt{X=2} and \texttt{Y=3}. When \texttt{b(2)} is encountered,
 the second instance is advanced, because it matches the target. The analyzer may
@@ -1262,31 +1262,31 @@ discard running instances.
 
 \subsection{Kleene Star in Contract Definition}
 
-The analyzer never invalidates a running instance. This fact allows for
-optimization in contract definitions. As defined in Chapter~\ref{chThree}, a
-target or a spoiler is a regular expression over methods. The analyzer should
+The analyzer never invalidates a~running instance. This fact allows for
+optimization in contract definitions. As defined in Chapter~\ref{chThree},
+a~target or a~spoiler is a~regular expression over methods. The analyzer should
 therefore recognize contracts defined using all three basic operations:
 concatenation (\texttt{ab}), alternation (\texttt{a|b}), and Kleene star
-(\texttt{a*}). Due to the fact, that no method call can invalidate a running
+(\texttt{a*}). Due to the fact, that no method call can invalidate a~running
 instance, the Kleene star operation is not needed. All parts of an expression
-that are also operands of a Kleene star operation can be removed with no impact
-on the analysis. For example, a regular expression \texttt{ab*c} can be replaced
+that are also operands of a~Kleene star operation can be removed with no impact
+on the analysis. For example, a~regular expression \texttt{ab*c} can be replaced
 with \texttt{ac}. Calls to method \texttt{b} will be simply ignored. These
-simplified regular expressions, when converted to a finite automaton, do not
+simplified regular expressions, when converted to a~finite automaton, do not
 create any loops. This allows for simpler structures in the implementation of
 the analyzer.
 
 \subsection{Nested Method Calls}
 
 The method described in \cite{contracts} is based on program traces where
-every method represents a single event in the trace. However, the RoadRunner
+every method represents a~single event in the trace. However, the RoadRunner
 framework produces two events for every method: method entry and method exit.
 For parametric contracts, we need to obtain values of parameters and also the
 return value, which is available only on method exit. For convenience, the
 analyzer should use only the method exit event. This means that the analyzer may
 produce unexpected results when the program under analysis contains nested calls
 to methods that are part of the contract. Consider the following methods that
-are both parts of a contract:
+are both parts of a~contract:
 
 \begin{lstlisting}[language=java]
 public void a() { b(); }
@@ -1305,7 +1305,7 @@ to obtain method arguments and return values so that the contract parameters
 can be assigned values.
 
 The \texttt{enter} and \texttt{exit} of RoadRunner's \texttt{Tool} class methods
-both take a \texttt{MethodEvent} parameter containing the following information:
+both take a~\texttt{MethodEvent} parameter containing the following information:
 \begin{itemize}
     \item Target --- \texttt{null} for static methods, the value of \texttt{this}
         for instance methods.
@@ -1327,10 +1327,10 @@ public void setReturnValue(Object returnValue);
 Arguments and return values which are reference values (class instances or
 arrays) can be stored directly in the \texttt{Object} data type. Primitive
 values (such as \texttt{int} or \texttt{float}) cannot be stored in
-\texttt{Object} directly, they must be wrapped in a class instance. Each
-primitive type has a corresponding object wrapper class, for example,
+\texttt{Object} directly, they must be wrapped in a~class instance. Each
+primitive type has a~corresponding object wrapper class, for example,
 \texttt{int} is wrapped in the \texttt{java.lang.Integer} class. The
-\texttt{getArgs()} method should return an array of size 0 for a method that
+\texttt{getArgs()} method should return an array of size 0 for a~method that
 takes no arguments and it should return \texttt{null} when the arguments are not
 available, for example when the argument instrumentation is turned off. The
 \texttt{getReturnValue()} should return \texttt{null} when the value is not
@@ -1338,11 +1338,11 @@ available (for example on method entry), when the method throws an exception, or
 when the method returns \texttt{void}.
 
 \subsection{Parameter Matching}
-When trying to advance a running instance, method arguments must be checked, if
+When trying to advance a~running instance, method arguments must be checked, if
 they match the previously assigned parameters. For reference types, the equality
 operator (\texttt{==}) is used which compares the addresses of both objects. For
 primitive values that are wrapped in an object, the \texttt{equals()} method
-must be used. As a result, the analyzer will always compare instances of wrapper
+must be used. As a~result, the analyzer will always compare instances of wrapper
 classes (such as \texttt{Integer}) by calling the \texttt{equals()} method, even
 if the instance was created by the program under analysis. This may or may not
 be the intended behavior and the user of the analyzer should be aware of this.
@@ -1350,18 +1350,18 @@ be the intended behavior and the user of the analyzer should be aware of this.
 \section{Contracts Definition and Parsing}
 \label{contracts}
 
-Before the start of the analysis, a contract must be specified. This section
-describes the syntax of a contract configuration file, how it is parsed, and how
+Before the start of the analysis, a~contract must be specified. This section
+describes the syntax of a~contract configuration file, how it is parsed, and how
 it is represented in the analyzer.
 
 \subsection{Contract Definition Syntax}
 
-The analyzer takes a contract definition as a parameter. At the top level, the
+The analyzer takes a~contract definition as a~parameter. At the top level, the
 definition contains pairs of targets and spoilers. Each target and spoiler is
-represented by a regular expression over methods. The on-the-fly dynamic
+represented by a~regular expression over methods. The on-the-fly dynamic
 analysis described in Chapter~\ref{chThree} expects several spoilers to be
-assigned to a single target. In practice, the spoilers can be merged into a
-single regular expression so that each target has exactly one spoiler. Each
+assigned to a~single target. In practice, the spoilers can be merged into
+a~single regular expression so that each target has exactly one spoiler. Each
 method is parametrized, including arguments, return value, and the object it is
 called upon (\texttt{this}).
 
@@ -1369,8 +1369,8 @@ To specify methods unambiguously, method names must be fully qualified (for
 example \texttt{java/lang/Object.toString}). Java allows method overloading, so
 to distinguish methods with the same name but different number and type of their
 parameters, the contract definition contains the method descriptor (for example
-\texttt{(Ljava/lang/Object;)V}. Each method in a contract definition consists of
-the enclosing class, the method name, the method descriptor, and a list of
+\texttt{(Ljava/lang/Object;)V}. Each method in a~contract definition consists of
+the enclosing class, the method name, the method descriptor, and a~list of
 meta-variables. For example:
 
 \begin{lstlisting}
@@ -1384,26 +1384,26 @@ the first parameter (integer). The second parameter (object) is marked with free
 meta-variable (\texttt{\_}) meaning that the analyzer will ignore its value. The
 return value or the target of the method can be omitted.
 
-Targets and spoilers are defined using a limited regular expression over
+Targets and spoilers are defined using a~limited regular expression over
 methods. Concatenation is achieved simply by writing two methods, one after
-another, alternation is denoted by a vertical bar (\texttt{|}). The Kleene star
-operator (\texttt{*}) is not allowed. An example of a target definition:
+another, alternation is denoted by a~vertical bar (\texttt{|}). The Kleene star
+operator (\texttt{*}) is not allowed. An example of a~target definition:
 
 \begin{lstlisting}
 Test.a()V X() ( Test.b()V X() | Test.c()V X() )
 \end{lstlisting}
 
 A contract clause is defined as two regular expressions over methods, separated
-by an arrow and a semicolon at the end. A contract is then a list of clauses. An
-example of a full contract is shown in Listing~\ref{contract}. The full grammar
+by an arrow and a~semicolon at the end. A contract is then a~list of clauses. An
+example of a~full contract is shown in Listing~\ref{contract}. The full grammar
 for contracts is shown in Appendix \ref{appGrammar}.
 
 \begin{lstlisting}[label=contract, float, caption={Contract from
-Chapter~\ref{chThree} written for a Map with \texttt{int} keys and
+Chapter~\ref{chThree} written for a~Map with \texttt{int} keys and
 \texttt{double} values. The first target matches an inserting element to the map
-at a given key and then retrieving it. The target can be invalidated by calling
+at a~given key and then retrieving it. The target can be invalidated by calling
 either \texttt{put} or \texttt{get} with the same key. The second target matches
-checking if a key is present in the map and then modifying the value at the
+checking if a~key is present in the map and then modifying the value at the
 given key. The target can be invalidated by replacing the value or by removing
 it.}]
 Map.put(ID)V M(K,_) Map.get(I)D M(K)
@@ -1415,24 +1415,24 @@ Map.contains(I)Z M(K)
 \end{lstlisting}
 
 \subsection{Contract Representation}
-All parts of a contract definition are parsed into a corresponding class
-instance. Each method in a target or spoiler is represented by a
-\texttt{Signature} instance. It consists of a method name, a fully qualified
-name of the enclosing class, and a method descriptor. The method descriptor
+All parts of a~contract definition are parsed into a~corresponding class
+instance. Each method in a~target or spoiler is represented by
+a~\texttt{Signature} instance. It consists of a~method name, a~fully qualified
+name of the enclosing class, and a~method descriptor. The method descriptor
 contains information about parameter types. The main purpose of this class is to
 be compared with method invocation events to determine if the invoked method
-matches the method from a contract. Meta-variables are parsed into a
-\texttt{MetaVars} instance.
+matches the method from a~contract. Meta-variables are parsed into
+a~\texttt{MetaVars} instance.
 
-Each target and spoiler is represented by a \texttt{State} instance that will
-later be used to construct a finite automaton for detecting running target and
-spoiler instances. A target with a single method will be represented by two
-states: one starting state with a transition to an accepting state. The
+Each target and spoiler is represented by a~\texttt{State} instance that will
+later be used to construct a~finite automaton for detecting running target and
+spoiler instances. A target with a~single method will be represented by two
+states: one starting state with a~transition to an accepting state. The
 transition will contain the method signature and meta-variables. During parsing
 of more complex targets and spoilers, these one-method state structures are
 combined. See Figure~\ref{states} for an example. During the analysis,
-\texttt{State} instances will be used for checking whether a given method
-invocation can advance a given target or spoiler.
+\texttt{State} instances will be used for checking whether a~given method
+invocation can advance a~given target or spoiler.
 
 \begin{figure}[hbt]
     \begin{center}
@@ -1443,8 +1443,8 @@ invocation can advance a given target or spoiler.
     \end{center}
 \end{figure}
 
-A contract is then made up of target--spoiler pairs. When a contract is created,
-a set of all method signatures used in the contract is extracted. During the
+A contract is then made up of target--spoiler pairs. When a~contract is created,
+a~set of all method signatures used in the contract is extracted. During the
 analysis, the set of signatures is used to filter method invocations so that
 only relevant methods are processed by the analyzer.
 
@@ -1452,29 +1452,29 @@ only relevant methods are processed by the analyzer.
 \label{contractAnalyzer}
 The main class, \texttt{ContractAnalyzer} receives events from the program under
 analysis, detects target and spoiler instances in all threads, and looks for
-contract violations when a target or spoiler instance finishes. The
+contract violations when a~target or spoiler instance finishes. The
 \texttt{ContractAnalyzer} class provides the following interface:
 \begin{itemize}
-    \item A constructor that takes a \texttt{Contract} instance.
-    \item \texttt{exit} method that is called on method exit. It takes a thread
-        identifier, a method signature, and method arguments (also containing
-        the return value). When a contract violation is detected, the
+    \item A constructor that takes a~\texttt{Contract} instance.
+    \item \texttt{exit} method that is called on method exit. It takes a~thread
+        identifier, a~method signature, and method arguments (also containing
+        the return value). When a~contract violation is detected, the
         \texttt{exit} method will throw an exception.
-    \item \texttt{acquire} and \texttt{release} methods that are called when a
-        synchronized block or a synchronized method is entered and exited. The
-        methods both take a thread identifier and a lock identifier.
-    \item \texttt{create} method that is called when a new thread is created. It
-        takes a thread identifier.
+    \item \texttt{acquire} and \texttt{release} methods that are called when
+        a~synchronized block or a~synchronized method is entered and exited. The
+        methods both take a~thread identifier and a~lock identifier.
+    \item \texttt{create} method that is called when a~new thread is created. It
+        takes a~thread identifier.
     \item \texttt{fork} and \texttt{join} methods that take two thread
         identifiers.
 \end{itemize}
 
 The \texttt{ContractAnalyzer} class manages data stored with threads and locks.
-When created by calling \texttt{create}, each thread will get a trace window and
-a vector clock. Methods \texttt{acquire}, \texttt{release}, \texttt{fork}, and
+When created by calling \texttt{create}, each thread will get a~trace window and
+a~vector clock. Methods \texttt{acquire}, \texttt{release}, \texttt{fork}, and
 \texttt{join} only modify vector clocks of threads and locks.
 
-The \texttt{exit} method calls the trace window associated with a given thread.
+The \texttt{exit} method calls the trace window associated with a~given thread.
 The trace window receives method signature and arguments so that it can try to
 advance all of its target and spoiler instances. It also receives the current
 vector clock and references to trace windows of other threads so that it can
@@ -1491,13 +1491,13 @@ methods will still be concurrent.
 
 \subsection{Tracking of Target and Spoiler Instances}
 
-For each thread, a \texttt{Window} object is kept during the analysis. It
-contains target and spoiler instances present in a trace window. When a method
-invocation is detected in a thread, all target and spoiler instances are
+For each thread, a~\texttt{Window} object is kept during the analysis. It
+contains target and spoiler instances present in a~trace window. When a~method
+invocation is detected in a~thread, all target and spoiler instances are
 advanced (if possible) and new instances are started.
 
-An instance is bound to a target or spoiler from the contract definition. The
-instance is created by encountering the first method signature in a target or
+An instance is bound to a~target or spoiler from the contract definition. The
+instance is created by encountering the first method signature in a~target or
 spoiler. The instance is advanced to the next state and waits for the next
 method as defined in the given target or spoiler. During the first transition,
 values of all parameters are assigned. There can be multiple instances of the
@@ -1508,10 +1508,10 @@ When an instance is advanced using the last method in the target or spoiler
 definition, it reaches an accepting state. At this point, the analyzer checks
 for contract violations (see Section~\ref{violations}). Then the instance is
 reset. That means that the instance again waits for the first method signature
-in a given target or spoiler. The value of parameters will however stay
+in a~given target or spoiler. The value of parameters will however stay
 unchanged. The vector clocks of the beginning and the end of the instance are
 saved. So when an instance is running for the second time, it has access to the
-vector clocks of a previously encountered instance. See
+vector clocks of a~previously encountered instance. See
 Figure~\ref{instanceLifeCycle} for illustration of an instance life cycle.
 
 \begin{figure}[hbt]
@@ -1522,9 +1522,9 @@ Figure~\ref{instanceLifeCycle} for illustration of an instance life cycle.
         \input{figures/instancelifecycle3.tex}
         \input{figures/instancelifecycle4.tex}
         \caption{An example of an instance life cycle. In the first step, the
-        instance is created when a method call \texttt{a(42)} is encountered.
+        instance is created when a~method call \texttt{a(42)} is encountered.
         The vector clock of the beginning is set and the parameters are assigned
-        a value. In step 2, the instance is fully accepted. At this point, the
+        a~value. In step 2, the instance is fully accepted. At this point, the
         analyzer looks for contract violations. Then the instance is reset, the
         vector clock of the beginning is reset, and the vector clocks of the
         last instance are set. In step 3, method \texttt(a) is called with an
@@ -1533,9 +1533,9 @@ Figure~\ref{instanceLifeCycle} for illustration of an instance life cycle.
     \end{center}
 \end{figure}
 
-When a method call enters the trace window, all running instances (those with
+When a~method call enters the trace window, all running instances (those with
 parameters already assigned) are advanced. The method call may however also
-start a new instance that is not yet part of the trace window. The analyzer
+start a~new instance that is not yet part of the trace window. The analyzer
 tries to create new instances from targets and spoilers from the contract. These
 new instances are added to the trace window only if there is no matching
 instance already present in the trace window. Two instances are matching, if
@@ -1545,8 +1545,8 @@ practice, the only difference between these matching instances is that one
 contains information about the previously encountered instance while the other
 does not.
 
-\emph{Example.} Consider target \texttt{a(X) b(X)} and a program trace
-\texttt{a(1) b(1) a(2) b(2) a(1)}. After \texttt{a(1)}, the analyzer adds a new
+\emph{Example.} Consider target \texttt{a(X) b(X)} and a~program trace
+\texttt{a(1) b(1) a(2) b(2) a(1)}. After \texttt{a(1)}, the analyzer adds a~new
 instance $i_1$ to the window with $X=1$. After \texttt{b(1)}, $i_1$ is advanced,
 accepted, and reset. No new instance is started because there is no target
 starting with method \texttt{b}. After \texttt{a(2)}, $i_1$ cannot be advanced,
@@ -1558,18 +1558,18 @@ is added because $i_1$ would match the newly created instance.
 \subsection{Detection of Contract Violations}
 \label{violations}
 
-Each time a target or a spoiler is fully recognized by the analyzer, it must be
-checked whether there are any contract violations. When a method enters a trace
+Each time a~target or a~spoiler is fully recognized by the analyzer, it must be
+checked whether there are any contract violations. When a~method enters a~trace
 window, there may be several instances from the same thread that will be fully
 accepted by this method call. For each accepted target and spoiler instance, the
 analyzer will look for conflicting instances in trace windows from other
 threads.
 
 When an instance is fully accepted, the analyzer will retrieve all
-\emph{conflicting instances} from other threads. If the instance is a target
-instance, the analyzer will retrieve instances of a spoiler that can invalidate
-the target, as specified in the contract. Similarly, if the instance is a
-spoiler instance, the analyzer will look for instances of a target that can be
+\emph{conflicting instances} from other threads. If the instance is a~target
+instance, the analyzer will retrieve instances of a~spoiler that can invalidate
+the target, as specified in the contract. Similarly, if the instance is
+a~spoiler instance, the analyzer will look for instances of a~target that can be
 invalidated by the spoiler. For each conflicting instance, it is checked whether
 the contract parameter values match. Then finally, the analyzer checks the
 vector clocks of each matching instance and decides if the two instances
@@ -1579,21 +1579,21 @@ The two instances may not actually interleave each other. The interleaving is
 decided based on the vector clocks of the beginnings and ends of the two
 instances. Vector clocks are only updated when threads synchronize themselves.
 So the analyzer will mark the two instances as interleaving when there was not
-a synchronization between the threads that would prevent them to interleave each
+a~synchronization between the threads that would prevent them to interleave each
 other in another run of the program under analysis.
-Figure~\ref{detectionExample} shows an example of a contract violation detected
-in a program.
+Figure~\ref{detectionExample} shows an example of a~contract violation detected
+in a~program.
 
 \begin{figure}[hbt]
     \begin{center}
         \label{detectionExample}
         \input{figures/detection.tex}
-        \caption{An example of a contract violation in a program. Consider a
-        target \texttt{a(X) b(X)} and a spoiler \texttt{c(\_)}. In thread $t$, a
-        target instance $r_1$ with $X=1$ is detected, it begins and ends at
+        \caption{An example of a~contract violation in a~program. Consider
+        a~target \texttt{a(X) b(X)} and a~spoiler \texttt{c(\_)}. In thread $t$,
+        a~target instance $r_1$ with $X=1$ is detected, it begins and ends at
         $\langle 1,0 \rangle$. There is no spoiler instance accepted at this
-        moment, so there is no contract violation. Then a thread $u$ is created
-        and a spoiler instance $s_1$ is accepted, it begins and ends at $\langle
+        moment, so there is no contract violation. Then a~thread $u$ is created
+        and a~spoiler instance $s_1$ is accepted, it begins and ends at $\langle
         1,1 \rangle$. The spoiler instance does not interleave the $r_1$ because
         $\langle 1,0 \rangle \sqsubseteq \langle 1,1 \rangle$.  Then another
         target instance $r_2$ is detected in $t$ with $X=2$, it begins and ends
@@ -1608,23 +1608,23 @@ in a program.
 The \texttt{ContractAnalyzer} class described in Section~\ref{contractAnalyzer}
 is not meant to be called directly by RoadRunner because it contains only
 methods specific to the validation of contracts. The \texttt{ContractTool} class
-was created as a layer between RoadRunner and \texttt{ContractAnalyzer}. Its
-purpose is to load a contract from a file, create a \texttt{ContractAnalyzer}
+was created as a~layer between RoadRunner and \texttt{ContractAnalyzer}. Its
+purpose is to load a~contract from a~file, create a~\texttt{ContractAnalyzer}
 instance, and forward relevant events from RoadRunner to
 \texttt{ContractAnalyzer}.
 
-The \texttt{ContractTool} class is a subclass of the \texttt{Tool} class (see
+The \texttt{ContractTool} class is a~subclass of the \texttt{Tool} class (see
 Section~\ref{roadRunnerUsage}). The following methods are overridden:
 \begin{itemize}
     \item \texttt{init}, which is called before the analysis, after
         command-line options are processed;
-    \item \texttt{exit}, which is called when a method exits;
-    \item \texttt{create}, which is called when a new thread is created;
-    \item \texttt{acquire} and \texttt{release()}, which is called when a
-        synchronized method or a synchronized block is entered or exited;
-    \item \texttt{preStart}, which is called before a new thread is started
-        (after a fork operation);
-    \item \texttt{postJoin}, which is called after a thread is joined with
+    \item \texttt{exit}, which is called when a~method exits;
+    \item \texttt{create}, which is called when a~new thread is created;
+    \item \texttt{acquire} and \texttt{release()}, which is called when
+        a~synchronized method or a~synchronized block is entered or exited;
+    \item \texttt{preStart}, which is called before a~new thread is started
+        (after a~fork operation);
+    \item \texttt{postJoin}, which is called after a~thread is joined with
         another thread.
 \end{itemize}
 
@@ -1632,7 +1632,7 @@ Methods for detecting memory accesses will not be used by the tool, and also no
 data will be stored in shadow memory locations, except for vector clocks stored
 with locks.
 
-In its \texttt{init} method, the tool loads a contract definition from a file
+In its \texttt{init} method, the tool loads a~contract definition from a~file
 and calls the contract parser. After the contract is parsed, it constructs
 \texttt{ContractAnalyzer}.
 
@@ -1643,9 +1643,9 @@ happens in \texttt{ContractTool} and not in \texttt{ContractAnalyzer} because it
 is not essential to the analysis and also, there are several filtering solutions
 available. In this master's thesis, the filtering is done by comparing method
 signatures during the analysis. A better approach, which might be implemented in
-the future, is to instrument only methods contained in a contract. In that case,
+the future, is to instrument only methods contained in a~contract. In that case,
 no filtering during analysis is needed as it is guaranteed that each method
-event produced will belong to a method in the contract.
+event produced will belong to a~method in the contract.
 
 The rest of the methods, \texttt{create}, \texttt{acquire}, \texttt{release},
 \texttt{preStart}, and \texttt{postJoin}, just pick relevant information from
@@ -1678,16 +1678,16 @@ which are briefly described in this section.
 \paragraph{Immutable data structures}
 All classes except for \texttt{ContractAnalyzer} and \texttt{ContractTool} are
 immutable. Once created, the internal state of objects does not change. All
-operations produce a new object instead of modifying the current one. See the
+operations produce a~new object instead of modifying the current one. See the
 next section for more details.
 
 \paragraph{Side effects and pure functions}
 Most methods in the analyzer are pure functions, which means that each call can
-be always replaced with a resulting value of the call. For example, consider
+be always replaced with a~resulting value of the call. For example, consider
 pure function \texttt{int sum(int a, int b)}. Then the method call
 \texttt{sum(2,3)} can be always replaced with \texttt{5} without changing
-program behavior. Pure functions perform no side effects (such as writing to a
-file).
+program behavior. Pure functions perform no side effects (such as writing to
+a~file).
 
 \paragraph{Higher-order function}
 The analyzer contains and uses methods that take functions as parameters.
@@ -1698,12 +1698,12 @@ The data structures used by the analyzer are \emph{immutable}. An immutable
 object is an object whose internal state remains constant after it has been
 created.  This property brings several benefits. The object can be shared among
 multiple threads without the need for synchronization. Immutable objects are
-always in a consistent state. The public methods of a given class will always
+always in a~consistent state. The public methods of a~given class will always
 behave the same way on an object. Immutable objects are also easy to test and
 reason about.
 
 In Java, immutability is achieved by following rules. Immutable classes should
-be \texttt{final} to avoid overriding of methods. All fields of a class
+be \texttt{final} to avoid overriding of methods. All fields of a~class
 should be \texttt{private} and \texttt{final}. All fields should reference only
 immutable objects or, if not possible, the fields should not be modified in the
 class. All methods that would normally modify the object should return updated
@@ -1714,7 +1714,7 @@ caption={Simplified implementation of an immutable finite automaton. The
 automaton consists of references to the starting state and the current state.
 The public constructor allows creating automatons that are in their starting
 states, ensuring consistency. The advance method does not update the current
-state but creates a new finite automaton with an updated current state.}]
+state but creates a~new finite automaton with an updated current state.}]
 public final class FiniteAutomaton {
     private final State start;
     private final State current;
@@ -1749,7 +1749,7 @@ method arguments, or contract parameters, are not used directly by the analyzer
 but via interfaces. For example, there is the \texttt{JvmSignature} class that
 implements the \texttt{Signature} interface.
 
-The collection that stores target and spoiler instances in a trace window is
+The collection that stores target and spoiler instances in a~trace window is
 abstracted in the \texttt{InstanceCollection} interface. The
 \texttt{MultimapInstanceCollection} implements the collection using Vavr's
 \texttt{Multimap} data structure. This approach makes it easy to create
@@ -1765,41 +1765,41 @@ analyzer, several components were upgraded.
 
 The ASM framework was upgraded to version 7.0 which supports Java 11. RoadRunner
 can therefore analyze programs compiled for Java 11. Before the upgrade took
-place, the custom modifications of the ASM framework were isolated to a series
+place, the custom modifications of the ASM framework were isolated to a~series
 of patches against the unmodified ASM version 5.0.2. Then, for each new version
-up to 7.0, the ASM was always replaced with a newer version and the custom
-patches were reapplied and modified if necessary. As a result, the ASM framework
+up to 7.0, the ASM was always replaced with a~newer version and the custom
+patches were reapplied and modified if necessary. As a~result, the ASM framework
 can be easily upgraded in the future by reapplying the custom patch series. The
 RoadRunner itself was modified to be built for Java 11.
 
 \section{Contract File Parsing}
 \label{cfParsing}
-One of the inputs to the analyzer is a contract definition. The syntax of the
+One of the inputs to the analyzer is a~contract definition. The syntax of the
 definition is described in Chapter~\ref{chFour}. Due to its length, it is passed
-to the analyzer in a text file. The file name is specified using a command-line
+to the analyzer in a~text file. The file name is specified using a~command-line
 option. RoadRunner allows tools to easily add new command-line options. The
 options are then automatically parsed and made available for the tool to use.
 
-The file with contract definition is then scanned using a lexical analyzer and
-parsed using a LALR parser. The lexical analyzer is generated using
+The file with contract definition is then scanned using a~lexical analyzer and
+parsed using a~LALR parser. The lexical analyzer is generated using
 JFlex\footnote{available at \url{https://jflex.de/}} and the parser is generated
 by CUP\footnote{available at \url{http://www2.cs.tum.edu/projects/cup/}}. The
 primary reason for choosing these generators was that both of them were already
 used in RoadRunner, so no new dependency was added to the project.
 
-The lexical analyzer recognizes various symbols for delimiting the methods in a
-contract but it does not split class names and method descriptors, they are
-passed to the parser as a single string. For example, \texttt{java/lang/Object}
+The lexical analyzer recognizes various symbols for delimiting the methods in
+a~contract but it does not split class names and method descriptors, they are
+passed to the parser as a~single string. For example, \texttt{java/lang/Object}
 or \texttt{(Ljava/langString;II)V}. The list of terminals it produces is defined
 in the parser.
 
-The parser takes the contract definition file contents, creates a lexical
-analyzer, and parses the file. The result is a \texttt{Contract} instance or an
-exception. Each method in a contract is parsed as a finite-state machine with a
-single state. The whole target or spoiler definition is constructed either by
+The parser takes the contract definition file contents, creates a~lexical
+analyzer, and parses the file. The result is a~\texttt{Contract} instance or an
+exception. Each method in a~contract is parsed as a~finite-state machine with
+a~single state. The whole target or spoiler definition is constructed either by
 concatenating or alternating two states from left to right.
 
-The current implementation of the parser introduces a limitation to the range of
+The current implementation of the parser introduces a~limitation to the range of
 allowed regular expressions. When the alternation operation is used (denoted by
 \texttt{|}), the expressions cannot start with the same method. For example, the
 regular expression \texttt{(ab|ac)} is not allowed. The resulting finite
@@ -1813,13 +1813,13 @@ RoadRunner was modified to obtain method arguments and return values during the
 analysis. The implementation is based on changes described in \cite{janousek},
 the final version however fixes several major issues. The initial implementation
 adds new fields to the \texttt{MethodEvent} class which holds information about
-a method invocation. These changes were taken without modifications from
+a~method invocation. These changes were taken without modifications from
 \cite{janousek}.
 
 The main instrumentation logic is contained in the
 \texttt{SyncAndMethodThunkInserter} class from the
 \texttt{rr.instrument.classes} package, in the \texttt{createMethodThunk}
-method. The method creates a new method that will generate enter and exit events
+method. The method creates a~new method that will generate enter and exit events
 and call the original method. In the beginning, the values of method parameters
 need to be stored, at the end, the return value must be stored. The initial
 implementation described in \cite{janousek} contained several issues. Static
@@ -1837,23 +1837,23 @@ stack. Reference values are stored directly in the array. Primitive values are
 wrapped in an object by calling the \texttt{valueOf()} method in the
 corresponding class depending on the primitive type. For example, \texttt{int}
 values are passed to the \texttt{java.lang.Integer.valueOf()} function. After
-processing all arguments, the array is stored in a local variable.
+processing all arguments, the array is stored in a~local variable.
 
-The original method is then called in a try--catch block. On normal exit, the
+The original method is then called in a~try--catch block. On normal exit, the
 return value is converted to an object, the same way parameters are converted.
-Then a method exit event is generated, containing both the array of arguments
+Then a~method exit event is generated, containing both the array of arguments
 and the return value. If an exception is caught, the return value is set to
 \texttt{null} and an exit event is generated containing the arguments. An
-example of a instrumented method is shown in Listing~/ref{paramInst}.
+example of a~instrumented method is shown in Listing~/ref{paramInst}.
 
 \begin{lstlisting}[label=paramInst, float, caption={A method instrumented to
 obtain arguments and the return value. On lines 5--11, the enter event is
-generated. On lines 14--18, an array for arguments is created and stored in a
-local variable. On lines 19--25, the first argument is wrapped in an object and
-stored in the array on index 0.  On lines 26--29, the second argument is stored
-directly in the array on index 1. On lines 30--33, the original method is
-called. On lines 36--40, the return value is wrapped and stored in a local
-variable. Lines 42--50 generate the exit event. Lines 53--60 contain a catch
+generated. On lines 14--18, an array for arguments is created and stored in
+a~local variable. On lines 19--25, the first argument is wrapped in an object
+and stored in the array on index 0.  On lines 26--29, the second argument is
+stored directly in the array on index 1. On lines 30--33, the original method is
+called. On lines 36--40, the return value is wrapped and stored in a~local
+variable. Lines 42--50 generate the exit event. Lines 53--60 contain a~catch
 block in case an exception is thrown in the original function.}]
 public int foo(int, java.lang.String);
  0: invokestatic  #20   // Method rr/state/ShadowThread
@@ -1903,7 +1903,7 @@ public int foo(int, java.lang.String);
 Each part of the analyzer was thoroughly tested using several different
 approaches. The core analyzer functionality was tested using unit tests written
 in JUnit 5\footnote{available at \url{https://junit.org/junit5/}}. The
-instrumentation of method arguments and returns values was tested using a custom
+instrumentation of method arguments and returns values was tested using a~custom
 RoadRunner tool. The integration of all parts was tested using Bash scripts that
 prepare contract files, programs under analysis, and launch RoadRunner. This
 section describes approaches used for testing different parts of the analyzer.
@@ -1911,7 +1911,7 @@ See Appendix \ref{manual} for instructions for running the tests.
 
 The analyzer was implemented so that there is almost no need to work with
 RoadRunner's internal structures when testing the analyzer. The
-\texttt{ContractTool} class serves as a wrapper for \texttt{ContractAnalyzer}.
+\texttt{ContractTool} class serves as a~wrapper for \texttt{ContractAnalyzer}.
 All structures, such as \texttt{MethodEvent}, are transformed into objects
 specific to the contract analyzer. In tests, \texttt{ContractAnalyzer} is used
 directly. RoadRunner is not executed, the events coming from the program under
@@ -1920,29 +1920,29 @@ thread scheduler and are very fast.
 
 The contract parser is tested using JUnit 5 tests. The contract definition is
 passed to the parser and the produced \texttt{Contract} instance is compared
-with a \texttt{Contract} instance constructed directly in code. The contract for
+with a~\texttt{Contract} instance constructed directly in code. The contract for
 comparison is constructed by creating appropriate objects such as method
 signatures, meta-variables, and finite automaton states.
 
-Changes to instrumentation were tested by preparing a custom subclass of
+Changes to instrumentation were tested by preparing a~custom subclass of
 RoadRunner's \texttt{Tool} class that overrides the \texttt{exit} method and
 prints arguments and the return value to the standard output. A testing Java
 program was created that calls methods with various numbers and types of
 parameters. The test consists of analyzing the testing program with RoadRunner
 using the custom tool. The tool prints method arguments and return values to the
 output and the values must match those in the testing program. The whole process
-is automated using a Bash script.
+is automated using a~Bash script.
 
 The integration of all parts is again automated using bash scripts. Testing
 programs and files with contract definitions are prepared. The script compiles
 the testing program and analyzes it with RoadRunner that is using the contract
-tool. Then it verifies if a contract violation has been found.
+tool. Then it verifies if a~contract violation has been found.
 
 
 
 \chapter{Conclusion}
 
-The goal of this thesis was to design a dynamic analyzer for validating
+The goal of this thesis was to design a~dynamic analyzer for validating
 parametric contracts with spoilers. The analyzer was fully implemented as an
 extension to the RoadRunner framework.
 
@@ -1952,14 +1952,14 @@ RoadRunner framework. Contracts for parallelism were then introduced, together
 with an on-the-fly method for contract analysis. A dynamic analyzer for tracking
 parametric contracts was proposed. Several restrictions were put on the analyzer
 in the design phase to mitigate problems in previous prototype implementations.
-The analyzer consists of the following parts: a parser for contract definitions,
+The analyzer consists of the following parts: a~parser for contract definitions,
 modified instrumentation of methods, and the core analyzer that tracks target
 and spoiler instances and detects contract violations. All parts of the analyzer
 were implemented and their functionality was verified by an extensive test
 suite. The analyzer was able to detect all contract violations present in the
 testing programs.
 
-The analyzer implementation provides a solid basis for contract validation of
+The analyzer implementation provides a~solid basis for contract validation of
 programs written in Java. The changes in method instrumentation are not tied to
 the contract validation and can be used by various other analyzers that may
 benefit from obtaining method arguments and return values.

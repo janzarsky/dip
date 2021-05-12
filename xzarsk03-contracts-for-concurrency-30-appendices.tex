@@ -1,7 +1,7 @@
 \chapter{Manual}
 \label{manual}
 
-The analyzer requires a Java Virtual Machine version 11 and
+The analyzer requires a~Java Virtual Machine version 11 and
 Ant\footnote{available at \url{http://ant.apache.org/}}. For
 convenience, the analyzer should be compiled and run on Linux as there are
 several Bash scripts used in the process. All commands, such as \texttt{ant} or
@@ -27,12 +27,12 @@ To verify the compilation, run \texttt{rrrun -help}. To instrument and run a
 testing program, first compile the program: \texttt{javac test/Test.java} and
 then run RoadRunner: \texttt{rrrun test.Test}.
 
-To launch the contract analyzer on a simple program, run the following commands:
+To launch the contract analyzer on a~simple program, run the following commands:
 \begin{lstlisting}
 $ javac test/ContractTest.java
 $ rrrun -tool=CT -contractFile=test/ContractTest.contract test.ContractTest
 \end{lstlisting}
-The analyzer should find a contract violation.
+The analyzer should find a~contract violation.
 
 \chapter{Contract Definition Grammar}
 \label{appGrammar}
@@ -68,19 +68,19 @@ presented below. The grammar is described in the BNF syntax.
 
 The terminals have the following definitions:
 \begin{itemize}
-    \item \texttt{<class>} is a class name in the internal representation of
+    \item \texttt{<class>} is a~class name in the internal representation of
         the JVM specification, for example: \texttt{java/lang/Object};
     \item \texttt{<name>} is the method name, as defined by the JVM
         specification, for example: \texttt{equals};
     \item \texttt{<descriptor>} is the method descriptor, as defined by JVM
         specification, for example: \texttt{(Ljava/lang/Object;)Z};
-    \item \texttt{<letter>} is a single letter, such as \texttt{X}.
+    \item \texttt{<letter>} is a~single letter, such as \texttt{X}.
 \end{itemize}
 
 \chapter{Class Diagram of the Contract Analyzer}
 \label{diagram}
 
-The following page contains a UML diagram of the contract analyzer described in
+The following page contains a~UML diagram of the contract analyzer described in
 Chapter~\ref{chThree}. In the diagram, the following classes are omitted for
 clarity:
 \begin{itemize}
@@ -92,8 +92,8 @@ clarity:
     \texttt{ImmutableVectorClock}, and \texttt{ContractParams}.
 \end{itemize}
 
-The \texttt{ContractAnalyzer} class is a generic class with two type parameters:
-\texttt{T} is a type representing a thread, \texttt{L} represents a lock. During
+The \texttt{ContractAnalyzer} class is a~generic class with two type parameters:
+\texttt{T} is a~type representing a~thread, \texttt{L} represents a~lock. During
 the analysis, RoadRunner types are used: \texttt{T} is \texttt{ShadowThread},
 \texttt{L} is \texttt{ShadowLock}. Collections and containers used in the
 diagram are parts of the Vavr library.
