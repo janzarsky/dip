@@ -835,17 +835,24 @@ into account are marked with free meta-variable (denoted with an underscore).
 \emph{Example.} The example from Section~\ref{basicContracts} can be extended
 with parameters:
 \begin{align*}
-    (\varrho_1) &\ \texttt{put(X,\_) \_ = get(X)}\\
-    (\varrho_2) &\ \texttt{\_ = contains(X) ( put(X,\_) | \_ = get(X) |
+    (\varrho_1) &\ \texttt{put(X,\_) \_=get(X)}\\
+    (\varrho_2) &\ \texttt{\_=contains(X) ( put(X,\_) | \_=get(X) |
     remove(X) )}
 \end{align*}
+Clause $\varrho_1$ cares about calls to \texttt{put} and \texttt{get} that
+operate on the same key (the \texttt{X} meta-variable) but it is not concerned
+with the value that is put or retrieved (the \texttt{\_} meta-variable).
+Similarly, in clause $\varrho_2$, only method calls operating with the same key
+must be atomic.
 
 The basic definition of contracts contains one implicit parameter, the object
-that the method was called upon (\texttt{this} in Java)~\cite{FITPUB10817}. To
-better illustrate this, the example can be rewritten as:
+that the method was called upon (\texttt{this} in Java)~\cite{FITPUB10817}. The
+atomicity is required only on methods called upon the same object (as these
+method calls usually modify the same data). To better illustrate this, the
+example can be rewritten as:
 \begin{align*}
-    (\varrho_1) &\ \texttt{X.put(Y,\_) \_ = X.get(Y)}\\
-    (\varrho_2) &\ \texttt{\_ = X.contains(Y) ( X.put(Y,\_) | \_ = X.get(Y) |
+    (\varrho_1) &\ \texttt{X.put(Y,\_) \_=X.get(Y)}\\
+    (\varrho_2) &\ \texttt{\_=X.contains(Y) ( X.put(Y,\_) | \_=X.get(Y) |
     X.remove(Y) )}
 \end{align*}
 
