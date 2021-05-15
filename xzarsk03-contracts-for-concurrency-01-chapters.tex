@@ -782,7 +782,11 @@ atomicity violations~\cite{contracts}.
 \emph{Contracts for concurrency}~\cite{FITPUB10817},
 \cite{DBLP:journals/corr/SousaDFL15}, are a~case of a~software protocol that
 expresses access restrictions in a~concurrent setting. In its basic form, they
-specify sequences of methods that must be executed atomically. The contracts can
+specify sequences of methods that must be executed atomically.
+
+\cite{highLevelDataRaces}
+
+The contracts can
 be extended with parameters to reflect the data flow between the methods (so
 that only methods manipulating the same data must be executed atomically).
 Another extension adds so-called \emph{spoilers} (so that given sequence must be

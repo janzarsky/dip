@@ -22,6 +22,7 @@
 %\documentclass[english]{fitthesis} % without assignment - for the work start to avoid compilation problem
 %\documentclass[zadani]{fitthesis} % odevzdani do wisu a/nebo tisk s barevnými odkazy - odkazy jsou barevné
 \documentclass[english,zadani,odsaz]{fitthesis} % for submission to the IS FIT and/or print with color links - links are color
+%\documentclass[english,zadani,odsaz,cprint]{fitthesis}
 %\documentclass[zadani,print]{fitthesis} % pro černobílý tisk - odkazy jsou černé
 %\documentclass[english,zadani,print]{fitthesis} % for the black and white print - links are black
 %\documentclass[zadani,cprint]{fitthesis} % pro barevný tisk - odkazy jsou černé, znak VUT barevný
@@ -182,7 +183,69 @@
 % rozšířený abstrakt v češtině nebo slovenštině, bude mít rozsah 2 až 6
 % normostran a bude obsahovat úvod, popis vlastního řešení a shrnutí a
 % zhodnocení dosažených výsledků."
-\extendedabstract{\todo{}}
+\extendedabstract{Při vývoji softwaru se běžně využívají knihovny nebo moduly
+    vyvinuté jinými vývojáři. Při jejich integraci je zapotřebí dodržet
+    pravidla stanovená autorem knihovny. Pravidla zahrnují syntaxi a~sémantiku
+    operací poskytovaných knihovnou. Ve vícevláknovém prostředí je ale zapotřebí
+    dodržet dodatečné požadavky na synchronizaci vláken pracujících s~knihovnou.
+
+    Kontrakty pro paralelismus slouží ke specifikaci omezení pro práci
+    s~knihovnou ve vícevláknových programech. Kontrakty specifikují, které
+    sekvence operací musí být vykonávány atomicky, tedy bez toho, aby jiné
+    vlákno provádělo souběžně jinou operaci. Existují dvě rozšíření, které
+    upřesňují, za jakých podmínek je nutné dodržet atomicitu operací.
+    Parametrické kontrakty reflektují datový tok mezi operacemi. Umožňují tak
+    například vyjádřit, že dvě operace musí být prováděny atomicky pouze tehdy,
+    pokud modifikují stejná data. Kontrakty se spojlery dovolují některým
+    operacím probíhat souběžně, například pokud operace provádí pouze čtení
+    sdílených dat. Kontrakty pro paralelismus lze sledovat za běhu programu
+    a~existuje metoda pro kontrolu jejich dodržování.
+
+    Cílem této práce je vytvořit dynamický analyzátor, který sleduje dodržování
+    parametrických kontraktů se spojlery. Analyzátor pracuje s~vícevláknovými
+    programy v~jazyce Java. Využívá frameworku RoadRunner, který provádí
+    instrumentaci programů pro zkoumání chování programů za běhu. RoadRunner
+    vkládá instrukce do bajtkódu programu, které pak za běhu zasílají
+    analyzátoru události o~volaných metodách, přístupech do paměti,
+    synchronizaci vláken a~podobně.
+
+    Vstupem analyzátoru je konfigurační soubor s~definicí kontraktu, který
+    určuje sekvence detekované analyzátorem. Sledovaný program je následně
+    instrumentován frameworkem RoadRunner. Instrumentace volání metod byla
+    v~rámci práce rozšířena o~získávání argumentů metod a~jejich návratových
+    hodnot. Instrumentovaný program je následně spuštěn. Analyzátor pro
+    sledování kontraktů pro paralelismus konzumuje události spojené s~voláním
+    metod a~synchronizací vláken. Na základě těchto událostí jsou detekovány
+    sekvence metod a~případná porušení kontraktu. Analyzátor si pro každé vlákno
+    programu udržuje naposledy detekované sekvence metod. Pro každé vlákno
+    a~zámek si také udržuje vektorové hodiny nesoucí informace o~vzájemné
+    synchronizaci vláken. Jakmile je detekována celá sekvence, analyzátor na
+    základě nedávných sekvencí v~jiných vláknech a~vektorových hodinách
+    vyhodnotí, zda nedošlo k~proložení sekvencí tak, aby byl porušen kontrakt.
+
+    Při návrhu analyzátoru byly zohledněny výsledky existujících prototypových
+    implementací a~schopnosti analyzátoru byly záměrně omezeny. Analyzátor tak
+    klade dodatečné požadavky jak na kontrakty, tak na programy, které dokáže
+    sledovat. Kontrakty musí splňovat následující podmínku: hodnoty všech
+    parametrů kontraktu jsou určeny voláním první metody kontraktu. Tato
+    podmínka zabraňuje zbytečné duplikaci sledovaných sekvencí. Analyzované
+    programy nesmí obsahovat zanořená volání metod, které jsou sledovány v~rámci
+    kontraktu.
+
+    Při implementaci byly využity principy funkcionálního programování, zejména
+    neměnné (immutable) objekty postavené na knihovně Vavr nebo funkce vyššího
+    řádu. Jednotlivé části analyzátoru byly otestovány pomocí jednotkových
+    testů, analyzátor jako celek pomocí Bash skriptů.
+
+    Výsledkem práce je plně funkční analyzátor parametrických kontraktů se
+    spojlery. Změny v~instrumentaci mohou být využity dalšími analyzátory
+    vyžadujícími argumenty metod a~návratové hodnoty. Jednotlivé části
+    analyzátoru mohou být v~budoucnu optimalizovány s~ohledem na rychlost.
+    Funkcionální implementace analyzátoru umožňuje snadnou paralelizaci kontroly
+    kontraktů. Dalšího zlepšení výkonu lze dosáhnout lepší definicí podmínek, za
+    kterých lze zahazovat detekované sekvence metod. Analyzátor lze rozšířit
+    o~vkládání šumu pro detekci méně obvyklých chyb.
+}
 
 % nastavení délky bloku s titulkem pro úpravu zalomení řádku - lze definovat zde nebo výše / setting the length of a block with a thesis title for adjusting a line break - can be defined here or above
 %\titlelength{14.5cm}
