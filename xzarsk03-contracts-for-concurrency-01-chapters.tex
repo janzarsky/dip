@@ -1950,6 +1950,50 @@ programs and files with contract definitions are prepared. The script compiles
 the testing program and analyzes it with RoadRunner that is using the contract
 tool. Then it verifies if a~contract violation has been found.
 
+\subsection{Overview of Integration Tests}
+This section provides an overview of integration tests written for the analyzer.
+
+\paragraph{Array list}
+The contract in this test covers operations on an array list with the following
+operations: \texttt{add}, \texttt{get}, \texttt{set}, \texttt{contains},
+\texttt{indexOf}, \texttt{remove}, and \texttt{size}. There are four programs in
+this test, each violating one contract clause.
+
+\paragraph{Account}
+This test was taken from the test suite of the Gluon project\footnote{available
+at \url{https://github.com/trxsys/gluon}}. The test simulates a~bank account
+with two operations: \texttt{getBalance} and \texttt{setBalance}. Even though
+the operations are synchronized, there is a~high-level data race where a~thread
+reads the balance, increments it, and writes it back.
+
+\paragraph{Block allocation}
+This test was taken from the test suite of the Gluon project. There is a~shared
+vector that for each block of a~buffer stores whether it is free or occupied.
+When allocating a~block, a~free block must be found and then it must be set as
+occupied. Between finding a block and marking it as occupied, another thread may
+mark the same block as occupied.
+
+\paragraph{Arithmetic database}
+This test was taken from the test suite of the Gluon project. The test simulates
+a~database with two tables. The first table contains a~set of regular
+expressions and the second holds the results of the expressions. Each table is
+accessed using synchronized methods. There are several problems related to the
+absence of transactions when accessing multiple tables or when performing
+several operations on the same table.
+
+\paragraph{Connection test}
+This test was taken from the test suite of the Gluon project. The test simulates
+a~chat application that uses a~socket to send messages over the network.
+A~message counter is associated with the socket that is incremented with each
+message sent. When the socket is closed, there is an inconsistency when a~thread
+may see a~closed socket but the counter is not yet zeroed. When a~message is
+sent, it is checked that the socket is still open before sending the message.
+However, the socket may be closed in the meantime by another thread.
+
+
+\section{Performance}
+\todo{}
+
 
 
 \chapter{Conclusion}
