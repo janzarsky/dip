@@ -172,7 +172,7 @@ A thread in Java is represented by a~\texttt{Thread} instance. There are two
 ways to create a~thread: by extending the \texttt{Thread} class, or by
 implementing the \texttt{Runnable} interface. Both approaches produce
 a~\texttt{Thread} instance that executes the \texttt{run} method in a~new thread
-when started.
+when~started.
 
 To start a~thread, the \texttt{start} method must be called (which will in
 turn call the \texttt{run} method). The thread will terminate upon returning
@@ -333,7 +333,7 @@ least one of which is write, and these accesses are not ordered by
 \emph{happens-before}~\cite{jmmspec}. This situation is illustrated in
 Figure~\ref{hb2}.
 
-\begin{figure}[hbt]
+\begin{figure}[H]
     \label{hb1}
     \input{figures/hbexample.tex}
     \caption{\emph{Happens-before} relations in a~correctly synchronized program
@@ -345,7 +345,7 @@ Figure~\ref{hb2}.
     \emph{happens-before} (the black arrow).}
 \end{figure}
 
-\begin{figure}[hbt]
+\begin{figure}[H]
     \label{hb2}
     \input{figures/hbexample2.tex}
     \caption{\emph{Happens-before} relations in an incorrectly synchronized
@@ -585,10 +585,20 @@ Every analyzer in RoadRunner is based on the \texttt{Tool} class.
 Listing~\ref{toolclass} contains the most important methods of \texttt{Tool}.
 During the analysis, every time an action is detected, the appropriate method in
 \texttt{Tool} is called, along with an \texttt{Event} object that contains
-information about the event.
+information about the event. The following events are detected by the RoadRunner
+framework:
+\begin{itemize}
+    \item method entry and exit,
+    \item memory accesses (reads and writes to fields and variables),
+    \item lock acquires and releases,
+    \item synchronization signals (wait and notify),
+    \item thread forking and joining.
+\end{itemize}
+There are several subclasses of the \texttt{Event} class with specific
+information about events.
 
-\begin{lstlisting}[language=java, label=toolclass, float, caption={The abstract
-class \texttt{Tool}. Only selected public methods are shown.}]
+\begin{lstlisting}[language=java, label=toolclass, float=hbt, caption={The
+abstract class \texttt{Tool}. Only selected public methods are shown.}]
 public abstract class Tool {
   // event handlers for accessing a memory location
   public void access(AccessEvent fae) { }
@@ -608,18 +618,6 @@ public abstract class Tool {
   public ShadowVar makeShadowVar(AccessEvent ae) { }
 }
 \end{lstlisting}
-
-The following events are detected by the RoadRunner framework:
-\begin{itemize}
-    \item method entry and exit,
-    \item memory accesses (reads and writes to fields and variables),
-    \item lock acquires and releases,
-    \item synchronization signals (wait and notify),
-    \item thread forking and joining.
-\end{itemize}
-
-There are several subclasses of the \texttt{Event} class with specific
-information about events.
 
 RoadRunner allows associating data with objects from the program under analysis.
 For each thread, a~\texttt{ShadowThread} object is created which contains
@@ -784,7 +782,7 @@ atomicity violations~\cite{contracts}.
 expresses access restrictions in a~concurrent setting. In its basic form, they
 specify sequences of methods that must be executed atomically.
 
-\cite{highLevelDataRaces}
+\cite{highLevelDataRaces} \todo{TODO: high-level data races}
 
 The contracts can
 be extended with parameters to reflect the data flow between the methods (so
@@ -807,6 +805,7 @@ $\Sigma_\mathbb{M}$. A contract violation occurs when any of the sequences in
 a~contract is interleaved with an execution of a~method from $\Sigma_\mathbb{M}$
 over the same object.
 
+\medskip \noindent
 \emph{Example.} Consider a~map implementation with the following operations:
 \texttt{put(key, value)}, \texttt{get(key)}, \texttt{remove(key)}, and
 \texttt{contains(key)}. Then a~contract for this class may contain the following
@@ -827,17 +826,16 @@ In some situations, the definition of contracts may be too restrictive,
 producing false alarms. In~\cite{contracts}, contracts are extended with
 parameters to reflect the data flow between methods. Consider the following
 example:
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, frame=none]
 if (q.contains(42)) q.remove(42);
 \end{lstlisting}
-
 These two calls must be executed atomically only if they share the same
 argument. This dependency can be expressed using \emph{meta-variables} placed as
 the parameters or return values of methods. Parameters that should not be taken
 into account are marked with free meta-variable (denoted with an underscore).
 
-\emph{Example.} The example from Section~\ref{basicContracts} can be extended
-with parameters:
+\medskip \noindent \emph{Example.} The example from Section~\ref{basicContracts}
+can be extended with parameters:
 \begin{align*}
     (\varrho_1) &\ \texttt{put(X,\_) \_=get(X)}\\
     (\varrho_2) &\ \texttt{\_=contains(X) ( put(X,\_) | \_=get(X) |
@@ -849,6 +847,7 @@ with the value that is put or retrieved (the \texttt{\_} meta-variable).
 Similarly, in clause $\varrho_2$, only method calls operating with the same key
 must be atomic.
 
+\medskip
 The basic definition of contracts contains one implicit parameter, the object
 that the method was called upon (\texttt{this} in Java)~\cite{FITPUB10817}. The
 atomicity is required only on methods called upon the same object (as these
@@ -878,8 +877,6 @@ computation and should not be marked as a~contract violation. In this example,
 methods \texttt{put} and \texttt{remove} are spoilers for a~target
 $\varrho_1$, denoted as \texttt{put get} $\leftsquigarrow$ \texttt{put|remove}.
 
-% TODO: this is basically copied - is it ok?
-
 Formally, as defined in~\cite{contracts}, let $\mathbb{R}$ be the set of
 \emph{target} clauses where each target $\varrho \in \mathbb{R}$ is a~regular
 expression over $\Sigma_\mathbb{M}$. Let $\mathbb{S}$ be the set of
@@ -892,6 +889,7 @@ Contract violation is observed when a~target sequence $\varrho \in \mathbb{R}$
 is fully interleaved by a~spoiler sequence $\sigma \in \mathbb{C}(\varrho)$ and
 the sequences are executed on the same object.
 
+\medskip \noindent
 \emph{Example.} The example from section~\ref{basicContracts} can be extended
 with spoilers:
 \begin{align*}
@@ -904,6 +902,7 @@ When combining parametric contracts with spoilers, the spoilers may also contain
 parameters. Then a~contract violation is detected only when spoiler arguments
 match target arguments.
 
+\medskip \noindent
 \emph{Example.} Examples from sections~\ref{parametricContracts} and
 \ref{contractsWithSpoilers} combined together:
 \begin{align*}
@@ -940,8 +939,6 @@ generated by a~thread $t \in \mathbb{T}$ is then denoted as $\mathbb{E}_t$. Let
 $\mathbb{E} = \bigcup_{t \in \mathbb{T}} \mathbb{E}_t$. A \emph{trace} is then
 a~sequence $\tau = e_1 \hdots e_n \in \mathbb{E}^+$~\cite{contracts}.
 
-% TODO: basically copied
-
 Given a~trace $\tau = e_1 \hdots e_n \in \mathbb{E}^+$, we call its subsequence
 $r = e_{i_1} e_{i_2} \hdots e_{i_k}$, $1 < k \leq n$, an \emph{instance} of
 a~target $\varrho \in \mathbb{R}$ if, and only if:
@@ -953,10 +950,12 @@ a~target $\varrho \in \mathbb{R}$ if, and only if:
         $e_{i_k}$.
 \end{enumerate}
 
+\medskip \noindent
 \emph{Example.} Given target $\varrho = abc$, and a~trace $\tau_1 = adbdc$,
 there is a~target instance $r = e_1 e_3 e_4$. In trace $\tau_2 = acbdc$, there
 is no target instance.
 
+\medskip
 A \emph{spoiler instance} $s$ of a~spoiler $\sigma \in \mathbb{S}$ is defined
 similarly. We let $start(r) = e_{i_1}$ and $end(r) = e_{i_k}$ denote the first
 and last events of a~target, respectively. Likewise, $start(s)$ and $end(s)$
@@ -1057,11 +1056,13 @@ incremented using the $inc_t$ function.
     \text{else} \, V(u)
 \end{align*}
 
+\medskip \noindent
 \emph{Example}. Consider threads $t_1$, $t_2$, $t_3$, and two vector clocks:
 $V_1 = \langle 1,0,2 \rangle$, $V_2 = \langle 1,0,5 \rangle$. Then $V_1
 \sqsubseteq V_2$ is true, $V_1 \sqcup V_2 = \langle 1,0,5 \rangle$, and
 $inc_{t_2}(V_1) = \langle 1,1,2 \rangle$.
 
+\medskip
 During the analysis, three kinds of clocks are kept. For each thread $t \in
 \mathbb{T}$, a~vector clock $\mathbb{C}_t$ stores information about the last
 synchronization with other threads. For each lock $l \in \mathbb{L}$, a~vector
@@ -1071,9 +1072,8 @@ kept~\cite{contracts}.
 
 The \emph{happens-before} relation is defined using vector clocks. For an event
 $e_t$ from a~thread $t$ and an event $e_u$ from a~thread $u$, $e_t \prec_{hb}
-e_u$ when $VC_{e_t}(t) \varleq VC_{e_u}(t)$.
-
-The clocks are updated on the following actions:
+e_u$ when $VC_{e_t}(t) \varleq VC_{e_u}(t)$. The clocks are updated on the
+following actions:
 \begin{itemize}
     \item Fork --- when a~thread $t$ creates a~new thread $u$:
         \begin{align*}
@@ -1099,7 +1099,7 @@ The clocks are updated on the following actions:
         \end{align*}
         The releasing thread will be synchronized with the thread that will
         acquire the lock in the future. The thread does not know with which
-        thread so the thread's vector clock is stored in the lock. Then the
+        thread, so the thread's vector clock is stored in the lock. Then the
         thread is updated so that events coming after the release will not be
         synchronized with the thread that acquires the lock in the future.
     \item Acquire --- when a~thread $t$ acquires a~lock $l$.
@@ -1118,15 +1118,13 @@ The clocks are updated on the following actions:
 
 \section{Previous Work}
 
-\todo{TODO}
-
-\begin{itemize}
-    \item \cite{janousek} - Java, RoadRunner, parametric contracts with spoilers
-    \item \cite{contracts} - C++, ANaConDA, parametric contracts with spoilers
-    \item \cite{FITPUB10817} - Java, IBM Concurrency Testing Tool, basic
-        contracts
-    \item \cite{DBLP:journals/corr/SousaDFL15} - Java, only static analysis
-\end{itemize}
+There are several existing implementation of dynamic analyzers for contracts for
+concurrency. In~\cite{FITPUB10817}, the IBM Concurrency Testing Tool is used for
+tracking the basic contracts in Java programs. In~\cite{contracts}, the ANaConDA
+framework is used for tracking parametric contracts with spoilers in programs
+written in C++. In~\cite{janousek}, the RoadRunner framework is used to track
+parametric contracts with spoiler in Java programs. The prototype implementation
+in~\cite{janousek} served as a~reference for this thesis.
 
 
 
@@ -1160,8 +1158,8 @@ from the program under analysis, detects target and spoiler instances, and looks
 for contract violations. It manages data stored with threads and locks, such as
 trace windows and vector clocks. The \texttt{ContractAnalyzer} class can be
 instantiated without any dependencies from the RoadRunner project, which is
-useful for testing purposes. A detailed description of \texttt{ContractAnalyzer}
-can be found in Section~\ref{contractAnalyzer}.
+useful for testing purposes. Section~\ref{contractAnalyzer} describes
+\texttt{ContractAnalyzer} in detail.
 
 The \texttt{ContractTool} class is a~subclass of RoadRunner's \texttt{Tool}
 class. During the initialization of \texttt{ContractTool}, the contract
@@ -1200,8 +1198,8 @@ c(X,Y)} and the following program trace: \texttt{a(1) b(2) b(3) c(1,3)}.  When
 of \texttt{X} is set to 1. But when processing \texttt{b(2)}, the analyzer
 cannot reliably decide whether the method call belongs to the instance or not
 (there might be \texttt{c(1,2)} later in the trace). The only option is to keep
-the instance and create a~duplicate which is then advanced (while setting
-\texttt{Y} to 2).
+the instance and create a~duplicate instance which is then advanced (while
+setting \texttt{Y} to 2).
 
 To prevent duplication of instances, the following restriction was put on the
 contract definition. All target and spoiler parameters must be assigned in the
@@ -1273,6 +1271,7 @@ clear, what the proper behavior should be. The analyzer should therefore never
 discard running instances.
 
 \subsection{Kleene Star in Contract Definition}
+\label{kleene}
 
 The analyzer never invalidates a~running instance. This fact allows for
 optimization in contract definitions. As defined in Chapter~\ref{chThree},
@@ -1299,12 +1298,10 @@ analyzer should use only the method exit event. This means that the analyzer may
 produce unexpected results when the program under analysis contains nested calls
 to methods that are part of the contract. Consider the following methods that
 are both parts of a~contract:
-
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, frame=none]
 public void a() { b(); }
 public void b() { ... }
 \end{lstlisting}
-
 After calling method \texttt{a()}, the trace recorded by the analyzer will be
 \texttt{b() a()} instead of more intuitive \texttt{a() b()}.
 
@@ -1325,11 +1322,9 @@ both take a~\texttt{MethodEvent} parameter containing the following information:
         definition (name, descriptor, whether it is synchronized or static).
     \item Call site location --- where was the method invoked.
 \end{itemize}
-
 The \texttt{MethodEvent} class was extended for storing method arguments and the
 return value. The following methods were added:
-
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, frame=none]
 public Object[] getArgs();
 public void setArgs(Object[] args);
 public Object getReturnValue();
@@ -1344,10 +1339,9 @@ primitive type has a~corresponding object wrapper class, for example,
 \texttt{int} is wrapped in the \texttt{java.lang.Integer} class. The
 \texttt{getArgs()} method should return an array of size 0 for a~method that
 takes no arguments and it should return \texttt{null} when the arguments are not
-available, for example when the argument instrumentation is turned off. The
-\texttt{getReturnValue()} should return \texttt{null} when the value is not
-available (for example on method entry), when the method throws an exception, or
-when the method returns \texttt{void}.
+available. The \texttt{getReturnValue()} should return \texttt{null} when the
+value is not available (for example on method entry), when the method throws an
+exception, or when the method returns \texttt{void}.
 
 \subsection{Parameter Matching}
 When trying to advance a~running instance, method arguments must be checked, if
@@ -1385,23 +1379,25 @@ parameters, the contract definition contains the method descriptor (for example
 the enclosing class, the method name, the method descriptor, and a~list of
 meta-variables. For example:
 
-\begin{lstlisting}
+\begin{lstlisting}[frame=none]
 test/sanity/ArrayList.set(ILjava/lang/Object;)Ljava/lang/Object; X=Y(Z,_)
 \end{lstlisting}
 
 This represents the \texttt{set} method called on an \texttt{ArrayList} from
 the \texttt{test.sanity} package. The first meta-variable \texttt{X} is the
 return value, \texttt{Y} is the \texttt{ArrayList} instance, and \texttt{Z} is
-the first parameter (integer). The second parameter (object) is marked with free
-meta-variable (\texttt{\_}) meaning that the analyzer will ignore its value. The
-return value or the target of the method can be omitted.
+the first parameter (integer). The second parameter (object) is marked with
+a~free meta-variable (\texttt{\_}) meaning that the analyzer will ignore its
+value. The return value or the target of the method may be omitted, the parser
+will treat them as free meta-variables.
 
 Targets and spoilers are defined using a~limited regular expression over
 methods. Concatenation is achieved simply by writing two methods, one after
 another, alternation is denoted by a~vertical bar (\texttt{|}). The Kleene star
-operator (\texttt{*}) is not allowed. An example of a~target definition:
+operator (\texttt{*}) is not allowed (see Section~\ref{kleene}). An example of
+a~target definition:
 
-\begin{lstlisting}
+\begin{lstlisting}[frame=none]
 Test.a()V X() ( Test.b()V X() | Test.c()V X() )
 \end{lstlisting}
 
@@ -1422,7 +1418,7 @@ Map.put(ID)V M(K,_) Map.get(I)D M(K)
     <- Map.put(ID)V M(K,_) | Map.remove(I)D M(K) ;
 
 Map.contains(I)Z M(K)
-  ( Map.put(ID)V M(K,_) | Map.get(I)D M.(K) | Map.remove(I)D M(K) )
+  ( Map.put(ID)V M(K,_) | Map.get(I)D M(K) | Map.remove(I)D M(K) )
   <- Map.put(ID)V M(K,_) | Map.remove(I)D M(K) ;
 \end{lstlisting}
 
@@ -1494,10 +1490,9 @@ look for contract violations.
 
 The \texttt{ContractAnalyzer} class is created and called by the
 \texttt{ContractTool} class which directly uses the RoadRunner API. The
-\texttt{ContractTool} class is described in Section~\ref{contractTool}.
-
-The interface of the analyzer is made up of synchronized methods to ensure
-proper synchronization. This approach is not the same as the event serialization
+\texttt{ContractTool} class is described in Section~\ref{contractTool}. The
+interface of the analyzer is made up of synchronized methods to ensure proper
+synchronization. This approach is not the same as the event serialization
 mentioned in Chapter~\ref{chTwo}. All events that are not calling analyzer's
 methods will still be concurrent.
 
@@ -1539,7 +1534,7 @@ Figure~\ref{instanceLifeCycle} for illustration of an instance life cycle.
         a~value. In step 2, the instance is fully accepted. At this point, the
         analyzer looks for contract violations. Then the instance is reset, the
         vector clock of the beginning is reset, and the vector clocks of the
-        last instance are set. In step 3, method \texttt(a) is called with an
+        last instance are set. In step 3, method \texttt{a} is called with an
         argument that matches the value of \texttt{X} in the instance. The
         instance is started again.}
     \end{center}
@@ -1557,6 +1552,7 @@ practice, the only difference between these matching instances is that one
 contains information about the previously encountered instance while the other
 does not.
 
+\medskip \noindent
 \emph{Example.} Consider target \texttt{a(X) b(X)} and a~program trace
 \texttt{a(1) b(1) a(2) b(2) a(1)}. After \texttt{a(1)}, the analyzer adds a~new
 instance $i_1$ to the window with $X=1$. After \texttt{b(1)}, $i_1$ is advanced,
@@ -1639,14 +1635,11 @@ Section~\ref{roadRunnerUsage}). The following methods are overridden:
     \item \texttt{postJoin}, which is called after a~thread is joined with
         another thread.
 \end{itemize}
-
 Methods for detecting memory accesses will not be used by the tool, and also no
 data will be stored in shadow memory locations, except for vector clocks stored
-with locks.
-
-In its \texttt{init} method, the tool loads a~contract definition from a~file
-and calls the contract parser. After the contract is parsed, it constructs
-\texttt{ContractAnalyzer}.
+with locks. In its \texttt{init} method, the tool loads a~contract definition
+from a~file and calls the contract parser. After the contract is parsed, it
+constructs \texttt{ContractAnalyzer}.
 
 The \texttt{exit} method extracts relevant data from \texttt{MethodEvent} that
 is supplied by RoadRunner. Then it checks if the method exists in the contract,
@@ -1719,7 +1712,10 @@ be \texttt{final} to avoid overriding of methods. All fields of a~class
 should be \texttt{private} and \texttt{final}. All fields should reference only
 immutable objects or, if not possible, the fields should not be modified in the
 class. All methods that would normally modify the object should return updated
-object instead. See Listing~\ref{immutable} for an example.
+object instead. See Listing~\ref{immutable} for an example. To use immutable
+objects effectively, the Vavr collection library\footnote{available at
+\url{https://www.vavr.io/}} was used. It provides immutable replacements for
+standard Java collections.
 
 \begin{lstlisting}[language=java, label=immutable, float=hbt,
 caption={Simplified implementation of an immutable finite automaton. The
@@ -1749,10 +1745,6 @@ public final class FiniteAutomaton {
     public boolean isRunning() { return current != start; }
 }
 \end{lstlisting}
-
-To use immutable objects effectively, the Vavr collection
-library\footnote{available at \url{https://www.vavr.io/}} was used. It provides
-immutable replacements for standard Java collections.
 
 \subsection{Dependency Inversion Principle}
 Several parts of the analyzer were designed with the dependency inversion
@@ -1856,7 +1848,7 @@ return value is converted to an object, the same way parameters are converted.
 Then a~method exit event is generated, containing both the array of arguments
 and the return value. If an exception is caught, the return value is set to
 \texttt{null} and an exit event is generated containing the arguments. An
-example of a~instrumented method is shown in Listing~/ref{paramInst}.
+example of a~instrumented method is shown in Listing~\ref{paramInst}.
 
 \begin{lstlisting}[label=paramInst, float, caption={A method instrumented to
 obtain arguments and the return value. On lines 5--11, the enter event is
@@ -1945,7 +1937,7 @@ using the custom tool. The tool prints method arguments and return values to the
 output and the values must match those in the testing program. The whole process
 is automated using a~Bash script.
 
-The integration of all parts is again automated using bash scripts. Testing
+The integration of all parts is again automated using Bash scripts. Testing
 programs and files with contract definitions are prepared. The script compiles
 the testing program and analyzes it with RoadRunner that is using the contract
 tool. Then it verifies if a~contract violation has been found.
@@ -1992,7 +1984,7 @@ However, the socket may be closed in the meantime by another thread.
 
 
 \section{Performance}
-\todo{}
+\todo{TODO}
 
 
 

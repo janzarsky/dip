@@ -89,7 +89,6 @@ presented below. The grammar is described in the BNF syntax.
 
 <metavar> ::= <letter> | "_"
 \end{lstlisting}
-
 The terminals have the following definitions:
 \begin{itemize}
     \item \texttt{<class>} is a~class name in the internal representation of
@@ -115,7 +114,6 @@ clarity:
     \texttt{Args}, \texttt{Signature}, \texttt{MetaVars},
     \texttt{ImmutableVectorClock}, and \texttt{ContractParams}.
 \end{itemize}
-
 The \texttt{ContractAnalyzer} class is a~generic class with two type parameters:
 \texttt{T} is a~type representing a~thread, \texttt{L} represents a~lock. During
 the analysis, RoadRunner types are used: \texttt{T} is \texttt{ShadowThread},
@@ -124,6 +122,7 @@ diagram are parts of the Vavr library.
 
 \pagebreak
 
+\noindent
 \begin{tikzpicture}[every node/.style={scale=0.8}]
 % \draw[help lines,step=5mm,gray!20] (-1,-16) grid (14,1);
 \umlclass[anchor=north west, template={T,L}]{ContractAnalyzer}{
