@@ -20,18 +20,16 @@ restrictions given by contracts for concurrency, one may use either static or
 dynamic analysis, both providing different advantages.
 
 The main goal of this thesis is to design a~dynamic analyzer that detects
-contract violations in programs written in the Java programming language. The
-analyzer is built using the \emph{RoadRunner} framework that instruments
-programs under analysis and reports actions taken by the program via a~simple
-interface.
+violations of parametric contracts with spoilers in programs written in the Java
+programming language. The analyzer is built using the \emph{RoadRunner}
+framework. RoadRunner instruments programs under analysis and reports actions
+taken by the program via a~simple interface. The proposed analyzer extends the
+instrumentation done by RoadRunner to extract additional information about the
+program under analysis. Apart from the analyzer itself, a~parser for contract
+definitions is created.
 
-To perform the analysis, the following must be done. A grammar for contract
-definitions and a~parser must be created. The instrumentation performed by
-RoadRunner needs to be extended to extract additional information about the
-program under analysis. Then finally, an analyzer for parametric contracts with
-spoilers must be implemented using the RoadRunner interface. This master's
-thesis deals with the design of the analyzer, its implementation, and
-verification of its functionality.
+%There is a~dynamic analyzer implementation for parametric contracts with
+%spoilers in the ANaConDA framework for programs written in C/C++. The thesis
 
 The thesis is structured as follows. Chapter~\ref{chTwo} describes the specifics
 of multi-threaded programming in Java, the Java memory model, and an overview of
@@ -780,9 +778,16 @@ atomicity violations~\cite{contracts}.
 \emph{Contracts for concurrency}~\cite{FITPUB10817},
 \cite{DBLP:journals/corr/SousaDFL15}, are a~case of a~software protocol that
 expresses access restrictions in a~concurrent setting. In its basic form, they
-specify sequences of methods that must be executed atomically.
-
-\cite{highLevelDataRaces} \todo{TODO: high-level data races}
+specify sequences of methods that must be executed atomically. Contracts for
+concurrency help detect high-level data races in a~program. A \emph{high-level}
+data race occurs on a~higher abstraction layer. Program that is free of data
+races as defined by the Java memory model can still contain high-level data
+races when modifying complex data structures~\cite{highLevelDataRaces}. As an
+example, consider an~object that represents a~pair of coordinates with two
+synchronized methods: \texttt{setX} and \texttt{setY}. Even though both methods
+are executed atomically, there is a~window between setting the first and the
+second coordinate where the object is in an inconsistent state, allowing for
+a~high-level data race.
 
 The contracts can
 be extended with parameters to reflect the data flow between the methods (so
@@ -1122,7 +1127,7 @@ There are several existing implementation of dynamic analyzers for contracts for
 concurrency. In~\cite{FITPUB10817}, the IBM Concurrency Testing Tool is used for
 tracking the basic contracts in Java programs. In~\cite{contracts}, the ANaConDA
 framework is used for tracking parametric contracts with spoilers in programs
-written in C++. In~\cite{janousek}, the RoadRunner framework is used to track
+written in C/C++. In~\cite{janousek}, the RoadRunner framework is used to track
 parametric contracts with spoiler in Java programs. The prototype implementation
 in~\cite{janousek} served as a~reference for this thesis.
 
@@ -1984,7 +1989,34 @@ However, the socket may be closed in the meantime by another thread.
 
 
 \section{Performance}
-\todo{TODO}
+The performance of the analyzer was checked on the Account test case (see
+Section~\ref{testing}) with several modifications. The high-level data race
+present in the test case was removed so that the analyzer will not stop the
+program right after a~contract violation is detected. The number of operations
+performed on the account was added as a~parameter. The Account test case starts
+two threads and all tracked operations are performed on a~single object, so the
+number of tracked target and spoiler instances is constant.
+
+The test case was run using the RoadRunner benchmark mode. The measured results
+do not include the initialization of the analyzer. The Account test case was run
+three times: without instrumentation, with instrumentation, and with
+instrumentation and contract validation. The results are shown in
+Figure~\ref{performancefig}. As expected~\cite{RoadRunner}, the instrumented
+program is approximately ten times slower than the original program. The
+analyzer is 10--100 times slower than the instrumented program. To fully assess
+the performance of the analyzer, more benchmarks would be needed.
+
+\begin{figure}[H]
+    \begin{center}
+    \label{performancefig}
+    \input{figures/performance.tex}
+    \caption{Results of the Account benchmark. The first series shows the
+        runtime without any instrumentation. The second series is run with
+        RoadRunner instrumentation but without tracking of targets and spoilers.
+        The last one shows the runtime of instrumented program with contract
+        validation.}
+    \end{center}
+\end{figure}
 
 
 
@@ -2008,9 +2040,12 @@ suite. The analyzer was able to detect all contract violations present in the
 testing programs.
 
 The analyzer implementation provides a~solid basis for contract validation of
-programs written in Java. The changes in method instrumentation are not tied to
-the contract validation and can be used by various other analyzers that may
-benefit from obtaining method arguments and return values.
+programs written in Java. There is an ongoing work on the formalization of
+parametric contracts and extending experiments on standard libraries. The
+analyzer can be used for those experiments. The changes in method
+instrumentation are not tied to the contract validation and can be used by
+various other analyzers that may benefit from obtaining method arguments and
+return values.
 
 In the future, various parts of the analyzer may be tuned for better
 performance. The functional implementation allows easy parallelization of

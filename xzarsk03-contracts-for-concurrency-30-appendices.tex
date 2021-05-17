@@ -27,10 +27,10 @@ several Bash scripts used in the process. All commands, such as \texttt{ant} or
 \texttt{javac}, that are run during the compilation should belong to the same
 JVM installation.
 
-On Fedora 34, Java 11 is used by default. Ant can be installed by running
-\texttt{dnf install ant} as root. On Ubuntu 21.04, Java 11 must be installed by
-running \texttt{apt install openjdk-11-jdk}. Ant must be installed locally from
-the project's website.
+On Fedora 34, install Java 11 JDK and Ant by running
+\texttt{dnf install java-11-openjdk ant} as root. On Ubuntu 21.04, run
+\texttt{apt install openjdk-11-jdk}, Ant must be installed locally from the
+project's website.
 
 To compile the project, run \texttt{ant} in the RoadRunner directory. The
 project should compile and print \texttt{BUILD SUCCESSFUL} at the end. The unit
@@ -47,14 +47,13 @@ testing program, first compile the program: \texttt{javac test/Test.java} and
 then run RoadRunner: \texttt{rrrun test.Test}.
 
 To launch the contract analyzer on a~simple program, run the following commands:
-\begin{lstlisting}
+\begin{lstlisting}[frame=none]
 $ javac test/ContractTest.java
 $ rrrun -tool=CT -contractFile=test/ContractTest.contract test.ContractTest
 \end{lstlisting}
-The analyzer should find a~contract violation.
-
-The integration tests are by the following command:
-\begin{lstlisting}
+The analyzer should find a~contract violation. The integration tests are by the
+following command:
+\begin{lstlisting}[frame=none]
 $ testScripts/all.sh
 \end{lstlisting}
 
